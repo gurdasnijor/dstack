@@ -61,13 +61,14 @@ async def get_generated_asset(project_name: str, asset_id: str) -> Response:
     return Response(
         content=asset.content,
         media_type=asset.media_type,
-        headers={
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Expose-Headers": "Content-Length, Content-Type",
-            "Cache-Control": "private, max-age=86400",
-            "X-Content-Type-Options": "nosniff",
-        },
+        headers=_asset_headers(),
     )
+
+
+@assets_router.options("/{project_name}/assets/{asset_id}")
+async def options_generated_asset(project_name: str, asset_id: str) -> Response:
+    _get_stored_asset(project_name, asset_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT, headers=_asset_headers())
 
 
 @router.get("/{project_name}/models")
@@ -656,6 +657,17 @@ def _image_media_type(content: bytes) -> str:
     if content.startswith(b"RIFF") and content[8:12] == b"WEBP":
         return "image/webp"
     return "application/octet-stream"
+
+
+def _asset_headers() -> dict[str, str]:
+    return {
+        "Access-Control-Allow-Methods": "GET, OPTIONS",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Private-Network": "true",
+        "Access-Control-Expose-Headers": "Content-Length, Content-Type",
+        "Cache-Control": "private, max-age=86400",
+        "X-Content-Type-Options": "nosniff",
+    }
 
 
 def _stored_video_metadata_response(
