@@ -51,7 +51,9 @@ def endpoint_metadata_to_tags(metadata: ServiceEndpointMetadata) -> dict[str, st
     return tags
 
 
-def endpoint_metadata_from_tags(tags: Optional[dict[str, str]]) -> Optional[ServiceEndpointMetadata]:
+def endpoint_metadata_from_tags(
+    tags: Optional[dict[str, str]],
+) -> Optional[ServiceEndpointMetadata]:
     if not tags:
         return None
     data = {}
