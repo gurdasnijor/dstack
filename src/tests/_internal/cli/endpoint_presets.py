@@ -49,6 +49,42 @@ def get_endpoint_benchmark(*, verified: bool = True) -> EndpointBenchmark:
     )
 
 
+def get_image_benchmark(*, verified: bool = True) -> EndpointBenchmark:
+    benchmark = EndpointBenchmark(
+        tool="dstack benchmark images",
+        tool_version="1.0.0",
+        command="python benchmark_images.py --url $SERVICE_URL/v1/images/generations",
+        workload={
+            "api": "images_generations",
+            "request_path": "/v1/images/generations",
+            "num_requests": 3,
+            "concurrency": 1,
+            "width": 1024,
+            "height": 1024,
+            "num_inference_steps": 30,
+            "outputs_per_request": 1,
+            "output_unit": "image",
+            "parameters": {"seed": 1, "response_format": "b64_json"},
+        },
+        metrics={
+            "successful_requests": 3,
+            "failed_requests": 0,
+            "duration_seconds": 18.2,
+            "total_outputs": 3,
+            "total_output_bytes": 4_219_000,
+            "latency_ms": {"mean": 6060, "p50": 6010, "p99": 6210},
+        },
+    )
+    if not verified:
+        return benchmark
+    return benchmark.copy(
+        update={
+            "target": EndpointBenchmarkTarget(type="server-proxy"),
+            "client": EndpointBenchmarkClient(type="local"),
+        }
+    )
+
+
 def get_endpoint_preset(
     *,
     preset_id: str = "8f3a12c4",
@@ -93,7 +129,8 @@ def get_running_service_run() -> Run:
             "name": "qwen-build-2",
             "image": "vllm/vllm-openai:v0.11.0",
             "commands": [
-                "vllm serve community/Qwen3.5-27B-GPTQ-Int4 --served-model-name Qwen/Qwen3.5-27B"
+                "vllm serve community/Qwen3.5-27B-GPTQ-Int4 "
+                "--revision 0123456789abcdef --served-model-name Qwen/Qwen3.5-27B"
             ],
             "port": 8000,
             "model": "Qwen/Qwen3.5-27B",
@@ -144,6 +181,75 @@ def get_successful_endpoint_report(run: Run) -> AgentFinalReport:
         service_yaml="type: service",
         base="Qwen/Qwen3.5-27B",
         model="community/Qwen3.5-27B-GPTQ-Int4",
+        api_model_name="Qwen/Qwen3.5-27B",
+        source="huggingface",
+        revision="0123456789abcdef",
+        modality="text-generation",
         context_length=32768,
         benchmark=get_endpoint_benchmark(verified=False),
+    )
+
+
+def get_running_image_service_run() -> Run:
+    service = ServiceConfiguration.parse_obj(
+        {
+            "name": "juggernaut-build-2",
+            "image": "vllm/vllm-omni:v0.24.0",
+            "commands": [
+                "vllm serve eniora/Juggernaut_XL_Ragnarok --omni "
+                "--diffusion-load-format diffusers "
+                "--revision fe71bb49af337c43faf10a6b50b0dd1d10b23015"
+            ],
+            "port": 8000,
+            "probes": [{"type": "http", "url": "/health"}],
+            "gateway": False,
+            "fleets": ["gpu-fleet"],
+            "backends": ["runpod"],
+            "env": ["HF_TOKEN"],
+            "resources": {"gpu": "24GB:1"},
+        }
+    )
+    resources = Resources(
+        cpus=32,
+        memory_mib=125 * 1024,
+        gpus=[Gpu(name="RTX3090", memory_mib=24 * 1024)],
+        spot=False,
+        disk=Disk(size_mib=150 * 1024),
+    )
+    job = SimpleNamespace(
+        job_spec=SimpleNamespace(job_num=0, replica_num=0, replica_group="0"),
+        job_submissions=[
+            SimpleNamespace(
+                deployment_num=0,
+                status=JobStatus.RUNNING,
+                job_runtime_data=SimpleNamespace(
+                    offer=SimpleNamespace(instance=SimpleNamespace(resources=resources))
+                ),
+            )
+        ],
+    )
+    return Run.construct(
+        id=uuid4(),
+        project_name="main",
+        status=RunStatus.RUNNING,
+        run_spec=SimpleNamespace(run_name="juggernaut-build-2", configuration=service),
+        jobs=[job],
+        service=ServiceSpec(url="/proxy/services/main/juggernaut-build-2/"),
+        deployment_num=0,
+    )
+
+
+def get_successful_image_report(run: Run) -> AgentFinalReport:
+    return AgentFinalReport(
+        success=True,
+        run_id=run.id,
+        run_name=run.run_spec.run_name,
+        service_yaml="type: service",
+        base="eniora/Juggernaut_XL_Ragnarok",
+        model="eniora/Juggernaut_XL_Ragnarok",
+        api_model_name="eniora/Juggernaut_XL_Ragnarok",
+        source="huggingface",
+        revision="fe71bb49af337c43faf10a6b50b0dd1d10b23015",
+        modality="image-generation",
+        benchmark=get_image_benchmark(verified=False),
     )

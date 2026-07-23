@@ -10,8 +10,13 @@ from dstack._internal.cli.services.endpoints.apply import (
     _select_plan,
     apply_endpoint_preset,
 )
+from dstack._internal.cli.services.endpoints.verify import build_verified_endpoint_preset
 from dstack._internal.core.models.instances import InstanceAvailability
-from tests._internal.cli.endpoint_presets import get_endpoint_preset
+from tests._internal.cli.endpoint_presets import (
+    get_endpoint_preset,
+    get_running_image_service_run,
+    get_successful_image_report,
+)
 
 pytestmark = pytest.mark.windows
 
@@ -54,6 +59,35 @@ class TestGetMatchingPresets:
             configuration=configuration,
             preset_id=None,
         )
+
+    def test_matches_non_chat_preset_without_service_model(self):
+        run = get_running_image_service_run()
+        report = get_successful_image_report(run)
+        preset = build_verified_endpoint_preset(
+            run=run,
+            endpoint_configuration=EndpointConfiguration(
+                name="juggernaut",
+                model={
+                    "repo": report.model,
+                    "source": "huggingface",
+                    "modality": "image-generation",
+                },
+            ),
+            report=report,
+        )
+        configuration = EndpointConfiguration(
+            name="juggernaut",
+            model={
+                "repo": report.model,
+                "source": "huggingface",
+                "revision": report.revision,
+                "modality": "image-generation",
+            },
+        )
+
+        assert _get_matching_presets([preset], configuration=configuration, preset_id=None) == [
+            preset
+        ]
 
 
 class TestBuildService:

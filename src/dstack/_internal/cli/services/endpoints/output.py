@@ -13,6 +13,7 @@ from dstack._internal.utils.common import pretty_date, pretty_resources
 def print_endpoint_presets(presets: list[EndpointPreset], verbose: bool = False) -> None:
     table = Table(box=None)
     table.add_column("MODEL", no_wrap=True)
+    table.add_column("MODALITY", no_wrap=True)
     table.add_column("RESOURCES" if verbose else "GPU")
     table.add_column("CONTEXT", justify="right")
     table.add_column("BENCHMARK", min_width=len("concurrency=1"), overflow="fold")
@@ -36,6 +37,7 @@ def _add_preset(table: Table, preset: EndpointPreset, *, verbose: bool) -> None:
         table,
         {
             "MODEL": f"[secondary]   preset={preset.id}[/]",
+            "MODALITY": preset.modality,
             column: _format_resources(groups[0].resources, verbose=verbose),
             "CONTEXT": format_endpoint_context_length(preset),
             "BENCHMARK": format_endpoint_benchmark(preset, verbose=verbose),
@@ -61,6 +63,8 @@ def _add_preset(table: Table, preset: EndpointPreset, *, verbose: bool) -> None:
 
 
 def format_endpoint_context_length(preset: EndpointPreset) -> str:
+    if preset.context_length is None:
+        return "-"
     return _format_token_count(preset.context_length)
 
 
@@ -70,33 +74,70 @@ def format_endpoint_benchmark(preset: EndpointPreset, *, verbose: bool = False) 
     workload = benchmark.workload
     metrics = benchmark.metrics
     requests_per_second = metrics.successful_requests / metrics.duration_seconds
-    output_tokens_per_second = metrics.total_output_tokens / metrics.duration_seconds
-    parts = [
-        f"concurrency={workload.concurrency}",
-        f"{_format_number(output_tokens_per_second)} tok/s",
-        f"TTFT {_format_latency(metrics.ttft_ms.p50)}",
-    ]
+    if workload.api in {"chat_completions", "completions"}:
+        assert metrics.total_output_tokens is not None
+        assert metrics.ttft_ms is not None
+        output_tokens_per_second = metrics.total_output_tokens / metrics.duration_seconds
+        parts = [
+            f"concurrency={workload.concurrency}",
+            f"{_format_number(output_tokens_per_second)} tok/s",
+            f"TTFT {_format_latency(metrics.ttft_ms.p50)}",
+        ]
+    else:
+        assert metrics.latency_ms is not None
+        throughput = metrics.successful_requests / metrics.duration_seconds
+        unit = workload.output_unit or "req"
+        if metrics.total_outputs is not None:
+            throughput = metrics.total_outputs / metrics.duration_seconds
+        parts = [
+            f"concurrency={workload.concurrency}",
+            f"{_format_number(throughput)} {unit}/s",
+            f"p50 {_format_latency(metrics.latency_ms.p50)}",
+        ]
     if verbose:
-        ttft = _format_latency_summary(
-            metrics.ttft_ms.mean, metrics.ttft_ms.p50, metrics.ttft_ms.p99
-        )
-        tpot = _format_latency_summary(
-            metrics.tpot_ms.mean, metrics.tpot_ms.p50, metrics.tpot_ms.p99
-        )
         parts.extend(
             [
                 f"hardware={_format_validation_gpus(validation)}",
                 f"api={workload.api}",
                 f"n={workload.num_requests}",
-                f"{_format_token_count(workload.input_tokens)}"
-                f"->{_format_token_count(workload.output_tokens)}",
                 f"{_format_number(requests_per_second)} req/s",
                 f"duration={_format_number(metrics.duration_seconds)}s",
-                f"TTFT mean/p50/p99={ttft}",
-                f"TPOT mean/p50/p99={tpot}",
                 f"{benchmark.tool} {benchmark.tool_version}",
             ]
         )
+        if workload.api in {"chat_completions", "completions"}:
+            assert workload.input_tokens is not None
+            assert workload.output_tokens is not None
+            assert metrics.ttft_ms is not None
+            assert metrics.tpot_ms is not None
+            parts.extend(
+                [
+                    f"{_format_token_count(workload.input_tokens)}"
+                    f"->{_format_token_count(workload.output_tokens)}",
+                    "TTFT mean/p50/p99="
+                    + _format_latency_summary(
+                        metrics.ttft_ms.mean,
+                        metrics.ttft_ms.p50,
+                        metrics.ttft_ms.p99,
+                    ),
+                    "TPOT mean/p50/p99="
+                    + _format_latency_summary(
+                        metrics.tpot_ms.mean,
+                        metrics.tpot_ms.p50,
+                        metrics.tpot_ms.p99,
+                    ),
+                ]
+            )
+        else:
+            assert metrics.latency_ms is not None
+            parts.append(
+                "latency mean/p50/p99="
+                + _format_latency_summary(
+                    metrics.latency_ms.mean,
+                    metrics.latency_ms.p50,
+                    metrics.latency_ms.p99,
+                )
+            )
     return " ".join(parts)
 
 

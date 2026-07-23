@@ -24,7 +24,11 @@ def build_endpoint_preset(
     validation_replicas: list[EndpointPresetValidationReplica],
     base_model: str,
     model: str,
-    context_length: int,
+    api_model_name: str,
+    source: str,
+    revision: str | None,
+    modality: str,
+    context_length: int | None,
     benchmark: EndpointBenchmark,
 ) -> EndpointPreset:
     service = service.copy(deep=True)
@@ -39,8 +43,18 @@ def build_endpoint_preset(
     set_service_gpu_vendors_from_validations(service, [validation])
     return EndpointPreset(
         base=base_model,
-        id=make_endpoint_preset_id(service, context_length=context_length),
+        id=make_endpoint_preset_id(
+            service,
+            model=model,
+            revision=revision,
+            modality=modality,
+            context_length=context_length,
+        ),
         model=model,
+        api_model_name=api_model_name,
+        source=source,
+        revision=revision,
+        modality=modality,
         context_length=context_length,
         created_at=get_current_datetime(),
         service=service,
@@ -50,11 +64,18 @@ def build_endpoint_preset(
 
 def make_endpoint_preset_id(
     service: ServiceConfiguration,
-    context_length: int,
+    *,
+    model: str = "",
+    revision: str | None = None,
+    modality: str = "text-generation",
+    context_length: int | None,
 ) -> str:
     payload = json.dumps(
         {
             "service": service_configuration_to_preset_data(service),
+            "model": model,
+            "revision": revision,
+            "modality": modality,
             "context_length": context_length,
         },
         sort_keys=True,
@@ -64,10 +85,14 @@ def make_endpoint_preset_id(
 
 
 def endpoint_preset_to_data(preset: EndpointPreset) -> dict[str, Any]:
-    return {
+    data = {
         "base": preset.base,
         "id": preset.id,
         "model": preset.model,
+        "api_model_name": preset.api_model_name,
+        "source": preset.source,
+        "revision": preset.revision,
+        "modality": preset.modality,
         "context_length": preset.context_length,
         "created_at": preset.created_at.isoformat(),
         "service": service_configuration_to_preset_data(preset.service),
@@ -75,6 +100,7 @@ def endpoint_preset_to_data(preset: EndpointPreset) -> dict[str, Any]:
             json.loads(validation.json(exclude_none=True)) for validation in preset.validations
         ],
     }
+    return {key: value for key, value in data.items() if value is not None}
 
 
 def service_configuration_to_preset_data(

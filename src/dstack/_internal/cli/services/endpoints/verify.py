@@ -67,22 +67,46 @@ def build_verified_endpoint_preset(
     if run.status != RunStatus.RUNNING or run.service is None:
         raise CLIError("Claude final service is not running")
     service = run.run_spec.configuration
-    if not isinstance(service, ServiceConfiguration) or service.model is None:
-        raise CLIError("Claude final run is not a model service")
-    if service.model.name != endpoint_configuration.model.api_model_name:
-        raise CLIError("Claude final service model name does not match the endpoint request")
+    if not isinstance(service, ServiceConfiguration):
+        raise CLIError("Claude final run is not a service")
     assert report.base is not None
     assert report.model is not None
-    assert report.context_length is not None
+    assert report.api_model_name is not None
+    assert report.source is not None
+    assert report.modality is not None
     assert report.benchmark is not None
+    if report.api_model_name != endpoint_configuration.model.api_model_name:
+        raise CLIError("Claude final report model name does not match the endpoint request")
+    if service.model is not None:
+        if service.model.name != endpoint_configuration.model.api_model_name:
+            raise CLIError("Claude final service model name does not match the endpoint request")
+    elif not service.probes:
+        raise CLIError("Claude final non-chat service has no explicit health probe")
+    if report.revision is not None and report.revision not in service.json(exclude_none=True):
+        raise CLIError("Claude final service does not pin the reported model revision")
     if endpoint_configuration.model.allows_variant_selection:
         if report.base != endpoint_configuration.model.api_model_name:
             raise CLIError("Claude final report base does not match the endpoint request")
     elif report.model != endpoint_configuration.model.exact_repo:
         raise CLIError("Claude changed an exact model request")
     if (
-        endpoint_configuration.context_length is not None
-        and report.context_length < endpoint_configuration.context_length
+        endpoint_configuration.model.source_type != "auto"
+        and report.source != endpoint_configuration.model.source_type
+    ):
+        raise CLIError("Claude changed the requested model source")
+    if (
+        endpoint_configuration.model.requested_revision is not None
+        and report.revision != endpoint_configuration.model.requested_revision
+    ):
+        raise CLIError("Claude changed the requested model revision")
+    if (
+        endpoint_configuration.model.requested_modality != "auto"
+        and report.modality != endpoint_configuration.model.requested_modality
+    ):
+        raise CLIError("Claude changed the requested model modality")
+    if endpoint_configuration.context_length is not None and (
+        report.context_length is None
+        or report.context_length < endpoint_configuration.context_length
     ):
         raise CLIError("Claude final service does not meet the requested context length")
 
@@ -105,6 +129,10 @@ def build_verified_endpoint_preset(
         validation_replicas=_get_validation_replicas(run, service),
         base_model=report.base,
         model=report.model,
+        api_model_name=report.api_model_name,
+        source=report.source,
+        revision=report.revision,
+        modality=report.modality,
         context_length=report.context_length,
         benchmark=benchmark,
     )

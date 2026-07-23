@@ -79,18 +79,35 @@ def _get_matching_presets(
     model_name = configuration.model.api_model_name
     matches = []
     for preset in presets:
-        service_model = preset.service.model
         if preset_id is not None and preset.id != preset_id:
             continue
-        if service_model is None or service_model.name.lower() != model_name.lower():
+        if (preset.api_model_name or preset.base).lower() != model_name.lower():
             continue
         if configuration.context_length is not None:
-            if preset.context_length < configuration.context_length:
+            if (
+                preset.context_length is None
+                or preset.context_length < configuration.context_length
+            ):
                 continue
         if configuration.model.allows_variant_selection:
             if preset.base.lower() != model_name.lower():
                 continue
         elif preset.model != configuration.model.exact_repo:
+            continue
+        if (
+            configuration.model.source_type != "auto"
+            and preset.source != configuration.model.source_type
+        ):
+            continue
+        if (
+            configuration.model.requested_revision is not None
+            and preset.revision != configuration.model.requested_revision
+        ):
+            continue
+        if (
+            configuration.model.requested_modality != "auto"
+            and preset.modality != configuration.model.requested_modality
+        ):
             continue
         matches.append(preset)
     return matches
@@ -151,7 +168,9 @@ def _format_requested_model(configuration: EndpointConfiguration) -> str:
 
 
 def _format_selected_preset(preset: EndpointPreset) -> str:
-    details = (
-        f"context={format_endpoint_context_length(preset)}, {format_endpoint_benchmark(preset)}"
-    )
+    details = format_endpoint_benchmark(preset)
+    if preset.modality != "text-generation":
+        details = f"modality={preset.modality}, {details}"
+    if preset.context_length is not None:
+        details = f"context={format_endpoint_context_length(preset)}, {details}"
     return f"{escape(preset.id)} ([secondary]{details}[/])"

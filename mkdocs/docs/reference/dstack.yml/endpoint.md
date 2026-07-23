@@ -23,8 +23,8 @@ used to create or apply an [endpoint preset](../../concepts/endpoints.md).
 
 === "Exact model"
 
-    Requires an exact model repo or path and optionally sets another
-    client-facing model name.
+    Requires an exact model locator and optionally constrains its source,
+    revision, modality, and client-facing model name.
 
     #SCHEMA# dstack._internal.cli.models.endpoints.EndpointModelRepo
         overrides:
