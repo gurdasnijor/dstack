@@ -1,7 +1,8 @@
 import os
+import shutil
 import sys
 import tempfile
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import List, TextIO
 
 import yaml
@@ -39,7 +40,8 @@ class EndpointPresetStore:
     def save(self, preset: EndpointPreset) -> Path:
         path = self._path(preset.base, preset.id)
         path.parent.mkdir(parents=True, exist_ok=True)
-        content = yaml.safe_dump(endpoint_preset_to_data(preset), sort_keys=False)
+        stored_preset, staged_assets = self._stage_assets(preset, path)
+        content = yaml.safe_dump(endpoint_preset_to_data(stored_preset), sort_keys=False)
         fd, temporary_path = tempfile.mkstemp(
             dir=path.parent,
             prefix=f".{preset.id}.",
@@ -50,12 +52,15 @@ class EndpointPresetStore:
                 f.write(content)
                 f.flush()
                 os.fsync(f.fileno())
+            self._replace_assets(path, staged_assets)
             os.replace(temporary_path, path)
         finally:
             try:
                 Path(temporary_path).unlink()
             except FileNotFoundError:
                 pass
+            if staged_assets is not None:
+                shutil.rmtree(staged_assets, ignore_errors=True)
         return path
 
     def delete(self, preset_id: str) -> bool:
@@ -64,6 +69,8 @@ class EndpointPresetStore:
             return False
         path = self._path(preset.base, preset.id)
         path.unlink()
+        shutil.rmtree(self._assets_path(path), ignore_errors=True)
+        self._remove_empty_assets_directory(path)
         try:
             path.parent.rmdir()
         except OSError:
@@ -78,6 +85,9 @@ class EndpointPresetStore:
             raise CLIError(f"Endpoint preset directory {directory} contains another base model")
         for path in paths:
             path.unlink()
+            shutil.rmtree(self._assets_path(path), ignore_errors=True)
+        if paths:
+            self._remove_empty_assets_directory(paths[0])
         try:
             directory.rmdir()
         except OSError:
@@ -87,9 +97,65 @@ class EndpointPresetStore:
     def _load(self, path: Path) -> EndpointPreset:
         try:
             with path.open(encoding="utf-8") as f:
-                return EndpointPreset.parse_obj(yaml.safe_load(f))
+                preset = EndpointPreset.parse_obj(yaml.safe_load(f))
+            for mapping in preset.service.files:
+                local_path = Path(mapping.local_path).expanduser()
+                if not local_path.is_absolute():
+                    mapping.local_path = str((path.parent / local_path).resolve())
+            return preset
         except (OSError, ValidationError, yaml.YAMLError) as e:
             raise CLIError(f"Invalid endpoint preset file {path}: {e}") from e
+
+    def _stage_assets(
+        self,
+        preset: EndpointPreset,
+        path: Path,
+    ) -> tuple[EndpointPreset, Path | None]:
+        stored_preset = preset.copy(deep=True)
+        if not stored_preset.service.files:
+            return stored_preset, None
+        staged_assets = Path(
+            tempfile.mkdtemp(
+                dir=path.parent,
+                prefix=f".{preset.id}.assets.",
+            )
+        )
+        try:
+            for index, mapping in enumerate(stored_preset.service.files):
+                source = Path(mapping.local_path).expanduser().resolve()
+                if not source.exists():
+                    raise CLIError(f"Endpoint preset file {mapping.local_path} does not exist")
+                destination = staged_assets / f"{index}-{source.name}"
+                if source.is_dir():
+                    shutil.copytree(source, destination)
+                else:
+                    shutil.copy2(source, destination)
+                mapping.local_path = str(PurePosixPath("assets") / preset.id / destination.name)
+        except Exception:
+            shutil.rmtree(staged_assets, ignore_errors=True)
+            raise
+        return stored_preset, staged_assets
+
+    def _replace_assets(self, path: Path, staged_assets: Path | None) -> None:
+        assets_path = self._assets_path(path)
+        if staged_assets is None:
+            shutil.rmtree(assets_path, ignore_errors=True)
+            self._remove_empty_assets_directory(path)
+            return
+        assets_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.rmtree(assets_path, ignore_errors=True)
+        os.replace(staged_assets, assets_path)
+
+    @staticmethod
+    def _assets_path(path: Path) -> Path:
+        return path.parent / "assets" / path.stem
+
+    @staticmethod
+    def _remove_empty_assets_directory(path: Path) -> None:
+        try:
+            (path.parent / "assets").rmdir()
+        except OSError:
+            pass
 
     def _path(self, base: str, preset_id: str) -> Path:
         if not preset_id or any(char in preset_id for char in "/\\"):

@@ -14,6 +14,7 @@ from dstack._internal.cli.models.endpoint_presets import (
 from dstack._internal.cli.services.endpoints.store import EndpointPresetStore
 from dstack._internal.core.errors import CLIError
 from dstack._internal.core.models.envs import EnvSentinel
+from dstack._internal.core.models.files import FilePathMapping
 from tests._internal.cli.endpoint_presets import (
     get_endpoint_benchmark,
     get_endpoint_preset,
@@ -120,6 +121,43 @@ class TestEndpointPresetStore:
         store.save(updated)
 
         assert store.get(updated.id) == updated
+
+    def test_snapshots_service_files_beside_preset(self, tmp_path: Path):
+        store = EndpointPresetStore(tmp_path / "presets")
+        source = tmp_path / "agent-workspace" / "server.py"
+        source.parent.mkdir()
+        source.write_text("print('ready')\n")
+        preset = get_endpoint_preset()
+        preset.service.files = [FilePathMapping(local_path=str(source), path="server.py")]
+
+        path = store.save(preset)
+        source.unlink()
+
+        data = yaml.safe_load(path.read_text())
+        assert data["service"]["files"] == [
+            {
+                "local_path": f"assets/{preset.id}/0-server.py",
+                "path": "server.py",
+            }
+        ]
+        stored = store.get(preset.id)
+        assert stored is not None
+        stored_path = Path(stored.service.files[0].local_path)
+        assert stored_path.read_text() == "print('ready')\n"
+        assert stored_path == path.parent / "assets" / preset.id / "0-server.py"
+
+    def test_delete_removes_snapshotted_service_files(self, tmp_path: Path):
+        store = EndpointPresetStore(tmp_path / "presets")
+        source = tmp_path / "server.py"
+        source.write_text("print('ready')\n")
+        preset = get_endpoint_preset()
+        preset.service.files = [FilePathMapping(local_path=str(source), path="server.py")]
+        path = store.save(preset)
+
+        assert store.delete(preset.id)
+
+        assert not path.exists()
+        assert not (path.parent / "assets").exists()
 
     def test_loads_legacy_chat_preset_without_generalized_metadata(self, tmp_path: Path):
         store = EndpointPresetStore(tmp_path / "presets")

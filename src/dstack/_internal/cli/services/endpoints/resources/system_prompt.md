@@ -285,6 +285,13 @@ For token APIs, verify the context length that the final service actually
 supports and report it as `final_report.json.context_length`. Omit context length
 when it has no meaning for the modality.
 
+For OpenAI-compatible chat APIs, verification must cover both a plain streaming
+chat completion and a request with at least one harmless function tool and
+`tool_choice: "auto"`. Configure the runtime's model-appropriate tool-call
+parser and automatic tool-choice support when required. A health check or plain
+token benchmark does not prove compatibility with clients such as OpenWebUI
+that attach tools to ordinary conversations.
+
 # Benchmark
 
 Send benchmark requests to the final service run's absolute dstack service URL
