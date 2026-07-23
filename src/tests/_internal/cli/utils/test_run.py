@@ -153,9 +153,7 @@ def test_adds_endpoint_metadata_to_service_options_for_older_servers():
 
     _add_endpoint_metadata_to_service_options(data)
 
-    assert data["runs"][0]["service"]["options"]["endpoint"] == metadata.dict(
-        exclude_none=True
-    )
+    assert data["runs"][0]["service"]["options"]["endpoint"] == metadata.dict(exclude_none=True)
 
 
 async def create_run_with_job(

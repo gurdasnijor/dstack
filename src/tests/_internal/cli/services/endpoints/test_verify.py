@@ -127,9 +127,7 @@ class TestBuildVerifiedEndpointPreset:
     def test_tightens_gpu_floor_to_successfully_validated_memory(self):
         run = get_running_image_service_run()
         validated_gpu = (
-            run.jobs[0]
-            .job_submissions[0]
-            .job_runtime_data.offer.instance.resources.gpus[0]
+            run.jobs[0].job_submissions[0].job_runtime_data.offer.instance.resources.gpus[0]
         )
         validated_gpu.memory_mib = 40 * 1024
 
