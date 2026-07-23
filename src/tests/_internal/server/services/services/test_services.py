@@ -13,7 +13,12 @@ from dstack._internal.core.models.gateways import (
     LetsEncryptGatewayCertificate,
 )
 from dstack._internal.core.models.runs import RunSpec
+from dstack._internal.core.models.services import (
+    ServiceEndpointMetadata,
+    endpoint_metadata_to_tags,
+)
 from dstack._internal.server.services.services import (
+    _get_service_spec,
     _register_service_in_server,
     _should_configure_service_https_on_gateway,
     _should_show_service_https,
@@ -53,6 +58,35 @@ class TestServiceConfigurationHttps:
     def test_accepts_auto(self) -> None:
         conf = ServiceConfiguration(commands=["python serve.py"], port=8000, https="auto")
         assert conf.https == "auto"
+
+
+class TestEndpointServiceMetadata:
+    def test_exposes_validated_endpoint_metadata_in_service_options(self) -> None:
+        metadata = ServiceEndpointMetadata(
+            base="stabilityai/stable-diffusion-xl-base-1.0",
+            model="eniora/Juggernaut_XL_Ragnarok",
+            api_model_name="eniora/Juggernaut_XL_Ragnarok",
+            source="huggingface",
+            revision="fe71bb49",
+            modality="image-generation",
+            api="images_generations",
+            request_path="/v1/images/generations",
+            output_unit="image",
+        )
+        configuration = ServiceConfiguration(
+            commands=["python serve.py"],
+            port=8000,
+            tags=endpoint_metadata_to_tags(metadata),
+        )
+
+        service = _get_service_spec(
+            configuration,
+            service_url="/proxy/services/main/juggernaut/",
+            model_url="/proxy/models/main/juggernaut/",
+        )
+
+        assert service.model is None
+        assert service.options["endpoint"] == metadata.dict(exclude_none=True)
 
 
 class TestShouldConfigureServiceHttpsOnGateway:

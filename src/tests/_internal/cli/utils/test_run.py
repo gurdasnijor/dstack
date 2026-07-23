@@ -11,7 +11,12 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from dstack._internal.cli.utils.run import _format_pull_progress, get_runs_table
+from dstack._internal.cli.utils.run import (
+    _add_endpoint_metadata_to_service_options,
+    _format_pull_progress,
+    _redact_env_values,
+    get_runs_table,
+)
 from dstack._internal.core.models.backends.base import BackendType
 from dstack._internal.core.models.configurations import (
     AnyRunConfiguration,
@@ -27,6 +32,10 @@ from dstack._internal.core.models.runs import (
     JobStatus,
     JobTerminationReason,
     RunStatus,
+)
+from dstack._internal.core.models.services import (
+    ServiceEndpointMetadata,
+    endpoint_metadata_to_tags,
 )
 from dstack._internal.server.models import RunModel
 from dstack._internal.server.services import encryption  # noqa: F401  # import for side-effect
@@ -87,6 +96,66 @@ def get_table_cell_style(table: Table, column_name: str, row_idx: int = 0) -> Op
                     return match.group(1)
             return None
     return None
+
+
+def test_redacts_environment_values_from_json_output():
+    data = {
+        "runs": [
+            {
+                "run_spec": {
+                    "configuration": {"env": {"HF_TOKEN": "configuration-secret"}},
+                    "jobs": [
+                        {
+                            "job_spec": {
+                                "env": {
+                                    "HF_TOKEN": "resolved-secret",
+                                    "PUBLIC_SETTING": "value",
+                                }
+                            }
+                        }
+                    ],
+                }
+            }
+        ]
+    }
+
+    _redact_env_values(data)
+
+    configuration_env = data["runs"][0]["run_spec"]["configuration"]["env"]
+    job_env = data["runs"][0]["run_spec"]["jobs"][0]["job_spec"]["env"]
+    assert configuration_env == {"HF_TOKEN": "[redacted]"}
+    assert job_env == {
+        "HF_TOKEN": "[redacted]",
+        "PUBLIC_SETTING": "[redacted]",
+    }
+
+
+def test_adds_endpoint_metadata_to_service_options_for_older_servers():
+    metadata = ServiceEndpointMetadata(
+        base="stabilityai/stable-diffusion-xl-base-1.0",
+        model="eniora/Juggernaut_XL_Ragnarok",
+        api_model_name="eniora/Juggernaut_XL_Ragnarok",
+        source="huggingface",
+        revision="fe71bb49",
+        modality="image-generation",
+        api="images_generations",
+        request_path="/v1/images/generations",
+        output_unit="image",
+    )
+    data = {
+        "runs": [
+            {
+                "run_spec": {"configuration": {"tags": endpoint_metadata_to_tags(metadata)}},
+                "service": {"url": "/proxy/services/main/juggernaut/", "options": {}},
+            }
+        ]
+    }
+
+    _add_endpoint_metadata_to_service_options(data)
+
+    assert data["runs"][0]["service"]["options"]["endpoint"] == metadata.dict(
+        exclude_none=True
+    )
 
 
 async def create_run_with_job(

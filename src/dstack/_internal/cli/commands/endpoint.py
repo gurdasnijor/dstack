@@ -159,9 +159,13 @@ class EndpointCommand(BaseCommand):
             keep_service=args.keep_service,
             debug=args.debug,
         )
+        base_suffix = ""
+        if result.preset.base != result.preset.api_model_name:
+            base_suffix = f" (base: [code]{result.preset.base}[/])"
         console.print(
             f"Endpoint preset [code]{result.preset.id}[/] for "
-            f"[code]{result.preset.base}[/] saved to [code]{result.path}[/]"
+            f"[code]{result.preset.api_model_name}[/]{base_suffix} saved to "
+            f"[code]{result.path}[/]"
         )
         if args.keep_service:
             console.print(f"Final service [code]{result.final_run_name}[/] kept running")

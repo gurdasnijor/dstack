@@ -1,3 +1,4 @@
+import json
 import shutil
 from enum import Enum
 from typing import Any, Dict, List, Optional
@@ -37,6 +38,10 @@ from dstack._internal.core.models.runs import (
 from dstack._internal.core.models.runs import (
     Run as CoreRun,
 )
+from dstack._internal.core.models.services import (
+    ENDPOINT_METADATA_OPTION_KEY,
+    endpoint_metadata_from_tags,
+)
 from dstack._internal.core.services.profiles import get_termination
 from dstack._internal.utils.common import (
     DateFormatter,
@@ -59,7 +64,49 @@ def print_runs_json(project: str, runs: List[Run]) -> None:
         project=project,
         runs=[r._run for r in runs],
     )
-    print(output.json())
+    data = json.loads(output.json())
+    _add_endpoint_metadata_to_service_options(data)
+    _redact_env_values(data)
+    print(json.dumps(data, indent=2))
+
+
+def _add_endpoint_metadata_to_service_options(data: dict[str, Any]) -> None:
+    for run in data.get("runs", []):
+        configuration = run.get("run_spec", {}).get("configuration", {})
+        metadata = endpoint_metadata_from_tags(configuration.get("tags"))
+        service = run.get("service")
+        if metadata is None or not isinstance(service, dict):
+            continue
+        service.setdefault("options", {})[ENDPOINT_METADATA_OPTION_KEY] = metadata.dict(
+            exclude_none=True
+        )
+
+
+def _redact_env_values(value: Any) -> None:
+    if isinstance(value, list):
+        for item in value:
+            _redact_env_values(item)
+        return
+    if not isinstance(value, dict):
+        return
+    for key, item in value.items():
+        if key == "env":
+            value[key] = _redact_env(item)
+        else:
+            _redact_env_values(item)
+
+
+def _redact_env(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {key: "[redacted]" for key in value}
+    if isinstance(value, list):
+        return [
+            f"{item.split('=', 1)[0]}=[redacted]"
+            if isinstance(item, str) and "=" in item
+            else item
+            for item in value
+        ]
+    return value
 
 
 def print_run_plan(
@@ -353,6 +400,7 @@ def _format_instance_type(
 
 
 def _format_run_name(run: CoreRun, show_deployment_num: bool) -> str:
+    assert run.run_spec.run_name is not None
     parts: List[str] = [run.run_spec.run_name]
     if show_deployment_num:
         parts.append(f" [secondary]deployment={run.deployment_num}[/]")

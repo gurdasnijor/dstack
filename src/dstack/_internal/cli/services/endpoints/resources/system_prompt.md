@@ -39,9 +39,9 @@ a representative response can be verified and benchmarked.
 
 Use the real `dstack` CLI and shell commands in this workspace. Load and follow
 `/dstack` for dstack CLI/YAML syntax. Load and follow `/dstack-prototyping` for
-how to test a model-serving configuration with tasks before verifying it as a
-service. The skill files are installed under `.claude/skills` if you need to
-inspect them directly.
+service-first validation of documented runtime recipes and task fallback when
+important configuration is unknown. The skill files are installed under
+`.claude/skills` if you need to inspect them directly.
 
 # Progress
 
@@ -133,10 +133,46 @@ blocked the run and what the user/admin would need to change.
 
 # Task Usage
 
-Use `/dstack-prototyping` to learn how to use tasks. Keep in mind that using a
-task is a must. This means `sleep infinity` and directly attaching inside the
-task via SSH to run commands as the only way to use tasks. If there is any
-ambiguity, follow `/dstack-prototyping` and do nothing that contradicts it.
+Use `/dstack-prototyping` to choose between the service-first fast path and task
+fallback. Submit the candidate final service directly when source metadata and
+runtime documentation establish a concrete image, command, API, and probe.
+Only use a `sleep infinity` task when an important runtime assumption is
+unknown, interactive diagnosis is required, or a service failure cannot be
+resolved from its logs. Do not load the same model once in a task and again in a
+service merely to duplicate already documented runtime behavior.
+
+When task fallback is necessary, manage background servers by a PID file. Never
+use `pkill -f`, `pgrep -f`, or `killall`; the matching command can include the
+SSH shell itself. Do not restart a server while downloads, compilation, or logs
+show forward progress.
+
+# Efficiency And Retry Budget
+
+Finish model metadata, runtime, offer, and backend classification before the
+first submission. Aim for one candidate service on the documented fast path, or
+one task plus one final service on the exploratory path. Reuse the same idle
+instance and cache when moving from task to service.
+
+Retry an identical submission at most once for a clearly transient platform
+failure such as an image-pull timeout. Configuration errors require new evidence
+and a changed configuration, not repeated identical runs. Inspect logs before
+restarting a process or submitting another run. Stop after the first final
+service passes its representative request and benchmark.
+
+Every wait or poll loop must have an explicit deadline and inspect run status
+on each iteration. Exit immediately when a run reaches a terminal state. Never
+leave an unbounded `until dstack logs ...` or `while` loop waiting for a log
+message that a failed run can no longer produce.
+
+For research repositories, derive the minimum dependencies needed by the chosen
+inference path instead of running the entire environment setup blindly. Prefer
+binary wheels and skip optional CUDA extensions unless an import or real model
+request proves they are required. Before task-to-service transition, run the
+exact service command under its configured shell and send the representative
+inference request to that exact process. This must exercise lazy runtime
+compilation and native toolchain dependencies, not merely startup or a health
+probe. Image-based dstack commands default to `/bin/sh`; use POSIX `. file`
+instead of `source`, or explicitly set `shell: bash`.
 
 # Backend/Fleet Selection, Idle Duration, Instance Volumes
 
@@ -231,12 +267,13 @@ does not yet register, omit `service_yaml.model` and specify a real HTTP health
 probe explicitly. Preset metadata retains the client-facing model name.
 
 Before submitting the final service, choose service resources from the least
-restrictive requirements supported by the evidence, not from the exact machine
-that happened to run. For example, if the model worked on an A40 but the
-evidence only says it needs an NVIDIA GPU with at least 16GB memory, use that
-broader requirement. Use an exact GPU, region, backend, or instance type only
-when the endpoint constraints require it or the tested configuration depends on
-that exact choice.
+restrictive requirements actually supported by successful validation evidence.
+The CLI raises GPU count and per-GPU memory floors to the lowest successfully
+validated hardware, so a preset cannot silently deploy below what was tested.
+To produce a lower floor, validate the final service on that lower hardware
+class. Use an exact GPU name, region, backend, or instance type only when the
+endpoint constraints require it or the tested configuration depends on that
+exact choice.
 
 Use run status to know whether the final service is still starting, running, or
 failed. Use logs to understand failures. When dstack exposes the final service
@@ -258,6 +295,11 @@ Run one representative benchmark through the final service URL. Use streaming
 for token-generation APIs. Choose a workload that measures the endpoint's real
 unit of work. The packaged `/dstack-prototyping` skill contains an image
 benchmark helper for OpenAI-compatible image generation.
+
+For expensive non-token endpoints whose representative request takes more than
+10 seconds, one successful measured request is sufficient. Reuse the verified
+representative workload as the benchmark; do not add lower-quality workload
+variants or repeat it merely to obtain a larger sample count.
 
 Every benchmark has `tool`, `tool_version`, a secret-free `command`, `workload`,
 and `metrics`. Every workload has `api`, `num_requests`, and `concurrency`, plus

@@ -1,7 +1,7 @@
 ---
 name: dstack-prototyping
 description: |
-  Use with the dstack skill for model-serving work of any modality when the image, serving command, resources, backend/fleet choice, or service behavior is not proven. Guides task-first prototyping on real hardware and verification through the final dstack service URL.
+  Use with the dstack skill for model-serving work of any modality when the image, serving command, resources, backend/fleet choice, or service behavior must be verified. Guides service-first validation for documented recipes, task fallback for unknowns, and verification through the final dstack service URL.
 ---
 
 # dstack Prototyping
@@ -16,11 +16,17 @@ Find a working dstack service configuration for the requested model and its real
 API, whether it generates tokens, vectors, images, video, audio, or another
 documented output.
 
-Before submitting a service, use a task on real hardware to test the serving
-image, install/runtime assumptions, model download, cache path, command, port,
-launch flags, resources, env vars, backend/fleet choice, and local model
-request. Then submit the same configuration as a service and verify the model
-through the dstack service URL.
+When source metadata and runtime documentation provide a concrete image,
+command, API, and health probe, submit the candidate service directly. Verify
+the real model request and benchmark through its dstack service URL. This is the
+normal fast path because the service itself supplies the required real-hardware
+evidence without loading the model twice.
+
+Use a task first only when an important runtime assumption remains unknown and
+requires interactive inspection: an unproven image or install, uncertain launch
+flags, an undocumented request contract, or a failure that service logs cannot
+diagnose. After the task proves the configuration, submit the same configuration
+as the final service.
 
 ## Choose Where To Run
 
@@ -56,9 +62,15 @@ Diffusers adapter is a candidate for compatible pipelines and exposes
 choosing its image and command. ComfyUI, Diffusers services, media runtimes, or a
 model-specific HTTP server are valid when they provide a stable API and probe.
 
-## Use A Task Before Service
+## Choose Service-First Or Task-First
 
-Before submitting a service, start a long-lived task:
+Prefer service-first validation when the serving framework documents support
+for the detected architecture/modality and the complete candidate service can
+be expressed up front. If that service becomes healthy and answers the real
+request, benchmark it and finish; do not create a duplicate exploratory task.
+
+Use a task when configuration is genuinely unknown or a failed candidate
+service needs interactive diagnosis. Start a long-lived task:
 
 ```yaml
 commands:
@@ -79,10 +91,37 @@ running. For example (the command can be any long-running command):
 
 ```shell
 nohup vllm serve ... </dev/null > /tmp/vllm.log 2>&1 &
+echo $! > /tmp/dstack-endpoint-server.pid
 ```
 
-If the image, hardware choice, or major install path changes, submit another
-task so the changed setup is tested before service verification.
+Stop only the recorded PID, after verifying it is still the expected process.
+Never use `pkill -f`, `pgrep -f`, or `killall` for a serving process: pattern
+matching can select the SSH shell that contains the same command text and waste
+the entire model startup. Inspect the process log before restarting it, and do
+not restart while model downloads or compilation are still making progress.
+
+Every wait or poll loop must have a deadline and inspect the run status on each
+iteration. Exit immediately when a run reaches a terminal state; never leave an
+unbounded `until dstack logs ...` or `while` loop waiting for a log message that
+a failed run can no longer produce.
+
+Do not run a repository's complete environment bootstrap blindly. Derive the
+smallest dependency set for the selected inference path from imports and source
+metadata. Prefer compatible binary wheels, and do not compile optional CUDA
+extensions unless an import or real request proves they are required. A failed
+optional build is evidence to omit it, not retry it.
+
+Before moving from a task to a service, execute the exact service command with
+the same shell dstack will use. Container-image commands default to `/bin/sh`,
+where `source` is not available; use `. /path/to/activate` or explicitly set
+`shell: bash`. Send the representative inference request to that exact process,
+so lazy runtime compilation and native toolchain requirements are exercised as
+well as startup. This service-equivalence check must pass before another model
+startup is submitted.
+
+If the image, hardware choice, or major install path changes during task-based
+diagnosis, submit another task so the changed setup is tested before service
+verification.
 
 Do not move to a service after checking only GPU visibility, imports, logs, or a
 health endpoint. Start the server inside the task and send a request that uses
@@ -97,9 +136,9 @@ instance volumes when available.
 
 ## Verify As A Service
 
-Submit the service after the task has verified the configuration: image,
-command, port, resources, env vars, cache mounts if used, backend/fleet choice,
-and model request.
+When task fallback was required, submit the service after the task has verified
+the configuration: image, command, port, resources, env vars, cache mounts if
+used, backend/fleet choice, and model request.
 
 Use the service as a duplicate check of the same configuration under dstack
 service runtime. The model request that worked locally in the task must also work
@@ -120,6 +159,11 @@ Benchmark through the final dstack service URL, not an SSH tunnel or task-local
 port. Exclude warmups. Validate the output, not only the HTTP status: token
 content for generation, vector shape for embeddings, decoded media for
 image/audio/video, or the documented response contract for a custom API.
+
+For an expensive non-token endpoint whose representative request takes more
+than 10 seconds, use one successful measured request as the benchmark. Do not
+repeat it or substitute a lower-quality workload merely to increase the sample
+count.
 
 For an OpenAI-compatible image endpoint, use the packaged
 `scripts/benchmark_images.py`. Give it a JSON request body with

@@ -4,7 +4,11 @@ import requests
 
 from dstack._internal.core.errors import ServerClientError
 from dstack._internal.core.models.configurations import ServiceConfiguration
-from dstack._internal.core.models.services import AnyModel
+from dstack._internal.core.models.services import (
+    ENDPOINT_METADATA_OPTION_KEY,
+    AnyModel,
+    endpoint_metadata_from_tags,
+)
 
 
 def complete_service_model(model_info: AnyModel, env: Dict[str, str]):
@@ -50,4 +54,7 @@ def get_service_options(conf: ServiceConfiguration) -> dict:
     if conf.model is not None:
         complete_service_model(conf.model, env=conf.env.as_dict())
         options["openai"] = {"model": conf.model.dict()}
+    endpoint_metadata = endpoint_metadata_from_tags(conf.tags)
+    if endpoint_metadata is not None:
+        options[ENDPOINT_METADATA_OPTION_KEY] = endpoint_metadata.dict(exclude_none=True)
     return options

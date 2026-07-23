@@ -2,12 +2,80 @@
 Data structures related to `type: service` runs.
 """
 
+import base64
+import binascii
 from typing import Optional, Union
 
-from pydantic import Field
+from pydantic import Field, ValidationError
 from typing_extensions import Annotated, Literal
 
 from dstack._internal.core.models.common import CoreModel
+
+ENDPOINT_METADATA_OPTION_KEY = "endpoint"
+ENDPOINT_METADATA_TAG_FIELDS = {
+    "_dstack_endpoint_base": "base",
+    "_dstack_endpoint_model": "model",
+    "_dstack_endpoint_api_model_name": "api_model_name",
+    "_dstack_endpoint_source": "source",
+    "_dstack_endpoint_revision": "revision",
+    "_dstack_endpoint_modality": "modality",
+    "_dstack_endpoint_context_length": "context_length",
+    "_dstack_endpoint_api": "api",
+    "_dstack_endpoint_request_path": "request_path",
+    "_dstack_endpoint_output_unit": "output_unit",
+}
+
+
+class ServiceEndpointMetadata(CoreModel):
+    """Validated endpoint capability metadata carried with an applied service."""
+
+    base: str
+    model: str
+    api_model_name: str
+    source: str
+    revision: Optional[str] = None
+    modality: str
+    context_length: Optional[int] = None
+    api: str
+    request_path: Optional[str] = None
+    output_unit: Optional[str] = None
+
+
+def endpoint_metadata_to_tags(metadata: ServiceEndpointMetadata) -> dict[str, str]:
+    data = metadata.dict(exclude_none=True)
+    tags = {}
+    for tag, field in ENDPOINT_METADATA_TAG_FIELDS.items():
+        if field not in data:
+            continue
+        tags[tag] = _encode_endpoint_tag_value(str(data[field]))
+    return tags
+
+
+def endpoint_metadata_from_tags(tags: Optional[dict[str, str]]) -> Optional[ServiceEndpointMetadata]:
+    if not tags:
+        return None
+    data = {}
+    try:
+        for tag, field in ENDPOINT_METADATA_TAG_FIELDS.items():
+            if tag in tags:
+                data[field] = _decode_endpoint_tag_value(tags[tag])
+        if "context_length" in data:
+            data["context_length"] = int(data["context_length"])
+        return ServiceEndpointMetadata.parse_obj(data)
+    except (ValueError, UnicodeDecodeError, binascii.Error, ValidationError):
+        return None
+
+
+def _encode_endpoint_tag_value(value: str) -> str:
+    encoded = base64.urlsafe_b64encode(value.encode()).decode().rstrip("=")
+    if len(encoded) > 256:
+        raise ValueError("Endpoint metadata value is too long to carry in run tags")
+    return encoded
+
+
+def _decode_endpoint_tag_value(value: str) -> str:
+    padding = "=" * (-len(value) % 4)
+    return base64.b64decode(value + padding, altchars=b"-_", validate=True).decode()
 
 
 class BaseChatModel(CoreModel):
