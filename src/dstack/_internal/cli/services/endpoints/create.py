@@ -34,6 +34,10 @@ from dstack._internal.cli.services.endpoints.prompt import (
     format_model_inspection,
     get_endpoint_agent_system_prompt,
 )
+from dstack._internal.cli.services.endpoints.session import (
+    EndpointSessionRecorder,
+    write_baseline_summary,
+)
 from dstack._internal.cli.services.endpoints.store import EndpointPresetStore
 from dstack._internal.cli.services.endpoints.verify import (
     build_verified_endpoint_preset,
@@ -115,10 +119,18 @@ async def _create_endpoint_preset(
             *get_sensitive_inherited_env_values(),
         ]
     )
+    recorder = EndpointSessionRecorder(agent_session, redacted_values=redacted_values)
+    recorder.record(
+        "session_started",
+        model=configuration.model.api_model_name,
+        build_name=build_name,
+        allowed_fleets=list(allowed_fleets),
+    )
     report: Optional[AgentFinalReport] = None
     preset: Optional[EndpointPreset] = None
     preset_path: Optional[Path] = None
     creation_succeeded = False
+    creation_error: Optional[str] = None
     cleanup_error: Optional[str] = None
     with endpoint_agent_workspace() as workspace:
         env = build_endpoint_agent_env(
@@ -128,10 +140,19 @@ async def _create_endpoint_preset(
             workspace=workspace,
             token=token,
         )
+        recorder.phase_started("inspection")
         inspection_data = _run_inspection_stage(
             configuration=configuration,
             workspace=workspace,
             agent_session=agent_session,
+        )
+        recorder.phase_completed(
+            "inspection",
+            classification=(inspection_data or {}).get("classification"),
+            candidates=[
+                candidate.get("runtime")
+                for candidate in (inspection_data or {}).get("candidates", [])
+            ],
         )
         prompt = _build_prompt(
             configuration=configuration,
@@ -147,6 +168,7 @@ async def _create_endpoint_preset(
             agent_session=agent_session,
         )
         try:
+            recorder.phase_started("agent")
             process_output = await run_endpoint_agent(
                 prompt=prompt,
                 env=env,
@@ -155,6 +177,11 @@ async def _create_endpoint_preset(
                 redacted_values=redacted_values,
                 agent_session=agent_session,
             )
+            recorder.phase_completed(
+                "agent",
+                submitted_runs=_load_submitted_run_names(workspace.submissions_path),
+            )
+            recorder.phase_started("verification")
             report = load_endpoint_agent_report(
                 output=process_output,
                 workspace=workspace,
@@ -169,13 +196,23 @@ async def _create_endpoint_preset(
             if contains_redacted_value(endpoint_preset_to_data(preset), redacted_values):
                 raise CLIError("Generated endpoint preset contains a secret value")
             preset_path = store.save(preset)
+            recorder.phase_completed(
+                "verification",
+                run_name=report.run_name,
+                preset_id=preset.id,
+            )
             print_endpoint_progress(
                 f"Saved endpoint preset {preset.id} for {preset.base} at {preset_path}.",
                 agent_session=agent_session,
             )
             creation_succeeded = True
+        except BaseException as e:
+            creation_error = str(e) or type(e).__name__
+            recorder.fail_open_phases(creation_error)
+            raise
         finally:
             keep_final_service = keep_service and creation_succeeded
+            recorder.phase_started("cleanup")
             try:
                 await _cleanup_runs(
                     api=api,
@@ -185,8 +222,10 @@ async def _create_endpoint_preset(
                     keep_final_service=keep_final_service,
                     agent_session=agent_session,
                 )
+                recorder.phase_completed("cleanup", kept_final_service=keep_final_service)
             except Exception as e:
                 cleanup_error = str(e)
+                recorder.phase_failed("cleanup", error=cleanup_error)
                 if keep_final_service:
                     with suppress(Exception):
                         await _cleanup_runs(
@@ -196,6 +235,15 @@ async def _create_endpoint_preset(
                             final_run_name=report.run_name if report is not None else None,
                             agent_session=agent_session,
                         )
+            submitted_run_names = _load_submitted_run_names(workspace.submissions_path)
+            if report is not None and report.run_name:
+                submitted_run_names.append(report.run_name)
+            write_baseline_summary(
+                recorder,
+                submitted_run_names=list(dict.fromkeys(submitted_run_names)),
+                succeeded=creation_succeeded,
+                failure_summary=creation_error or cleanup_error,
+            )
 
     if cleanup_error is not None:
         raise CLIError(f"Failed to clean up preset creation runs: {cleanup_error}")
