@@ -109,9 +109,22 @@ class OpenAIChatModelFormat(ImmutableModel):
 AnyModelFormat = Union[TGIChatModelFormat, OpenAIChatModelFormat]
 
 
-class ChatModel(ImmutableModel):
+class EndpointModel(ImmutableModel):
     project_name: str
     name: str
     created_at: datetime
     run_name: str
-    format_spec: Annotated[AnyModelFormat, Field(discriminator="format")]
+    format_spec: Optional[Annotated[AnyModelFormat, Field(discriminator="format")]] = None
+    base: Optional[str] = None
+    model: Optional[str] = None
+    source: Optional[str] = None
+    revision: Optional[str] = None
+    modality: str = "text-generation"
+    context_length: Optional[int] = None
+    api: str = "chat_completions"
+    request_path: Optional[str] = None
+    output_unit: Optional[str] = None
+
+
+# Kept as an alias for compatibility with gateway state and downstream imports.
+ChatModel = EndpointModel

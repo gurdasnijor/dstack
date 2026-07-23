@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
-from dstack._internal.proxy.lib.models import ChatModel, Project, Service
+from dstack._internal.proxy.lib.models import EndpointModel, Project, Service
 
 
 class BaseProxyRepo(ABC):
@@ -15,11 +15,11 @@ class BaseProxyRepo(ABC):
         pass
 
     @abstractmethod
-    async def list_models(self, project_name: str) -> List[ChatModel]:
+    async def list_models(self, project_name: str) -> List[EndpointModel]:
         pass
 
     @abstractmethod
-    async def get_model(self, project_name: str, name: str) -> Optional[ChatModel]:
+    async def get_model(self, project_name: str, name: str) -> Optional[EndpointModel]:
         pass
 
     @abstractmethod

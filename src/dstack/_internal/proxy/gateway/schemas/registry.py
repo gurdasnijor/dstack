@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 
 from dstack._internal.core.models.instances import SSHConnectionParams
 from dstack._internal.core.models.routers import AnyServiceRouterConfig
+from dstack._internal.core.models.services import ServiceEndpointMetadata
 from dstack._internal.proxy.lib.models import RateLimit
 
 
@@ -34,6 +35,7 @@ class OpenAIOptions(BaseModel):
 
 class Options(BaseModel):
     openai: Optional[OpenAIOptions] = None
+    endpoint: Optional[ServiceEndpointMetadata] = None
 
 
 class RegisterServiceRequest(BaseModel):

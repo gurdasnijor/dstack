@@ -5,7 +5,7 @@ from dstack._internal.core.models.common import CoreModel
 
 class ChatMessage(CoreModel):
     role: str  # TODO(egor-s) types
-    content: str
+    content: Any
 
 
 class ChatCompletionsRequest(CoreModel):
@@ -70,6 +70,15 @@ class Model(CoreModel):
     id: str
     created: int
     owned_by: str
+    base: Optional[str] = None
+    model: Optional[str] = None
+    source: Optional[str] = None
+    revision: Optional[str] = None
+    modality: Optional[str] = None
+    context_length: Optional[int] = None
+    api: Optional[str] = None
+    request_path: Optional[str] = None
+    output_unit: Optional[str] = None
 
 
 class ModelsResponse(CoreModel):
