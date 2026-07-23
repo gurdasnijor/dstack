@@ -6,7 +6,7 @@ import secrets
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import AsyncIterator, Optional
+from typing import AsyncIterator, Optional, Union
 from urllib.parse import urlparse
 
 import httpx
@@ -322,12 +322,14 @@ async def _generate_image_content(
     request: Request,
     project_name: str,
 ) -> str:
+    controls = _image_diffusion_controls(body)
     reference_images = _last_user_reference_images(body)
     if reference_images:
         response = await _post_image_edit(
             model,
             _last_user_prompt(body),
             reference_images,
+            controls,
             http_client,
         )
         return _image_response_content(model, response, request, project_name)
@@ -338,29 +340,60 @@ async def _generate_image_content(
         "n": 1,
         "response_format": "b64_json",
     }
+    # `strength` (denoise) only applies to image-to-image edits; the text-to-image
+    # generations endpoint has no reference image to preserve.
+    payload.update({key: value for key, value in controls.items() if key != "strength"})
     response = await _post_json(http_client, _request_path(model), payload)
     return _image_response_content(model, response, request, project_name)
+
+
+def _image_diffusion_controls(body: ChatCompletionsRequest) -> dict:
+    """Collect optional diffusion controls to forward to image endpoints.
+
+    Only values explicitly provided by the caller are included, so the backend
+    keeps its own defaults for anything omitted. Populated by clients such as
+    OpenWebUI (native `seed`, plus custom parameters for the rest) to tune image
+    generation and, notably, how strongly a reference image conditions an edit
+    via `strength`.
+    """
+    controls: dict[str, Union[int, float, str]] = {}
+    if body.strength is not None:
+        controls["strength"] = body.strength
+    if body.seed is not None:
+        controls["seed"] = body.seed
+    if body.guidance_scale is not None:
+        controls["guidance_scale"] = body.guidance_scale
+    if body.num_inference_steps is not None:
+        controls["num_inference_steps"] = body.num_inference_steps
+    if body.negative_prompt is not None:
+        controls["negative_prompt"] = body.negative_prompt
+    return controls
 
 
 async def _post_image_edit(
     model: EndpointModel,
     prompt: str,
     reference_images: list[_ReferenceImage],
+    controls: dict,
     http_client: httpx.AsyncClient,
 ) -> httpx.Response:
     files = [
         ("image", (image.filename, image.content, image.media_type)) for image in reference_images
     ]
+    data: dict[str, str] = {
+        "model": model.name,
+        "prompt": prompt,
+        "size": "auto",
+        "response_format": "b64_json",
+    }
+    # Multipart form fields are strings; the backend coerces them back (e.g.
+    # `strength`/`guidance_scale` -> float, `seed` -> int).
+    data.update({key: str(value) for key, value in controls.items()})
     return await _request(
         http_client,
         "POST",
         _image_edit_path(model),
-        data={
-            "model": model.name,
-            "prompt": prompt,
-            "size": "auto",
-            "response_format": "b64_json",
-        },
+        data=data,
         files=files,
     )
 
