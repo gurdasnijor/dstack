@@ -1003,7 +1003,7 @@ def run_model_to_run(
     if run_model.service_spec is not None:
         service_spec = ServiceSpec.__response__.parse_raw(run_model.service_spec)
 
-    status_message = _get_run_status_message(run_model, job_models=job_models)
+    status_message = _get_run_status_message(run_model, job_models=job_models, run_spec=run_spec)
     error = _get_run_error(run_model)
     fleet = _get_run_fleet(run_model)
     next_triggered_at = None
@@ -1105,7 +1105,9 @@ def _get_run_jobs_with_submissions(
     return jobs
 
 
-def _get_run_status_message(run_model: RunModel, job_models: List[JobModel]) -> str:
+def _get_run_status_message(
+    run_model: RunModel, job_models: List[JobModel], run_spec: Optional[RunSpec] = None
+) -> str:
     if len(job_models) == 0:
         return run_model.status.value
 
@@ -1120,6 +1122,16 @@ def _get_run_status_message(run_model: RunModel, job_models: List[JobModel]) -> 
     if all(job_models[-1].status == JobStatus.PULLING for job_models in job_models_grouped_by_job):
         # Show `pulling`` if last job submission of all jobs is pulling
         return "pulling"
+
+    if (
+        run_spec is not None
+        and run_spec.configuration.type == "service"
+        and not run_model.status.is_finished()
+        and _service_is_pending_registration(job_models_grouped_by_job)
+    ):
+        # The service's processes run, but the proxy cannot route to any
+        # replica yet, so the advertised URL is not ready.
+        return "registering"
 
     if run_model.status in [RunStatus.SUBMITTED, RunStatus.PENDING]:
         # Show `retrying` if any job caused the run to retry
@@ -1136,6 +1148,20 @@ def _get_run_status_message(run_model: RunModel, job_models: List[JobModel]) -> 
                 return "retrying"
 
     return run_model.status.value
+
+
+def _service_is_pending_registration(job_models_grouped_by_job: List[List[JobModel]]) -> bool:
+    """
+    True when at least one replica's job 0 runs unregistered and no replica's
+    job 0 is registered, i.e. the run has running processes but no routable
+    replica. Registration is tracked on job 0 (see `_maybe_register_replica`).
+    """
+    latest_job0_submissions = [
+        job_models[-1] for job_models in job_models_grouped_by_job if job_models[-1].job_num == 0
+    ]
+    if any(j.registered for j in latest_job0_submissions):
+        return False
+    return any(j.status == JobStatus.RUNNING and not j.registered for j in latest_job0_submissions)
 
 
 def _get_last_job_termination_reason(job_models: List[JobModel]) -> Optional[JobTerminationReason]:
