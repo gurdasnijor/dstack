@@ -1,10 +1,12 @@
 import base64
 import json
+import os
 import secrets
 import time
-from collections import OrderedDict
 from dataclasses import dataclass
+from pathlib import Path
 from typing import AsyncIterator, Optional
+from urllib.parse import urlparse
 
 import httpx
 from fastapi import APIRouter, Depends, Request, status
@@ -33,17 +35,34 @@ from dstack._internal.proxy.lib.services.service_connection import (
 )
 
 router = APIRouter(dependencies=[Depends(ProxyAuth(auto_enforce=True))])
+assets_router = APIRouter()
 
 _STREAM_CONTENT_CHUNK_CHARS = 16 * 1024
-_MAX_STORED_VIDEOS = 32
+_MAX_STORED_ASSETS = 32
+_ASSET_ID_PREFIX = "dstack_asset_"
+_CACHED_VIDEO_ID_PREFIX = "dstack_cached_"
 
 
 @dataclass(frozen=True)
-class _StoredVideo:
+class _StoredAsset:
+    project_name: str
     model_name: str
     content: bytes
     media_type: str
     created_at: int
+
+
+@assets_router.get(
+    "/{project_name}/assets/{asset_id}",
+    name="get_generated_asset",
+)
+async def get_generated_asset(project_name: str, asset_id: str) -> Response:
+    asset = _get_stored_asset(project_name, asset_id)
+    return Response(
+        content=asset.content,
+        media_type=asset.media_type,
+        headers={"Cache-Control": "private, max-age=86400"},
+    )
 
 
 @router.get("/{project_name}/models")
@@ -86,7 +105,7 @@ async def post_chat_completions(
     model, service = await _resolve_model_service(project_name, body.model, model, repo)
     http_client = await get_service_replica_client(service, repo, service_conn_pool)
     if model.format_spec is None:
-        return await _post_endpoint_chat(model, body, http_client, project_name)
+        return await _post_endpoint_chat(model, body, http_client, request, project_name)
     client = get_chat_client(model, http_client)
     if not body.stream:
         return await client.generate(body)
@@ -128,8 +147,17 @@ async def post_videos(
     _require_api(model, {"videos", "video_generations"})
     response = await _request_endpoint(model, service, "POST", body, repo, service_conn_pool)
     if _is_video_response(response):
-        video_id = _store_video(request, model.name, response)
-        return _stored_video_metadata_response(video_id, _get_stored_video(request, video_id))
+        video_id = _store_asset(
+            project_name,
+            model.name,
+            response.content,
+            response.headers.get("content-type", "video/mp4").split(";", 1)[0],
+            prefix=_CACHED_VIDEO_ID_PREFIX,
+        )
+        return _stored_video_metadata_response(
+            video_id,
+            _get_stored_asset(project_name, video_id),
+        )
     return _video_create_response(model, response)
 
 
@@ -173,17 +201,25 @@ async def _post_endpoint_chat(
     model: EndpointModel,
     body: ChatCompletionsRequest,
     http_client: httpx.AsyncClient,
+    request: Request,
     project_name: str,
 ):
     if model.api in {"chat_completions", "completions"}:
         return await _forward_chat(model, body, http_client)
     if model.api == "images_generations":
-        content = await _generate_image_content(model, body, http_client)
+        content = await _generate_image_content(
+            model,
+            body,
+            http_client,
+            request,
+            project_name,
+        )
     elif model.api in {"videos", "video_generations"}:
         content = await _generate_video_content(
             model,
             body,
             http_client,
+            request,
             project_name,
         )
     else:
@@ -255,6 +291,8 @@ async def _generate_image_content(
     model: EndpointModel,
     body: ChatCompletionsRequest,
     http_client: httpx.AsyncClient,
+    request: Request,
+    project_name: str,
 ) -> str:
     payload = {
         "model": model.name,
@@ -270,7 +308,20 @@ async def _generate_image_content(
     if image.get("url"):
         return f"![Generated image]({image['url']})"
     if image.get("b64_json"):
-        return f"![Generated image](data:image/png;base64,{image['b64_json']})"
+        try:
+            content = base64.b64decode(image["b64_json"], validate=True)
+        except (ValueError, TypeError):
+            raise ProxyError(
+                "Image endpoint returned invalid base64",
+                status.HTTP_502_BAD_GATEWAY,
+            )
+        asset_id = _store_asset(
+            project_name,
+            model.name,
+            content,
+            _image_media_type(content),
+        )
+        return f"![Generated image]({_asset_url(request, project_name, asset_id)})"
     raise ProxyError("Image endpoint returned no usable image", status.HTTP_502_BAD_GATEWAY)
 
 
@@ -278,14 +329,20 @@ async def _generate_video_content(
     model: EndpointModel,
     body: ChatCompletionsRequest,
     http_client: httpx.AsyncClient,
+    request: Request,
     project_name: str,
 ) -> str:
     payload = {"model": model.name, "prompt": _last_user_prompt(body)}
     response = await _post_json(http_client, _request_path(model), payload)
     if _is_video_response(response):
         media_type = response.headers.get("content-type", "video/mp4").split(";", 1)[0]
-        content = base64.b64encode(response.content).decode()
-        return f"[Generated video](data:{media_type};base64,{content})"
+        asset_id = _store_asset(
+            project_name,
+            model.name,
+            response.content,
+            media_type,
+        )
+        return f"[Generated video]({_asset_url(request, project_name, asset_id)})"
     result = _response_json(response)
     url = result.get("url") or result.get("video_url")
     if url is None and result.get("data"):
@@ -363,8 +420,8 @@ async def _get_video_resource(
     repo: BaseProxyRepo,
     service_conn_pool: ServiceConnectionPool,
 ) -> Response:
-    if video_id.startswith("dstack_cached_"):
-        video = _get_stored_video(request, video_id)
+    if video_id.startswith(_CACHED_VIDEO_ID_PREFIX):
+        video = _get_stored_asset(project_name, video_id)
         if suffix:
             return Response(content=video.content, media_type=video.media_type)
         return _stored_video_metadata_response(video_id, video)
@@ -486,39 +543,119 @@ def _is_video_response(response: httpx.Response) -> bool:
     return response.headers.get("content-type", "").split(";", 1)[0].startswith("video/")
 
 
-def _get_video_store(request: Request) -> OrderedDict[str, _StoredVideo]:
-    store = getattr(request.app.state, "dstack_generated_videos", None)
-    if store is None:
-        store = OrderedDict()
-        request.app.state.dstack_generated_videos = store
-    return store
-
-
-def _store_video(request: Request, model_name: str, response: httpx.Response) -> str:
-    video_id = f"dstack_cached_{secrets.token_urlsafe(18)}"
-    media_type = response.headers.get("content-type", "video/mp4").split(";", 1)[0]
-    store = _get_video_store(request)
-    store[video_id] = _StoredVideo(
+def _store_asset(
+    project_name: str,
+    model_name: str,
+    content: bytes,
+    media_type: str,
+    *,
+    prefix: str = _ASSET_ID_PREFIX,
+) -> str:
+    asset_id = f"{prefix}{secrets.token_urlsafe(18)}"
+    asset = _StoredAsset(
+        project_name=project_name,
         model_name=model_name,
-        content=response.content,
+        content=content,
         media_type=media_type,
         created_at=int(time.time()),
     )
-    while len(store) > _MAX_STORED_VIDEOS:
-        store.popitem(last=False)
-    return video_id
+    root = _generated_assets_dir()
+    root.mkdir(parents=True, exist_ok=True)
+    content_path, metadata_path = _asset_paths(root, asset_id)
+    content_path.write_bytes(asset.content)
+    metadata_path.write_text(
+        json.dumps(
+            {
+                "project_name": asset.project_name,
+                "model_name": asset.model_name,
+                "media_type": asset.media_type,
+                "created_at": asset.created_at,
+            }
+        )
+    )
+    _prune_stored_assets(root)
+    return asset_id
 
 
-def _get_stored_video(request: Request, video_id: str) -> _StoredVideo:
-    video = _get_video_store(request).get(video_id)
-    if video is None:
-        raise ProxyError("Video not found", status.HTTP_404_NOT_FOUND)
-    return video
+def _get_stored_asset(project_name: str, asset_id: str) -> _StoredAsset:
+    if not asset_id.startswith((_ASSET_ID_PREFIX, _CACHED_VIDEO_ID_PREFIX)):
+        raise ProxyError("Asset not found", status.HTTP_404_NOT_FOUND)
+    root = _generated_assets_dir()
+    content_path, metadata_path = _asset_paths(root, asset_id)
+    try:
+        metadata = json.loads(metadata_path.read_text())
+        content = content_path.read_bytes()
+        asset = _StoredAsset(content=content, **metadata)
+    except (FileNotFoundError, json.JSONDecodeError, TypeError):
+        raise ProxyError("Asset not found", status.HTTP_404_NOT_FOUND)
+    if asset.project_name != project_name:
+        raise ProxyError("Asset not found", status.HTTP_404_NOT_FOUND)
+    return asset
+
+
+def _generated_assets_dir() -> Path:
+    configured = os.getenv("DSTACK_PROXY_ASSETS_DIR")
+    if configured:
+        return Path(configured).expanduser().resolve()
+    server_dir = Path(os.getenv("DSTACK_SERVER_DIR", "~/.dstack/server")).expanduser()
+    return (server_dir / "data" / "generated-assets").resolve()
+
+
+def _asset_paths(root: Path, asset_id: str) -> tuple[Path, Path]:
+    if not asset_id or any(character not in _ASSET_ID_CHARS for character in asset_id):
+        raise ProxyError("Asset not found", status.HTTP_404_NOT_FOUND)
+    return root / f"{asset_id}.bin", root / f"{asset_id}.json"
+
+
+_ASSET_ID_CHARS = frozenset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")
+
+
+def _prune_stored_assets(root: Path) -> None:
+    metadata_files = sorted(
+        root.glob("*.json"),
+        key=lambda path: path.stat().st_mtime,
+        reverse=True,
+    )
+    for metadata_path in metadata_files[_MAX_STORED_ASSETS:]:
+        content_path = metadata_path.with_suffix(".bin")
+        metadata_path.unlink(missing_ok=True)
+        content_path.unlink(missing_ok=True)
+
+
+def _asset_url(request: Request, project_name: str, asset_id: str) -> str:
+    public_base_url = request.headers.get("X-Dstack-Public-Base-URL", "").strip()
+    if public_base_url:
+        parsed = urlparse(public_base_url)
+        if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+            raise ProxyError(
+                "X-Dstack-Public-Base-URL must be an absolute HTTP(S) URL",
+                status.HTTP_400_BAD_REQUEST,
+            )
+        return f"{public_base_url.rstrip('/')}/assets/{asset_id}"
+    return str(
+        request.url_for(
+            "get_generated_asset",
+            project_name=project_name,
+            asset_id=asset_id,
+        )
+    )
+
+
+def _image_media_type(content: bytes) -> str:
+    if content.startswith(b"\x89PNG\r\n\x1a\n"):
+        return "image/png"
+    if content.startswith(b"\xff\xd8\xff"):
+        return "image/jpeg"
+    if content.startswith((b"GIF87a", b"GIF89a")):
+        return "image/gif"
+    if content.startswith(b"RIFF") and content[8:12] == b"WEBP":
+        return "image/webp"
+    return "application/octet-stream"
 
 
 def _stored_video_metadata_response(
     video_id: str,
-    video: _StoredVideo,
+    video: _StoredAsset,
 ) -> Response:
     return Response(
         content=json.dumps(

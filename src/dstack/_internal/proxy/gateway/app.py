@@ -27,6 +27,9 @@ from dstack._internal.proxy.gateway.services.nginx import Nginx
 from dstack._internal.proxy.gateway.services.registry import ACCESS_LOG_PATH, apply_all
 from dstack._internal.proxy.gateway.services.server_client import HTTPMultiClient
 from dstack._internal.proxy.gateway.services.stats import StatsCollector
+from dstack._internal.proxy.lib.routers.model_proxy import (
+    assets_router as model_assets_router,
+)
 from dstack._internal.proxy.lib.routers.model_proxy import router as model_proxy_router
 from dstack._internal.utils.common import run_async
 from dstack.version import __version__
@@ -79,6 +82,7 @@ def make_app(repo: Optional[GatewayProxyRepo] = None, nginx: Optional[Nginx] = N
     app.include_router(auth_router, prefix="/api/auth")
     app.include_router(config_router, prefix="/api/config")
     app.include_router(model_proxy_router, prefix="/api/models")
+    app.include_router(model_assets_router, prefix="/api/models")
     app.include_router(registry_router, prefix="/api/registry")
     app.include_router(stats_router, prefix="/api/stats")
 
