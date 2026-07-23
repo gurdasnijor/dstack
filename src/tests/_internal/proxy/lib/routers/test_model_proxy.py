@@ -348,6 +348,11 @@ async def test_image_generation_native_and_chat_projection(tmp_path, monkeypatch
     assert asset_response.status_code == 200
     assert asset_response.content == image_content
     assert asset_response.headers["content-type"] == "image/png"
+    assert asset_response.headers["access-control-allow-origin"] == "*"
+    assert asset_response.headers["access-control-expose-headers"] == (
+        "Content-Length, Content-Type"
+    )
+    assert asset_response.headers["x-content-type-options"] == "nosniff"
 
 
 @pytest.mark.asyncio
