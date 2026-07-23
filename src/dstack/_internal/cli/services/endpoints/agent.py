@@ -161,12 +161,14 @@ class EndpointAgentProcessOutput:
 
 
 @contextmanager
-def endpoint_agent_workspace() -> Iterator[EndpointAgentWorkspace]:
+def endpoint_agent_workspace(
+    *, install_dstack_cli: bool = True
+) -> Iterator[EndpointAgentWorkspace]:
     with tempfile.TemporaryDirectory(prefix="dpe-", dir=_get_short_temp_dir()) as directory:
         root = Path(directory)
         _validate_control_socket_path(root)
         workspace = EndpointAgentWorkspace(path=root / "w", dstack_home=root / "h")
-        _prepare_workspace(workspace)
+        _prepare_workspace(workspace, install_dstack_cli=install_dstack_cli)
         yield workspace
 
 
@@ -242,17 +244,21 @@ def build_endpoint_agent_env(
     auth: ClaudeAuth,
     workspace: EndpointAgentWorkspace,
     token: str,
+    controlled: bool = False,
 ) -> dict[str, str]:
-    config_manager = ConfigManager(workspace.dstack_home / ".dstack")
-    config_manager.configure_project(
-        name=api.project,
-        url=api.client.base_url,
-        token=token,
-        default=True,
-    )
-    config_manager.save()
     env = {name: value for name in _INHERITED_ENV_NAMES if (value := os.getenv(name))}
-    env.update(endpoint_env)
+    if not controlled:
+        # Legacy development shell: the agent gets the dstack CLI, the raw
+        # token, and resolved endpoint env values.
+        config_manager = ConfigManager(workspace.dstack_home / ".dstack")
+        config_manager.configure_project(
+            name=api.project,
+            url=api.client.base_url,
+            token=token,
+            default=True,
+        )
+        config_manager.save()
+        env.update(endpoint_env)
     if IS_WINDOWS:
         env.update(
             {name: value for name in _WINDOWS_INHERITED_ENV_NAMES if (value := os.getenv(name))}
@@ -260,9 +266,10 @@ def build_endpoint_agent_env(
     env["PATH"] = os.pathsep.join([str(workspace.bin_path), env.get("PATH", "")])
     env["DSTACK_SERVER_URL"] = api.client.base_url
     env["DSTACK_PROJECT"] = api.project
-    env["DSTACK_TOKEN"] = token
+    if not controlled:
+        env["DSTACK_TOKEN"] = token
+        env["DSTACK_ENDPOINT_BEARER_TOKEN"] = token
     env["DSTACK_ENDPOINT_SERVER_URL"] = api.client.base_url
-    env["DSTACK_ENDPOINT_BEARER_TOKEN"] = token
     env[_PROGRESS_ENV] = str(workspace.progress_path)
     for name in ["TMPDIR", "TEMP", "TMP"]:
         env[name] = str(workspace.temp_path)
@@ -406,7 +413,9 @@ def _validate_control_socket_path(build_root: Path) -> None:
         raise CLIError(f"Temporary path is too long for an SSH control socket: {build_root}")
 
 
-def _prepare_workspace(workspace: EndpointAgentWorkspace) -> None:
+def _prepare_workspace(
+    workspace: EndpointAgentWorkspace, *, install_dstack_cli: bool = True
+) -> None:
     workspace.path.mkdir(mode=0o700, parents=True, exist_ok=False)
     workspace.dstack_home.mkdir(mode=0o700)
     workspace.temp_path.mkdir(mode=0o700)
@@ -418,9 +427,15 @@ def _prepare_workspace(workspace: EndpointAgentWorkspace) -> None:
     workspace.bin_path.mkdir()
     _install_python_command(workspace.bin_path, "progress", _get_progress_script())
     (workspace.dstack_home / ".ssh").mkdir(mode=0o700)
-    _install_dstack_wrapper(workspace.bin_path, workspace.dstack_home)
+    if install_dstack_cli:
+        _install_dstack_wrapper(workspace.bin_path, workspace.dstack_home)
     _install_home_wrapper(workspace.bin_path, "ssh", workspace.dstack_home)
     _install_skills(workspace.path)
+
+
+def install_workspace_command(workspace: EndpointAgentWorkspace, name: str, script: str) -> None:
+    """Install an additional executable into the agent workspace bin."""
+    _install_python_command(workspace.bin_path, name, script)
 
 
 def _install_dstack_wrapper(bin_dir: Path, home: Path) -> None:

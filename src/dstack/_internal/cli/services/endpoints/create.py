@@ -8,6 +8,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, Sequence
 
+from pydantic import ValidationError
+
 from dstack._internal.cli.models.endpoint_agent import AgentFinalReport
 from dstack._internal.cli.models.endpoint_presets import EndpointPreset
 from dstack._internal.cli.models.endpoints import EndpointConfiguration
@@ -21,18 +23,33 @@ from dstack._internal.cli.services.endpoints.agent import (
     get_claude_auth,
     get_redacted_values,
     get_sensitive_inherited_env_values,
+    install_workspace_command,
     print_endpoint_progress,
+    redact,
     run_endpoint_agent,
 )
+from dstack._internal.cli.services.endpoints.controller import (
+    ControllerError,
+    ControllerPolicy,
+    EndpointController,
+)
+from dstack._internal.cli.services.endpoints.controller_api import DstackControllerAPI
 from dstack._internal.cli.services.endpoints.inspect.service import (
     InspectionResult,
     inspect_endpoint_model,
 )
 from dstack._internal.cli.services.endpoints.presets import endpoint_preset_to_data
 from dstack._internal.cli.services.endpoints.prompt import (
+    format_controlled_mutation_surface,
     format_endpoint_constraints,
     format_model_inspection,
     get_endpoint_agent_system_prompt,
+)
+from dstack._internal.cli.services.endpoints.rpc import (
+    CONTROLLER_SOCKET_ENV,
+    CONTROLLER_TOKEN_ENV,
+    EndpointControllerServer,
+    get_controller_client_script,
 )
 from dstack._internal.cli.services.endpoints.session import (
     EndpointSessionRecorder,
@@ -126,20 +143,52 @@ async def _create_endpoint_preset(
         build_name=build_name,
         allowed_fleets=list(allowed_fleets),
     )
+    controlled = not _legacy_agent_shell_enabled()
+    recorder.record("mutation_surface", controlled=controlled)
     report: Optional[AgentFinalReport] = None
     preset: Optional[EndpointPreset] = None
     preset_path: Optional[Path] = None
     creation_succeeded = False
     creation_error: Optional[str] = None
     cleanup_error: Optional[str] = None
-    with endpoint_agent_workspace() as workspace:
+    with endpoint_agent_workspace(install_dstack_cli=not controlled) as workspace:
         env = build_endpoint_agent_env(
             api=api,
             endpoint_env=endpoint_env,
             auth=auth,
             workspace=workspace,
             token=token,
+            controlled=controlled,
         )
+        controller: Optional[EndpointController] = None
+        server: Optional[EndpointControllerServer] = None
+        finalized: dict[str, object] = {}
+        if controlled:
+            controller = EndpointController(
+                policy=_build_controller_policy(
+                    configuration, build_name=build_name, allowed_fleets=allowed_fleets
+                ),
+                api=DstackControllerAPI(api, endpoint_env=endpoint_env, service_token=token),
+                recorder=recorder,
+                artifacts_dir=agent_session.path / "artifacts",
+                workspace_dir=workspace.path,
+                submissions_path=workspace.submissions_path,
+                finalize=_make_finalizer(
+                    api=api,
+                    source_configuration=source_configuration,
+                    store=store,
+                    redacted_values=redacted_values,
+                    holder=finalized,
+                ),
+            )
+            server = EndpointControllerServer(
+                controller,
+                socket_path=workspace.path.parent / "ctl.sock",
+                redacted_values=redacted_values,
+            )
+            env[CONTROLLER_SOCKET_ENV] = str(server.socket_path)
+            env[CONTROLLER_TOKEN_ENV] = server.token
+            install_workspace_command(workspace, "endpoint", get_controller_client_script())
         recorder.phase_started("inspection")
         inspection_data = _run_inspection_stage(
             configuration=configuration,
@@ -159,6 +208,7 @@ async def _create_endpoint_preset(
             build_name=build_name,
             allowed_fleets=allowed_fleets,
             inspection_data=inspection_data,
+            controlled=controlled,
         )
         if agent_session.debug:
             agent_session.write_prompt(prompt)
@@ -169,33 +219,52 @@ async def _create_endpoint_preset(
         )
         try:
             recorder.phase_started("agent")
-            process_output = await run_endpoint_agent(
-                prompt=prompt,
-                env=env,
-                workspace=workspace,
-                auth=auth,
-                redacted_values=redacted_values,
-                agent_session=agent_session,
-            )
+            if server is not None:
+                async with server:
+                    process_output = await run_endpoint_agent(
+                        prompt=prompt,
+                        env=env,
+                        workspace=workspace,
+                        auth=auth,
+                        redacted_values=redacted_values,
+                        agent_session=agent_session,
+                    )
+            else:
+                process_output = await run_endpoint_agent(
+                    prompt=prompt,
+                    env=env,
+                    workspace=workspace,
+                    auth=auth,
+                    redacted_values=redacted_values,
+                    agent_session=agent_session,
+                )
             recorder.phase_completed(
                 "agent",
                 submitted_runs=_load_submitted_run_names(workspace.submissions_path),
             )
             recorder.phase_started("verification")
-            report = load_endpoint_agent_report(
-                output=process_output,
-                workspace=workspace,
-                redacted_values=redacted_values,
-            )
-            run = api.client.runs.get(api.project, report.run_name)
-            preset = build_verified_endpoint_preset(
-                run=run,
-                endpoint_configuration=source_configuration,
-                report=report,
-            )
-            if contains_redacted_value(endpoint_preset_to_data(preset), redacted_values):
-                raise CLIError("Generated endpoint preset contains a secret value")
-            preset_path = store.save(preset)
+            if controller is not None:
+                report, preset, preset_path = _require_controller_finalization(
+                    controller=controller,
+                    process_output=process_output,
+                    holder=finalized,
+                    redacted_values=redacted_values,
+                )
+            else:
+                report = load_endpoint_agent_report(
+                    output=process_output,
+                    workspace=workspace,
+                    redacted_values=redacted_values,
+                )
+                run = api.client.runs.get(api.project, report.run_name)
+                preset = build_verified_endpoint_preset(
+                    run=run,
+                    endpoint_configuration=source_configuration,
+                    report=report,
+                )
+                if contains_redacted_value(endpoint_preset_to_data(preset), redacted_values):
+                    raise CLIError("Generated endpoint preset contains a secret value")
+                preset_path = store.save(preset)
             recorder.phase_completed(
                 "verification",
                 run_name=report.run_name,
@@ -214,27 +283,33 @@ async def _create_endpoint_preset(
             keep_final_service = keep_service and creation_succeeded
             recorder.phase_started("cleanup")
             try:
-                await _cleanup_runs(
-                    api=api,
-                    build_name=build_name,
-                    workspace=workspace,
-                    final_run_name=report.run_name if report is not None else None,
-                    keep_final_service=keep_final_service,
-                    agent_session=agent_session,
-                )
+                if controller is not None:
+                    controller.cleanup(keep_final=keep_final_service)
+                else:
+                    await _cleanup_runs(
+                        api=api,
+                        build_name=build_name,
+                        workspace=workspace,
+                        final_run_name=report.run_name if report is not None else None,
+                        keep_final_service=keep_final_service,
+                        agent_session=agent_session,
+                    )
                 recorder.phase_completed("cleanup", kept_final_service=keep_final_service)
             except Exception as e:
                 cleanup_error = str(e)
                 recorder.phase_failed("cleanup", error=cleanup_error)
                 if keep_final_service:
                     with suppress(Exception):
-                        await _cleanup_runs(
-                            api=api,
-                            build_name=build_name,
-                            workspace=workspace,
-                            final_run_name=report.run_name if report is not None else None,
-                            agent_session=agent_session,
-                        )
+                        if controller is not None:
+                            controller.cleanup(keep_final=False)
+                        else:
+                            await _cleanup_runs(
+                                api=api,
+                                build_name=build_name,
+                                workspace=workspace,
+                                final_run_name=report.run_name if report is not None else None,
+                                agent_session=agent_session,
+                            )
             submitted_run_names = _load_submitted_run_names(workspace.submissions_path)
             if report is not None and report.run_name:
                 submitted_run_names.append(report.run_name)
@@ -313,6 +388,7 @@ def _build_prompt(
     build_name: str,
     allowed_fleets: Sequence[str],
     inspection_data: Optional[dict] = None,
+    controlled: bool = False,
 ) -> str:
     context_lines = [f"- service_model_name: {configuration.model.api_model_name}"]
     context_lines.append(f"- model_source: {configuration.model.source_type}")
@@ -328,8 +404,11 @@ def _build_prompt(
     inspection_block = ""
     if inspection_data is not None:
         inspection_block = "\n" + format_model_inspection(inspection_data) + "\n"
+    mutation_block = ""
+    if controlled:
+        mutation_block = "\n" + format_controlled_mutation_surface() + "\n"
     return f"""{get_endpoint_agent_system_prompt()}
-
+{mutation_block}
 Endpoint context:
 - endpoint_name: {build_name}
 {chr(10).join(context_lines)}
@@ -410,6 +489,140 @@ def _run_inspection_stage(
 
 def _write_json(path: Path, data: dict) -> None:
     path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+_LEGACY_SHELL_ENV = "DSTACK_ENDPOINT_LEGACY_AGENT_SHELL"
+
+
+def _legacy_agent_shell_enabled() -> bool:
+    """Development flag: give the agent the legacy unrestricted dstack shell."""
+    return os.getenv(_LEGACY_SHELL_ENV, "").strip().lower() in {"1", "true", "yes"}
+
+
+def _env_number(name: str, default: Optional[float]) -> Optional[float]:
+    value = os.getenv(name)
+    if value is None or not value.strip():
+        return default
+    try:
+        return float(value)
+    except ValueError as e:
+        raise CLIError(f"{name} must be a number, got {value!r}") from e
+
+
+def _build_controller_policy(
+    configuration: EndpointConfiguration,
+    *,
+    build_name: str,
+    allowed_fleets: Sequence[str],
+) -> ControllerPolicy:
+    declared_workload: dict = {}
+    if configuration.model.requested_modality != "auto":
+        declared_workload["modality"] = configuration.model.requested_modality
+    if configuration.context_length is not None:
+        declared_workload["context_length"] = configuration.context_length
+    backends = configuration.backends
+    spot_policy = configuration.spot_policy
+    max_runs = _env_number("DSTACK_ENDPOINT_MAX_RUNS", 3)
+    max_concurrent = _env_number("DSTACK_ENDPOINT_MAX_CONCURRENT", 1)
+    total_budget = _env_number("DSTACK_ENDPOINT_TOTAL_BUDGET_SECONDS", 2 * 60 * 60)
+    assert max_runs is not None and max_concurrent is not None and total_budget is not None
+    return ControllerPolicy(
+        build_name=build_name,
+        allowed_fleets=tuple(allowed_fleets),
+        declared_workload=declared_workload,
+        max_runs=int(max_runs),
+        max_concurrent=int(max_concurrent),
+        total_budget_seconds=total_budget,
+        cost_budget=_env_number("DSTACK_ENDPOINT_COST_BUDGET", None),
+        max_price=configuration.max_price,
+        backends=tuple(str(backend.value) for backend in backends) if backends else None,
+        spot_policy=spot_policy.value if spot_policy is not None else None,
+    )
+
+
+def _make_finalizer(
+    *,
+    api: Client,
+    source_configuration: EndpointConfiguration,
+    store: EndpointPresetStore,
+    redacted_values: tuple[str, ...],
+    holder: dict,
+):
+    """Build the controller's finalize callback: verify the run, save the preset."""
+
+    def finalize(run_name: str, report_metadata: dict) -> dict:
+        try:
+            report = AgentFinalReport.parse_obj(report_metadata)
+        except ValidationError as e:
+            raise ControllerError(
+                f"final report is invalid: {e}", failure_class="validation"
+            ) from e
+        if not report.success:
+            raise ControllerError(
+                "final report does not claim success", failure_class="validation"
+            )
+        if report.run_name != run_name:
+            raise ControllerError(
+                "final report identifies a different run", failure_class="validation"
+            )
+        run = api.client.runs.get(api.project, report.run_name)
+        try:
+            preset = build_verified_endpoint_preset(
+                run=run,
+                endpoint_configuration=source_configuration,
+                report=report,
+            )
+        except CLIError as e:
+            raise ControllerError(str(e), failure_class="validation") from e
+        if contains_redacted_value(endpoint_preset_to_data(preset), redacted_values):
+            raise ControllerError(
+                "generated endpoint preset contains a secret value",
+                failure_class="validation",
+            )
+        try:
+            path = store.save(preset)
+        except CLIError as e:
+            raise ControllerError(str(e), failure_class="packaging") from e
+        holder["preset"] = preset
+        holder["report"] = report
+        holder["path"] = path
+        return {
+            "preset_id": preset.id,
+            "path": str(path),
+            "run_name": report.run_name,
+            "run_id": str(report.run_id),
+        }
+
+    return finalize
+
+
+def _require_controller_finalization(
+    *,
+    controller: EndpointController,
+    process_output,
+    holder: dict,
+    redacted_values: tuple[str, ...],
+) -> tuple[AgentFinalReport, EndpointPreset, Path]:
+    """In controlled mode, success exists only if the controller finalized."""
+    result = controller.finalized_result
+    if result is None:
+        summary = None
+        if isinstance(process_output.report_data, dict):
+            summary = process_output.report_data.get("failure_summary")
+        message = (
+            summary
+            or process_output.error
+            or "The agent exited without finalizing a preset through the controller"
+        )
+        controller.fail_session(str(message), failure_class="controller")
+        raise CLIError(redact(str(message), redacted_values))
+    report = holder.get("report")
+    preset = holder.get("preset")
+    path = holder.get("path")
+    assert isinstance(report, AgentFinalReport)
+    assert isinstance(preset, EndpointPreset)
+    assert isinstance(path, Path)
+    return report, preset, path
 
 
 async def _cleanup_runs(

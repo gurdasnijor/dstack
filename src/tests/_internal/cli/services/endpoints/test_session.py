@@ -121,6 +121,8 @@ def creation_context(tmp_path, monkeypatch):
         context_length=8192,
         fleets=["gpu-fleet"],
     )
+    # These flows exercise the legacy development shell path explicitly.
+    monkeypatch.setenv("DSTACK_ENDPOINT_LEGACY_AGENT_SHELL", "1")
     monkeypatch.setattr(
         "dstack._internal.cli.services.endpoints.create.get_claude_auth",
         lambda: SimpleNamespace(
