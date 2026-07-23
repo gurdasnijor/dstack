@@ -368,6 +368,143 @@ async def test_image_generation_native_and_chat_projection(tmp_path, monkeypatch
 
 
 @pytest.mark.asyncio
+async def test_image_chat_projection_uses_reference_image_edit(tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("DSTACK_PROXY_ASSETS_DIR", str(tmp_path))
+    auth = ProxyTestAuthProvider({"test-proj": {"token"}})
+    repo = GatewayProxyRepo()
+    await repo.set_project(make_project("test-proj"))
+    await repo.set_service(make_service("test-proj", "image-service"))
+    await repo.set_model(
+        make_endpoint_model(
+            "test-proj",
+            "test-image-model",
+            "image-service",
+            modality="image-generation",
+            api="images_generations",
+            request_path="/v1/images/generations",
+        )
+    )
+    reference_content = b"\x89PNG\r\n\x1a\nreference"
+    generated_content = b"\x89PNG\r\n\x1a\ngenerated"
+    upstream_requests = []
+
+    async def upstream(request: httpx.Request) -> httpx.Response:
+        upstream_requests.append(request)
+        return httpx.Response(
+            200,
+            json={
+                "created": 1,
+                "data": [{"b64_json": base64.b64encode(generated_content).decode()}],
+            },
+        )
+
+    upstream_client = httpx.AsyncClient(
+        transport=httpx.MockTransport(upstream),
+        base_url="http://image-service",
+    )
+    client = make_http_client(repo, auth)
+    with patch(
+        "dstack._internal.proxy.lib.routers.model_proxy.get_service_replica_client",
+        new=AsyncMock(return_value=upstream_client),
+    ):
+        response = await client.post(
+            "http://test-host/proxy/models/test-proj/chat/completions",
+            headers={"Authorization": "Bearer token"},
+            json={
+                "model": "test-image-model",
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": "Paint this as a watercolor"},
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": (
+                                        "data:image/png;base64,"
+                                        + base64.b64encode(reference_content).decode()
+                                    )
+                                },
+                            },
+                        ],
+                    }
+                ],
+            },
+        )
+    await upstream_client.aclose()
+
+    assert response.status_code == 200
+    assert len(upstream_requests) == 1
+    upstream_request = upstream_requests[0]
+    assert upstream_request.url.path == "/v1/images/edits"
+    assert upstream_request.headers["content-type"].startswith("multipart/form-data; boundary=")
+    assert b'name="model"' in upstream_request.content
+    assert b"test-image-model" in upstream_request.content
+    assert b'name="prompt"' in upstream_request.content
+    assert b"Paint this as a watercolor" in upstream_request.content
+    assert b'name="size"' in upstream_request.content
+    assert b"auto" in upstream_request.content
+    assert b'name="image"; filename="reference.png"' in upstream_request.content
+    assert b"Content-Type: image/png" in upstream_request.content
+    assert reference_content in upstream_request.content
+
+    content = response.json()["choices"][0]["message"]["content"]
+    asset_response = await client.get(
+        content.removeprefix("![Generated image](").removesuffix(")")
+    )
+    assert asset_response.status_code == 200
+    assert asset_response.content == generated_content
+
+
+@pytest.mark.asyncio
+async def test_image_chat_projection_rejects_non_data_reference_url() -> None:
+    auth = ProxyTestAuthProvider({"test-proj": {"token"}})
+    repo = GatewayProxyRepo()
+    await repo.set_project(make_project("test-proj"))
+    await repo.set_service(make_service("test-proj", "image-service"))
+    await repo.set_model(
+        make_endpoint_model(
+            "test-proj",
+            "test-image-model",
+            "image-service",
+            modality="image-generation",
+            api="images_generations",
+            request_path="/v1/images/generations",
+        )
+    )
+    client = make_http_client(repo, auth)
+    upstream_client = httpx.AsyncClient(base_url="http://image-service")
+
+    with patch(
+        "dstack._internal.proxy.lib.routers.model_proxy.get_service_replica_client",
+        new=AsyncMock(return_value=upstream_client),
+    ):
+        response = await client.post(
+            "http://test-host/proxy/models/test-proj/chat/completions",
+            headers={"Authorization": "Bearer token"},
+            json={
+                "model": "test-image-model",
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": "Paint this as a watercolor"},
+                            {
+                                "type": "image_url",
+                                "image_url": {"url": "https://private.example/reference.png"},
+                            },
+                        ],
+                    }
+                ],
+            },
+        )
+    await upstream_client.aclose()
+
+    assert response.status_code == 422
+    assert response.json()["detail"] == "Reference images must be base64 data image URLs"
+
+
+@pytest.mark.asyncio
 async def test_image_chat_projection_splits_large_stream_events(tmp_path, monkeypatch) -> None:
     monkeypatch.setenv("DSTACK_PROXY_ASSETS_DIR", str(tmp_path))
     auth = ProxyTestAuthProvider({"test-proj": {"token"}})
