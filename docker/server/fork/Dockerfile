@@ -23,7 +23,7 @@ ADD https://astral.sh/uv/install.sh /uv-installer.sh
 RUN sh /uv-installer.sh && rm /uv-installer.sh
 ENV PATH="/root/.local/bin/:$PATH"
 
-COPY pyproject.toml uv.lock README.md LICENSE ./
+COPY pyproject.toml README.md LICENSE.md ./
 COPY src ./src
 COPY skills ./skills
 RUN uv tool install --no-cache '.[all]'
