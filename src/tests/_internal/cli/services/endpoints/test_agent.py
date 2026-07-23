@@ -125,6 +125,14 @@ class TestAgentIsolation:
             if not IS_WINDOWS:
                 assert (workspace.dstack_home / ".ssh").stat().st_mode & 0o777 == 0o700
             assert not (workspace.dstack_home / ".dstack" / "config.yml").exists()
+            assert (
+                workspace.path
+                / ".claude"
+                / "skills"
+                / "dstack-prototyping"
+                / "scripts"
+                / "benchmark_images.py"
+            ).is_file()
             dstack_command = shutil.which("dstack", path=str(workspace.bin_path))
             assert dstack_command is not None
             result = subprocess.run(

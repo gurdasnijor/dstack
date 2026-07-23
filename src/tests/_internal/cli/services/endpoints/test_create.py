@@ -343,11 +343,32 @@ class TestBuildPrompt:
         )
 
         assert "- base_model: Qwen/Qwen3.5-27B" in base_prompt
-        assert "- model_repo:" not in base_prompt
+        assert "- model_source: auto" in base_prompt
+        assert "- requested_modality: auto" in base_prompt
+        assert "- model_locator:" not in base_prompt
         assert "- context_length: 8192" in base_prompt
-        assert "- model_repo: community/Qwen3.5-27B-GPTQ-Int4" in exact_prompt
+        assert "- model_locator: community/Qwen3.5-27B-GPTQ-Int4" in exact_prompt
         assert "- base_model:" not in exact_prompt
         assert "- context_length:" not in exact_prompt
+
+    def test_includes_source_revision_and_modality_in_prompt(self):
+        prompt = _build_prompt(
+            configuration=EndpointConfiguration(
+                name="juggernaut",
+                model={
+                    "repo": "eniora/Juggernaut_XL_Ragnarok",
+                    "source": "huggingface",
+                    "revision": "fe71bb49",
+                    "modality": "image-generation",
+                },
+            ),
+            build_name="juggernaut-build",
+            allowed_fleets=("gpu-fleet",),
+        )
+
+        assert "- model_source: huggingface" in prompt
+        assert "- model_revision: fe71bb49" in prompt
+        assert "- requested_modality: image-generation" in prompt
 
 
 class TestCleanupRuns:

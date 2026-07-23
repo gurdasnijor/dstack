@@ -58,6 +58,37 @@ including `fleets`, `backends`, `max_price`, and `spot_policy`, constrain both
 creation and reuse. Environment variables such as `HF_TOKEN` can be passed
 through `env`.
 
+Endpoint presets are modality-independent. The agent detects the model API from
+source metadata, selects a compatible serving runtime, verifies a real output,
+and records a modality-appropriate benchmark. For example, an exact Hugging
+Face diffusion model uses the same workflow:
+
+<div editor-title="image-endpoint.dstack.yml">
+
+```yaml
+type: endpoint
+name: juggernaut-xl-ragnarok
+
+model:
+  locator: eniora/Juggernaut_XL_Ragnarok
+  source: huggingface
+  modality: image-generation
+
+env:
+  - HF_TOKEN
+fleets:
+  - pooled-gpu
+```
+
+</div>
+
+Both `source` and `modality` default to `auto`; specifying them makes the request
+an explicit constraint. `revision` can pin a source version. A model locator is
+not limited to Hugging Face and may be a registry identifier, URL, path, object
+store URI, or another locator supported by the selected runtime. Preset creation
+fails with an actionable report when no runtime can serve and validate the
+requested model within the endpoint constraints.
+
 See the [reference](../reference/dstack.yml/endpoint.md) for all supported configuration options.
 
 ## Create a preset
@@ -103,9 +134,9 @@ Use `dstack endpoint preset` to list existing presets:
 
 ```shell
 $ dstack endpoint preset list
- MODEL                     GPU                    CONTEXT  BENCHMARK                           CREATED
+ MODEL                     MODALITY        GPU                    CONTEXT  BENCHMARK                           CREATED
  Qwen/Qwen2.5-7B-Instruct
-    preset=8f3a12c4        nvidia:16GB..24GB:1..  32K      concurrency=1 464 tok/s TTFT 312ms  1 hour ago
+    preset=8f3a12c4        text-generation  nvidia:16GB..24GB:1..  32K      concurrency=1 464 tok/s TTFT 312ms  1 hour ago
 ```
 
 </div>
@@ -142,6 +173,11 @@ Submit the run qwen25-7b? [y/n]: y
 </div>
 
 If you don't pass `--preset ID` or specify `preset` in the endpoint configuration, `dstack` automatically selects a matching preset based on the available fleet offers. It then deploys the preset as a service.
+
+Non-chat endpoints expose the serving runtime's native HTTP API through the
+normal dstack service URL. For example, a vLLM-Omni image preset uses
+`POST /v1/images/generations`; the exact path and measured workload are shown by
+`dstack endpoint preset list -v` or `dstack endpoint preset get ID`.
 
 ## Delete presets
 

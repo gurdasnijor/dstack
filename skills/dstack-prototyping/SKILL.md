@@ -1,7 +1,7 @@
 ---
 name: dstack-prototyping
 description: |
-  Use with the dstack skill for model-serving work when the image, serving command, resources, backend/fleet choice, or service behavior is not proven. Guides task-first prototyping on real hardware, choosing fleets/backends that can reuse idle instances and caches, checking vLLM/SGLang sources, and verifying the final dstack service with a model request.
+  Use with the dstack skill for model-serving work of any modality when the image, serving command, resources, backend/fleet choice, or service behavior is not proven. Guides task-first prototyping on real hardware and verification through the final dstack service URL.
 ---
 
 # dstack Prototyping
@@ -12,7 +12,9 @@ model-serving configuration is still unknown.
 
 ## Goal
 
-Find a working dstack service configuration for the requested model.
+Find a working dstack service configuration for the requested model and its real
+API, whether it generates tokens, vectors, images, video, audio, or another
+documented output.
 
 Before submitting a service, use a task on real hardware to test the serving
 image, install/runtime assumptions, model download, cache path, command, port,
@@ -44,6 +46,15 @@ For vLLM and SGLang, use these as credible sources:
 Use deeper serving-engine writeups, such as
 `https://www.lmsys.org/blog/2026-07-02-agent-assisted-sglang-development`, when
 these references do not explain the model, hardware, or serving failure.
+
+Do not assume vLLM or SGLang is the only valid serving stack. Inspect model
+source metadata first, then evaluate runtimes that explicitly support the
+detected architecture and modality. For Hugging Face diffusion repositories,
+inspect `model_index.json`, component configs, and the model card. vLLM-Omni's
+Diffusers adapter is a candidate for compatible pipelines and exposes
+`POST /v1/images/generations`; verify current vLLM-Omni documentation before
+choosing its image and command. ComfyUI, Diffusers services, media runtimes, or a
+model-specific HTTP server are valid when they provide a stable API and probe.
 
 ## Use A Task Before Service
 
@@ -98,3 +109,21 @@ If service verification fails because the image, install, model download,
 command, resources, cache, or model behavior needs to change, go back to a task.
 If the tested serving setup is still right and only the dstack service
 configuration is wrong, fix the configuration and submit the service again.
+
+For non-chat services, omit dstack's chat-only `model` field and configure an
+explicit HTTP health probe. This keeps the service generic while dstack still
+owns placement, lifecycle, proxying, and deployment.
+
+## Benchmark The Real Output
+
+Benchmark through the final dstack service URL, not an SSH tunnel or task-local
+port. Exclude warmups. Validate the output, not only the HTTP status: token
+content for generation, vector shape for embeddings, decoded media for
+image/audio/video, or the documented response contract for a custom API.
+
+For an OpenAI-compatible image endpoint, use the packaged
+`scripts/benchmark_images.py`. Give it a JSON request body with
+`response_format: b64_json`; it sends a warmup plus measured requests, validates
+that each response contains decodable PNG/JPEG/WebP bytes with the requested
+dimensions, and writes a benchmark object accepted by the endpoint preset
+schema. Run `python scripts/benchmark_images.py --help` for options.

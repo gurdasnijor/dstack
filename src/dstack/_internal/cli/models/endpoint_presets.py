@@ -1,6 +1,6 @@
 import re
 from datetime import datetime
-from typing import Annotated, Literal, Optional
+from typing import Annotated, Any, Literal, Optional
 
 from pydantic import (
     Field,
@@ -18,11 +18,24 @@ from dstack._internal.core.models.resources import CPUSpec, ResourcesSpec
 
 
 class EndpointBenchmarkWorkload(CoreModel):
-    api: Literal["chat_completions", "completions"]
+    api: str
+    request_path: Optional[str] = None
     num_requests: PositiveInt
-    input_tokens: PositiveInt
-    output_tokens: Annotated[int, Field(ge=2)]
     concurrency: PositiveInt
+    input_tokens: Optional[PositiveInt] = None
+    output_tokens: Optional[Annotated[int, Field(ge=2)]] = None
+    width: Optional[PositiveInt] = None
+    height: Optional[PositiveInt] = None
+    num_inference_steps: Optional[PositiveInt] = None
+    outputs_per_request: Optional[PositiveInt] = None
+    output_unit: Optional[str] = None
+    parameters: dict[str, Any] = Field(default_factory=dict)
+
+    @validator("api", "request_path", "output_unit")
+    def validate_optional_non_empty(cls, value: Optional[str]) -> Optional[str]:
+        if value is not None and not value.strip():
+            raise ValueError("value must be non-empty")
+        return value
 
 
 class EndpointBenchmarkLatency(CoreModel):
@@ -35,10 +48,13 @@ class EndpointBenchmarkMetrics(CoreModel):
     successful_requests: Annotated[int, Field(ge=0)]
     failed_requests: Annotated[int, Field(ge=0)]
     duration_seconds: PositiveFloat
-    total_input_tokens: Annotated[int, Field(ge=0)]
-    total_output_tokens: Annotated[int, Field(ge=0)]
-    ttft_ms: EndpointBenchmarkLatency
-    tpot_ms: EndpointBenchmarkLatency
+    latency_ms: Optional[EndpointBenchmarkLatency] = None
+    total_outputs: Optional[Annotated[int, Field(ge=0)]] = None
+    total_output_bytes: Optional[Annotated[int, Field(ge=0)]] = None
+    total_input_tokens: Optional[Annotated[int, Field(ge=0)]] = None
+    total_output_tokens: Optional[Annotated[int, Field(ge=0)]] = None
+    ttft_ms: Optional[EndpointBenchmarkLatency] = None
+    tpot_ms: Optional[EndpointBenchmarkLatency] = None
 
 
 class EndpointBenchmarkTarget(CoreModel):
@@ -81,6 +97,24 @@ class EndpointBenchmark(CoreModel):
             raise ValueError("benchmark must not include failed requests")
         if metrics.successful_requests != workload.num_requests:
             raise ValueError("benchmark request count must match workload.num_requests")
+        if workload.api in {"chat_completions", "completions"}:
+            required_workload = ("input_tokens", "output_tokens")
+            required_metrics = ("total_input_tokens", "total_output_tokens", "ttft_ms", "tpot_ms")
+            if any(getattr(workload, field) is None for field in required_workload):
+                raise ValueError("token benchmark must include input_tokens and output_tokens")
+            if any(getattr(metrics, field) is None for field in required_metrics):
+                raise ValueError("token benchmark must include token totals and TTFT/TPOT latency")
+        else:
+            if workload.request_path is None:
+                raise ValueError("non-token benchmark must include request_path")
+            if metrics.latency_ms is None:
+                raise ValueError("non-token benchmark must include end-to-end latency")
+            if workload.outputs_per_request is not None:
+                expected_outputs = workload.num_requests * workload.outputs_per_request
+                if metrics.total_outputs != expected_outputs:
+                    raise ValueError(
+                        "benchmark output count must match num_requests * outputs_per_request"
+                    )
         return values
 
 
@@ -100,14 +134,22 @@ class EndpointPreset(CoreModel):
     """Base model used for local preset lookup."""
     id: str
     model: str
-    """Exact repo/path loaded by the service command."""
-    context_length: PositiveInt
-    """Token context length this preset was verified to support."""
+    """Exact model locator loaded by the service command."""
+    api_model_name: Optional[str] = None
+    """Client-facing model name, independent of dstack's chat model registration."""
+    source: str = "unknown"
+    """Model source type, for example `huggingface`, `url`, `path`, or `custom`."""
+    revision: Optional[str] = None
+    """Immutable model revision when the source exposes one."""
+    modality: str = "text-generation"
+    """Verified endpoint modality."""
+    context_length: Optional[PositiveInt] = None
+    """Token context length, when the modality has token context."""
     created_at: datetime
     service: ServiceConfiguration
     validations: list[EndpointPresetValidation]
 
-    @validator("base", "id", "model")
+    @validator("base", "id", "model", "source", "modality")
     def validate_non_empty(cls, value: str) -> str:
         if not value.strip():
             raise ValueError("value must be non-empty")
@@ -119,8 +161,18 @@ class EndpointPreset(CoreModel):
         validations = values.get("validations")
         if service is None or validations is None:
             return values
-        if service.model is None:
-            raise ValueError("preset service must specify model")
+        api_model_name = values.get("api_model_name")
+        if api_model_name is None:
+            api_model_name = (
+                service.model.name if service.model is not None else values.get("base")
+            )
+            values["api_model_name"] = api_model_name
+        if not isinstance(api_model_name, str) or not api_model_name.strip():
+            raise ValueError("preset api_model_name must be non-empty")
+        if service.model is not None and service.model.name != api_model_name:
+            raise ValueError("preset service model name must match api_model_name")
+        if service.model is None and not service.probes:
+            raise ValueError("non-chat preset service must specify an explicit health probe")
         if any(group.resources is None for group in service.replica_groups):
             raise ValueError("preset service must specify resources")
         if service.name is not None or service.gateway is not None:

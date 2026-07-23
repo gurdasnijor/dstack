@@ -13,8 +13,10 @@ from dstack._internal.core.errors import CLIError
 from dstack._internal.core.models.envs import EnvSentinel
 from dstack._internal.core.models.profiles import ProfileParams
 from tests._internal.cli.endpoint_presets import (
+    get_running_image_service_run,
     get_running_service_run,
     get_successful_endpoint_report,
+    get_successful_image_report,
 )
 
 pytestmark = pytest.mark.windows
@@ -79,4 +81,59 @@ class TestBuildVerifiedEndpointPreset:
                     },
                 ),
                 report=report,
+            )
+
+    def test_rejects_reported_revision_not_used_by_service(self):
+        run = get_running_service_run()
+        run.run_spec.configuration.commands = ["vllm serve community/Qwen3.5-27B-GPTQ-Int4"]
+
+        with pytest.raises(CLIError, match="does not pin the reported model revision"):
+            build_verified_endpoint_preset(
+                run=run,
+                endpoint_configuration=EndpointConfiguration(
+                    name="qwen-build",
+                    model={"base": "Qwen/Qwen3.5-27B"},
+                ),
+                report=get_successful_endpoint_report(run),
+            )
+
+    def test_builds_non_chat_image_preset_with_explicit_probe(self):
+        run = get_running_image_service_run()
+
+        preset = build_verified_endpoint_preset(
+            run=run,
+            endpoint_configuration=EndpointConfiguration(
+                name="juggernaut-build",
+                model={
+                    "repo": "eniora/Juggernaut_XL_Ragnarok",
+                    "source": "huggingface",
+                    "modality": "image-generation",
+                },
+                gateway=False,
+                env=["HF_TOKEN"],
+            ),
+            report=get_successful_image_report(run),
+        )
+
+        assert preset.api_model_name == "eniora/Juggernaut_XL_Ragnarok"
+        assert preset.modality == "image-generation"
+        assert preset.source == "huggingface"
+        assert preset.revision == "fe71bb49af337c43faf10a6b50b0dd1d10b23015"
+        assert preset.context_length is None
+        assert preset.service.model is None
+        assert preset.service.probes[0].url == "/health"
+        assert preset.validations[0].benchmark.workload.api == "images_generations"
+
+    def test_rejects_non_chat_service_without_probe(self):
+        run = get_running_image_service_run()
+        run.run_spec.configuration.probes = None
+
+        with pytest.raises(CLIError, match="no explicit health probe"):
+            build_verified_endpoint_preset(
+                run=run,
+                endpoint_configuration=EndpointConfiguration(
+                    name="juggernaut-build",
+                    model="eniora/Juggernaut_XL_Ragnarok",
+                ),
+                report=get_successful_image_report(run),
             )

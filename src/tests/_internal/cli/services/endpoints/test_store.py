@@ -17,6 +17,7 @@ from dstack._internal.core.models.envs import EnvSentinel
 from tests._internal.cli.endpoint_presets import (
     get_endpoint_benchmark,
     get_endpoint_preset,
+    get_image_benchmark,
 )
 
 pytestmark = pytest.mark.windows
@@ -33,10 +34,17 @@ class TestEndpointBenchmark:
         workload_schema = schema["properties"]["workload"]
         metrics_schema = schema["properties"]["metrics"]
         assert set(workload_schema["properties"]) == set(EndpointBenchmarkWorkload.__fields__)
-        assert set(workload_schema["required"]) == set(workload_schema["properties"])
+        assert set(workload_schema["required"]) == {"api", "num_requests", "concurrency"}
         assert set(metrics_schema["properties"]) == set(EndpointBenchmarkMetrics.__fields__)
-        assert set(metrics_schema["required"]) == set(metrics_schema["properties"])
+        assert set(metrics_schema["required"]) == {
+            "successful_requests",
+            "failed_requests",
+            "duration_seconds",
+        }
         assert set(metrics_schema["properties"]["ttft_ms"]["properties"]) == set(
+            EndpointBenchmarkLatency.__fields__
+        )
+        assert set(metrics_schema["properties"]["latency_ms"]["properties"]) == set(
             EndpointBenchmarkLatency.__fields__
         )
 
@@ -58,6 +66,30 @@ class TestEndpointBenchmark:
         data["metrics"]["tool_specific"] = 1
 
         with pytest.raises(ValidationError, match="extra fields not permitted"):
+            EndpointBenchmark.parse_obj(data)
+
+    def test_accepts_non_token_image_metrics(self):
+        benchmark = get_image_benchmark()
+
+        assert benchmark.workload.output_unit == "image"
+        assert benchmark.metrics.total_outputs == 3
+        assert benchmark.metrics.latency_ms.p50 == 6010
+
+    @pytest.mark.parametrize(
+        ("mutation", "error"),
+        [
+            (lambda data: data["metrics"].pop("latency_ms"), "end-to-end latency"),
+            (
+                lambda data: data["metrics"].update(total_outputs=2),
+                "output count must match",
+            ),
+        ],
+    )
+    def test_rejects_incomplete_non_token_metrics(self, mutation, error):
+        data = get_image_benchmark().dict()
+        mutation(data)
+
+        with pytest.raises(ValidationError, match=error):
             EndpointBenchmark.parse_obj(data)
 
 
@@ -88,6 +120,20 @@ class TestEndpointPresetStore:
         store.save(updated)
 
         assert store.get(updated.id) == updated
+
+    def test_loads_legacy_chat_preset_without_generalized_metadata(self, tmp_path: Path):
+        store = EndpointPresetStore(tmp_path / "presets")
+        path = store.save(get_endpoint_preset())
+        data = yaml.safe_load(path.read_text())
+        for field in ("api_model_name", "source", "revision", "modality"):
+            data.pop(field, None)
+        path.write_text(yaml.safe_dump(data, sort_keys=False))
+
+        preset = store.list()[0]
+
+        assert preset.api_model_name == "Qwen/Qwen3.5-27B"
+        assert preset.source == "unknown"
+        assert preset.modality == "text-generation"
 
     def test_rejects_duplicate_preset_id(self, tmp_path: Path):
         store = EndpointPresetStore(tmp_path / "presets")

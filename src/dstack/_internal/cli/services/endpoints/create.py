@@ -255,10 +255,14 @@ def _build_prompt(
     allowed_fleets: Sequence[str],
 ) -> str:
     context_lines = [f"- service_model_name: {configuration.model.api_model_name}"]
+    context_lines.append(f"- model_source: {configuration.model.source_type}")
+    context_lines.append(f"- requested_modality: {configuration.model.requested_modality}")
+    if configuration.model.requested_revision is not None:
+        context_lines.append(f"- model_revision: {configuration.model.requested_revision}")
     if configuration.model.allows_variant_selection:
         context_lines.append(f"- base_model: {configuration.model.api_model_name}")
     else:
-        context_lines.append(f"- model_repo: {configuration.model.exact_repo}")
+        context_lines.append(f"- model_locator: {configuration.model.exact_repo}")
     if configuration.context_length is not None:
         context_lines.append(f"- context_length: {configuration.context_length}")
     return f"""{get_endpoint_agent_system_prompt()}
