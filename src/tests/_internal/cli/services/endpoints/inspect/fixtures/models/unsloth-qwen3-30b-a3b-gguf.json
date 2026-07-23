@@ -1,0 +1,204 @@
+{
+  "files": {
+    "config.json": {
+      "architectures": [
+        "Qwen3MoeForCausalLM"
+      ],
+      "attention_bias": false,
+      "attention_dropout": 0.0,
+      "decoder_sparse_step": 1,
+      "eos_token_id": 151645,
+      "head_dim": 128,
+      "hidden_act": "silu",
+      "hidden_size": 2048,
+      "initializer_range": 0.02,
+      "intermediate_size": 6144,
+      "max_position_embeddings": 40960,
+      "max_window_layers": 48,
+      "mlp_only_layers": [],
+      "model_type": "qwen3_moe",
+      "moe_intermediate_size": 768,
+      "norm_topk_prob": true,
+      "num_attention_heads": 32,
+      "num_experts": 128,
+      "num_experts_per_tok": 8,
+      "num_hidden_layers": 48,
+      "num_key_value_heads": 4,
+      "output_router_logits": false,
+      "pad_token_id": 151654,
+      "rms_norm_eps": 1e-06,
+      "rope_scaling": null,
+      "rope_theta": 1000000.0,
+      "router_aux_loss_coef": 0.001,
+      "sliding_window": null,
+      "tie_word_embeddings": false,
+      "torch_dtype": "bfloat16",
+      "transformers_version": "4.51.3",
+      "unsloth_fixed": true,
+      "use_cache": true,
+      "use_sliding_window": false,
+      "vocab_size": 151936
+    }
+  },
+  "fixture_schema": 1,
+  "model_info": {
+    "library_name": "transformers",
+    "pipeline_tag": "text-generation",
+    "safetensors": null,
+    "siblings": [
+      {
+        "rfilename": ".gitattributes",
+        "size": 3313
+      },
+      {
+        "rfilename": "BF16/Qwen3-30B-A3B-BF16-00001-of-00002.gguf",
+        "size": 49693950144
+      },
+      {
+        "rfilename": "BF16/Qwen3-30B-A3B-BF16-00002-of-00002.gguf",
+        "size": 11401853280
+      },
+      {
+        "rfilename": "Qwen3-30B-A3B-IQ4_NL.gguf",
+        "size": 17310782016
+      },
+      {
+        "rfilename": "Qwen3-30B-A3B-IQ4_XS.gguf",
+        "size": 16378073664
+      },
+      {
+        "rfilename": "Qwen3-30B-A3B-Q2_K.gguf",
+        "size": 11258610240
+      },
+      {
+        "rfilename": "Qwen3-30B-A3B-Q2_K_L.gguf",
+        "size": 11331539520
+      },
+      {
+        "rfilename": "Qwen3-30B-A3B-Q3_K_M.gguf",
+        "size": 14711847488
+      },
+      {
+        "rfilename": "Qwen3-30B-A3B-Q3_K_S.gguf",
+        "size": 13292468800
+      },
+      {
+        "rfilename": "Qwen3-30B-A3B-Q4_0.gguf",
+        "size": 17379988032
+      },
+      {
+        "rfilename": "Qwen3-30B-A3B-Q4_1.gguf",
+        "size": 19192500800
+      },
+      {
+        "rfilename": "Qwen3-30B-A3B-Q4_K_M.gguf",
+        "size": 18556686912
+      },
+      {
+        "rfilename": "Qwen3-30B-A3B-Q4_K_S.gguf",
+        "size": 17456009792
+      },
+      {
+        "rfilename": "Qwen3-30B-A3B-Q5_K_M.gguf",
+        "size": 21725581888
+      },
+      {
+        "rfilename": "Qwen3-30B-A3B-Q5_K_S.gguf",
+        "size": 21080511040
+      },
+      {
+        "rfilename": "Qwen3-30B-A3B-Q6_K.gguf",
+        "size": 25092532800
+      },
+      {
+        "rfilename": "Qwen3-30B-A3B-Q8_0.gguf",
+        "size": 32483932736
+      },
+      {
+        "rfilename": "Qwen3-30B-A3B-UD-IQ1_M.gguf",
+        "size": 9666859584
+      },
+      {
+        "rfilename": "Qwen3-30B-A3B-UD-IQ1_S.gguf",
+        "size": 9043300928
+      },
+      {
+        "rfilename": "Qwen3-30B-A3B-UD-IQ2_M.gguf",
+        "size": 10865578560
+      },
+      {
+        "rfilename": "Qwen3-30B-A3B-UD-IQ2_XXS.gguf",
+        "size": 10362262080
+      },
+      {
+        "rfilename": "Qwen3-30B-A3B-UD-IQ3_XXS.gguf",
+        "size": 12888085056
+      },
+      {
+        "rfilename": "Qwen3-30B-A3B-UD-Q2_K_XL.gguf",
+        "size": 11814277696
+      },
+      {
+        "rfilename": "Qwen3-30B-A3B-UD-Q3_K_XL.gguf",
+        "size": 13833048640
+      },
+      {
+        "rfilename": "Qwen3-30B-A3B-UD-Q4_K_XL.gguf",
+        "size": 17715663424
+      },
+      {
+        "rfilename": "Qwen3-30B-A3B-UD-Q5_K_XL.gguf",
+        "size": 21740302912
+      },
+      {
+        "rfilename": "Qwen3-30B-A3B-UD-Q6_K_XL.gguf",
+        "size": 26340325952
+      },
+      {
+        "rfilename": "Qwen3-30B-A3B-UD-Q8_K_XL.gguf",
+        "size": 35989944896
+      },
+      {
+        "rfilename": "README.md",
+        "size": 20099
+      },
+      {
+        "rfilename": "config.json",
+        "size": 989
+      },
+      {
+        "rfilename": "imatrix_unsloth.dat",
+        "size": 121910657
+      },
+      {
+        "rfilename": "params",
+        "size": 178
+      },
+      {
+        "rfilename": "template",
+        "size": 1482
+      }
+    ],
+    "tags": [
+      "transformers",
+      "gguf",
+      "qwen3_moe",
+      "text-generation",
+      "qwen3",
+      "qwen",
+      "unsloth",
+      "en",
+      "arxiv:2309.00071",
+      "base_model:Qwen/Qwen3-30B-A3B",
+      "base_model:quantized:Qwen/Qwen3-30B-A3B",
+      "license:apache-2.0",
+      "endpoints_compatible",
+      "region:us",
+      "imatrix",
+      "conversational"
+    ]
+  },
+  "repo": "unsloth/Qwen3-30B-A3B-GGUF",
+  "requested_revision": null,
+  "revision": "d5b1d57bd0b504ac62ae6c725904e96ef228dc74"
+}

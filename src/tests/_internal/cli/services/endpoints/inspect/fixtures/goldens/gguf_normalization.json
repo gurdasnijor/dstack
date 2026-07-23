@@ -1,0 +1,152 @@
+[
+  {
+    "gpu_layers": 0,
+    "host_memory_bytes": 1092703512,
+    "raw": {
+      "fullOffloaded": false,
+      "offloadLayers": 0,
+      "ram": {
+        "handleLastLayer": 27,
+        "handleLayers": 28,
+        "handleOutputLayer": true,
+        "nonuma": 1092703512,
+        "position": 0,
+        "remote": false,
+        "uma": 935417112
+      },
+      "vrams": [
+        {
+          "handleLastLayer": -1,
+          "handleLayers": 0,
+          "handleOutputLayer": false,
+          "nonuma": 543164416,
+          "position": 0,
+          "remote": false,
+          "uma": 0
+        }
+      ]
+    },
+    "strategy": "cpu-only",
+    "vram_bytes": 543164416
+  },
+  {
+    "gpu_layers": 8,
+    "host_memory_bytes": 1025594648,
+    "raw": {
+      "fullOffloaded": false,
+      "offloadLayers": 8,
+      "ram": {
+        "handleLastLayer": 19,
+        "handleLayers": 20,
+        "handleOutputLayer": true,
+        "nonuma": 1025594648,
+        "position": 0,
+        "remote": false,
+        "uma": 868308248
+      },
+      "vrams": [
+        {
+          "handleLastLayer": 27,
+          "handleLayers": 8,
+          "handleOutputLayer": false,
+          "nonuma": 1956358144,
+          "position": 0,
+          "remote": false,
+          "uma": 67108864
+        }
+      ]
+    },
+    "strategy": "partial:8",
+    "vram_bytes": 1956358144
+  },
+  {
+    "gpu_layers": 16,
+    "host_memory_bytes": 958485784,
+    "raw": {
+      "fullOffloaded": false,
+      "offloadLayers": 16,
+      "ram": {
+        "handleLastLayer": 11,
+        "handleLayers": 12,
+        "handleOutputLayer": true,
+        "nonuma": 958485784,
+        "position": 0,
+        "remote": false,
+        "uma": 801199384
+      },
+      "vrams": [
+        {
+          "handleLastLayer": 27,
+          "handleLayers": 16,
+          "handleOutputLayer": false,
+          "nonuma": 3324119040,
+          "position": 0,
+          "remote": false,
+          "uma": 134217728
+        }
+      ]
+    },
+    "strategy": "partial:16",
+    "vram_bytes": 3324119040
+  },
+  {
+    "gpu_layers": 24,
+    "host_memory_bytes": 891376920,
+    "raw": {
+      "fullOffloaded": false,
+      "offloadLayers": 24,
+      "ram": {
+        "handleLastLayer": 3,
+        "handleLayers": 4,
+        "handleOutputLayer": true,
+        "nonuma": 891376920,
+        "position": 0,
+        "remote": false,
+        "uma": 734090520
+      },
+      "vrams": [
+        {
+          "handleLastLayer": 27,
+          "handleLayers": 24,
+          "handleOutputLayer": false,
+          "nonuma": 4701140992,
+          "position": 0,
+          "remote": false,
+          "uma": 201326592
+        }
+      ]
+    },
+    "strategy": "partial:24",
+    "vram_bytes": 4701140992
+  },
+  {
+    "gpu_layers": 29,
+    "host_memory_bytes": 320951576,
+    "raw": {
+      "fullOffloaded": true,
+      "offloadLayers": 29,
+      "ram": {
+        "handleLastLayer": -1,
+        "handleLayers": 0,
+        "handleOutputLayer": false,
+        "nonuma": 320951576,
+        "position": 0,
+        "remote": false,
+        "uma": 163665176
+      },
+      "vrams": [
+        {
+          "handleLastLayer": 27,
+          "handleLayers": 28,
+          "handleOutputLayer": true,
+          "nonuma": 6214481920,
+          "position": 0,
+          "remote": false,
+          "uma": 553648128
+        }
+      ]
+    },
+    "strategy": "full-offload",
+    "vram_bytes": 6214481920
+  }
+]

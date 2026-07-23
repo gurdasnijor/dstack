@@ -1,0 +1,140 @@
+{
+  "fixture_schema": 1,
+  "captured_at": "2026-07-22",
+  "parser_version": "v0.25.0",
+  "source_command": "gguf-parser --hf-repo bartowski/Qwen2.5-7B-Instruct-GGUF --hf-file Qwen2.5-7B-Instruct-Q5_K_M.gguf --ctx-size 4096 --parallel-size 1 --gpu-layers 999 --gpu-layers-step 8 --estimate --json --skip-cache",
+  "estimate": {
+    "items": [
+      {
+        "offloadLayers": 0,
+        "fullOffloaded": false,
+        "ram": {
+          "handleLayers": 28,
+          "handleLastLayer": 27,
+          "handleOutputLayer": true,
+          "remote": false,
+          "position": 0,
+          "uma": 935417112,
+          "nonuma": 1092703512
+        },
+        "vrams": [
+          {
+            "handleLayers": 0,
+            "handleLastLayer": -1,
+            "handleOutputLayer": false,
+            "remote": false,
+            "position": 0,
+            "uma": 0,
+            "nonuma": 543164416
+          }
+        ]
+      },
+      {
+        "offloadLayers": 8,
+        "fullOffloaded": false,
+        "ram": {
+          "handleLayers": 20,
+          "handleLastLayer": 19,
+          "handleOutputLayer": true,
+          "remote": false,
+          "position": 0,
+          "uma": 868308248,
+          "nonuma": 1025594648
+        },
+        "vrams": [
+          {
+            "handleLayers": 8,
+            "handleLastLayer": 27,
+            "handleOutputLayer": false,
+            "remote": false,
+            "position": 0,
+            "uma": 67108864,
+            "nonuma": 1956358144
+          }
+        ]
+      },
+      {
+        "offloadLayers": 16,
+        "fullOffloaded": false,
+        "ram": {
+          "handleLayers": 12,
+          "handleLastLayer": 11,
+          "handleOutputLayer": true,
+          "remote": false,
+          "position": 0,
+          "uma": 801199384,
+          "nonuma": 958485784
+        },
+        "vrams": [
+          {
+            "handleLayers": 16,
+            "handleLastLayer": 27,
+            "handleOutputLayer": false,
+            "remote": false,
+            "position": 0,
+            "uma": 134217728,
+            "nonuma": 3324119040
+          }
+        ]
+      },
+      {
+        "offloadLayers": 24,
+        "fullOffloaded": false,
+        "ram": {
+          "handleLayers": 4,
+          "handleLastLayer": 3,
+          "handleOutputLayer": true,
+          "remote": false,
+          "position": 0,
+          "uma": 734090520,
+          "nonuma": 891376920
+        },
+        "vrams": [
+          {
+            "handleLayers": 24,
+            "handleLastLayer": 27,
+            "handleOutputLayer": false,
+            "remote": false,
+            "position": 0,
+            "uma": 201326592,
+            "nonuma": 4701140992
+          }
+        ]
+      },
+      {
+        "offloadLayers": 29,
+        "fullOffloaded": true,
+        "ram": {
+          "handleLayers": 0,
+          "handleLastLayer": -1,
+          "handleOutputLayer": false,
+          "remote": false,
+          "position": 0,
+          "uma": 163665176,
+          "nonuma": 320951576
+        },
+        "vrams": [
+          {
+            "handleLayers": 28,
+            "handleLastLayer": 27,
+            "handleOutputLayer": true,
+            "remote": false,
+            "position": 0,
+            "uma": 553648128,
+            "nonuma": 6214481920
+          }
+        ]
+      }
+    ],
+    "type": "model",
+    "architecture": "qwen2",
+    "contextSize": 4096,
+    "flashAttention": false,
+    "noMMap": false,
+    "embeddingOnly": false,
+    "reranking": false,
+    "distributable": true,
+    "logicalBatchSize": 2048,
+    "physicalBatchSize": 512
+  }
+}

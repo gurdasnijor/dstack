@@ -1,0 +1,47 @@
+{
+  "files": {},
+  "fixture_schema": 1,
+  "model_info": {
+    "library_name": null,
+    "pipeline_tag": "image-to-3d",
+    "safetensors": null,
+    "siblings": [
+      {
+        "rfilename": ".gitattributes",
+        "size": 1583
+      },
+      {
+        "rfilename": "README.md",
+        "size": 2488
+      },
+      {
+        "rfilename": "config.yaml",
+        "size": 987
+      },
+      {
+        "rfilename": "figures/input800.mp4",
+        "size": 148042
+      },
+      {
+        "rfilename": "figures/output_examples.mp4",
+        "size": 2425685
+      },
+      {
+        "rfilename": "model.ckpt",
+        "size": 1677246742
+      }
+    ],
+    "tags": [
+      "3d",
+      "image-to-3d",
+      "dataset:allenai/objaverse",
+      "arxiv:2311.04400",
+      "arxiv:2403.02151",
+      "license:mit",
+      "region:us"
+    ]
+  },
+  "repo": "stabilityai/TripoSR",
+  "requested_revision": null,
+  "revision": "5b521936b01fbe1890f6f9baed0254ab6351c04a"
+}

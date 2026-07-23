@@ -1,0 +1,629 @@
+{
+  "bartowski-qwen2-5-7b-instruct-gguf": {
+    "default": {
+      "available_quants": [
+        {
+          "checkpoint_bytes": 15237853600,
+          "file": "Qwen2.5-7B-Instruct-f16.gguf",
+          "quant": "F16",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-f16.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 2780342976,
+          "file": "Qwen2.5-7B-Instruct-IQ2_M.gguf",
+          "quant": "IQ2_M",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-IQ2_M.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 3574012608,
+          "file": "Qwen2.5-7B-Instruct-IQ3_M.gguf",
+          "quant": "IQ3_M",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-IQ3_M.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 3346256576,
+          "file": "Qwen2.5-7B-Instruct-IQ3_XS.gguf",
+          "quant": "IQ3_XS",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-IQ3_XS.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 4218473152,
+          "file": "Qwen2.5-7B-Instruct-IQ4_XS.gguf",
+          "quant": "IQ4_XS",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-IQ4_XS.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 3015940800,
+          "file": "Qwen2.5-7B-Instruct-Q2_K.gguf",
+          "quant": "Q2_K",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q2_K.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 3548164800,
+          "file": "Qwen2.5-7B-Instruct-Q2_K_L.gguf",
+          "quant": "Q2_K_L",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q2_K_L.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 4088459968,
+          "file": "Qwen2.5-7B-Instruct-Q3_K_L.gguf",
+          "quant": "Q3_K_L",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q3_K_L.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 3808391872,
+          "file": "Qwen2.5-7B-Instruct-Q3_K_M.gguf",
+          "quant": "Q3_K_M",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q3_K_M.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 3492369088,
+          "file": "Qwen2.5-7B-Instruct-Q3_K_S.gguf",
+          "quant": "Q3_K_S",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q3_K_S.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 4565332672,
+          "file": "Qwen2.5-7B-Instruct-Q3_K_XL.gguf",
+          "quant": "Q3_K_XL",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q3_K_XL.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 4444121792,
+          "file": "Qwen2.5-7B-Instruct-Q4_0.gguf",
+          "quant": "Q4_0",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q4_0.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 4431391424,
+          "file": "Qwen2.5-7B-Instruct-Q4_0_4_4.gguf",
+          "quant": "Q4_0_4_4",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q4_0_4_4.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 4431391424,
+          "file": "Qwen2.5-7B-Instruct-Q4_0_4_8.gguf",
+          "quant": "Q4_0_4_8",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q4_0_4_8.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 4431391424,
+          "file": "Qwen2.5-7B-Instruct-Q4_0_8_8.gguf",
+          "quant": "Q4_0_8_8",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q4_0_8_8.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 5087564480,
+          "file": "Qwen2.5-7B-Instruct-Q4_K_L.gguf",
+          "quant": "Q4_K_L",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q4_K_L.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 4683074240,
+          "file": "Qwen2.5-7B-Instruct-Q4_K_M.gguf",
+          "quant": "Q4_K_M",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q4_K_M.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 4457769664,
+          "file": "Qwen2.5-7B-Instruct-Q4_K_S.gguf",
+          "quant": "Q4_K_S",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q4_K_S.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 5781197504,
+          "file": "Qwen2.5-7B-Instruct-Q5_K_L.gguf",
+          "quant": "Q5_K_L",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q5_K_L.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 5444831936,
+          "file": "Qwen2.5-7B-Instruct-Q5_K_M.gguf",
+          "quant": "Q5_K_M",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q5_K_M.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 5315177152,
+          "file": "Qwen2.5-7B-Instruct-Q5_K_S.gguf",
+          "quant": "Q5_K_S",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q5_K_S.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 6254199488,
+          "file": "Qwen2.5-7B-Instruct-Q6_K.gguf",
+          "quant": "Q6_K",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q6_K.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 6518182592,
+          "file": "Qwen2.5-7B-Instruct-Q6_K_L.gguf",
+          "quant": "Q6_K_L",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q6_K_L.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 8098525888,
+          "file": "Qwen2.5-7B-Instruct-Q8_0.gguf",
+          "quant": "Q8_0",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q8_0.gguf"
+          ]
+        }
+      ],
+      "selected_file": "Qwen2.5-7B-Instruct-Q4_K_M.gguf",
+      "selected_shard_set": [
+        "Qwen2.5-7B-Instruct-Q4_K_M.gguf"
+      ],
+      "selection_reason": "default_q4km",
+      "selector": null
+    },
+    "selector-q5km": {
+      "available_quants": [
+        {
+          "checkpoint_bytes": 15237853600,
+          "file": "Qwen2.5-7B-Instruct-f16.gguf",
+          "quant": "F16",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-f16.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 2780342976,
+          "file": "Qwen2.5-7B-Instruct-IQ2_M.gguf",
+          "quant": "IQ2_M",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-IQ2_M.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 3574012608,
+          "file": "Qwen2.5-7B-Instruct-IQ3_M.gguf",
+          "quant": "IQ3_M",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-IQ3_M.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 3346256576,
+          "file": "Qwen2.5-7B-Instruct-IQ3_XS.gguf",
+          "quant": "IQ3_XS",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-IQ3_XS.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 4218473152,
+          "file": "Qwen2.5-7B-Instruct-IQ4_XS.gguf",
+          "quant": "IQ4_XS",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-IQ4_XS.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 3015940800,
+          "file": "Qwen2.5-7B-Instruct-Q2_K.gguf",
+          "quant": "Q2_K",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q2_K.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 3548164800,
+          "file": "Qwen2.5-7B-Instruct-Q2_K_L.gguf",
+          "quant": "Q2_K_L",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q2_K_L.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 4088459968,
+          "file": "Qwen2.5-7B-Instruct-Q3_K_L.gguf",
+          "quant": "Q3_K_L",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q3_K_L.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 3808391872,
+          "file": "Qwen2.5-7B-Instruct-Q3_K_M.gguf",
+          "quant": "Q3_K_M",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q3_K_M.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 3492369088,
+          "file": "Qwen2.5-7B-Instruct-Q3_K_S.gguf",
+          "quant": "Q3_K_S",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q3_K_S.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 4565332672,
+          "file": "Qwen2.5-7B-Instruct-Q3_K_XL.gguf",
+          "quant": "Q3_K_XL",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q3_K_XL.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 4444121792,
+          "file": "Qwen2.5-7B-Instruct-Q4_0.gguf",
+          "quant": "Q4_0",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q4_0.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 4431391424,
+          "file": "Qwen2.5-7B-Instruct-Q4_0_4_4.gguf",
+          "quant": "Q4_0_4_4",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q4_0_4_4.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 4431391424,
+          "file": "Qwen2.5-7B-Instruct-Q4_0_4_8.gguf",
+          "quant": "Q4_0_4_8",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q4_0_4_8.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 4431391424,
+          "file": "Qwen2.5-7B-Instruct-Q4_0_8_8.gguf",
+          "quant": "Q4_0_8_8",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q4_0_8_8.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 5087564480,
+          "file": "Qwen2.5-7B-Instruct-Q4_K_L.gguf",
+          "quant": "Q4_K_L",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q4_K_L.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 4683074240,
+          "file": "Qwen2.5-7B-Instruct-Q4_K_M.gguf",
+          "quant": "Q4_K_M",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q4_K_M.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 4457769664,
+          "file": "Qwen2.5-7B-Instruct-Q4_K_S.gguf",
+          "quant": "Q4_K_S",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q4_K_S.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 5781197504,
+          "file": "Qwen2.5-7B-Instruct-Q5_K_L.gguf",
+          "quant": "Q5_K_L",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q5_K_L.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 5444831936,
+          "file": "Qwen2.5-7B-Instruct-Q5_K_M.gguf",
+          "quant": "Q5_K_M",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q5_K_M.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 5315177152,
+          "file": "Qwen2.5-7B-Instruct-Q5_K_S.gguf",
+          "quant": "Q5_K_S",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q5_K_S.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 6254199488,
+          "file": "Qwen2.5-7B-Instruct-Q6_K.gguf",
+          "quant": "Q6_K",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q6_K.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 6518182592,
+          "file": "Qwen2.5-7B-Instruct-Q6_K_L.gguf",
+          "quant": "Q6_K_L",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q6_K_L.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 8098525888,
+          "file": "Qwen2.5-7B-Instruct-Q8_0.gguf",
+          "quant": "Q8_0",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q8_0.gguf"
+          ]
+        }
+      ],
+      "selected_file": "Qwen2.5-7B-Instruct-Q5_K_M.gguf",
+      "selected_shard_set": [
+        "Qwen2.5-7B-Instruct-Q5_K_M.gguf"
+      ],
+      "selection_reason": "selector",
+      "selector": "Q5_K_M"
+    }
+  },
+  "unsloth-qwen3-30b-a3b-gguf": {
+    "default": {
+      "available_quants": [
+        {
+          "checkpoint_bytes": 61095803424,
+          "file": "BF16/Qwen3-30B-A3B-BF16-00001-of-00002.gguf",
+          "quant": "BF16",
+          "shard_set": [
+            "BF16/Qwen3-30B-A3B-BF16-00001-of-00002.gguf",
+            "BF16/Qwen3-30B-A3B-BF16-00002-of-00002.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 9666859584,
+          "file": "Qwen3-30B-A3B-UD-IQ1_M.gguf",
+          "quant": "IQ1_M",
+          "shard_set": [
+            "Qwen3-30B-A3B-UD-IQ1_M.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 9043300928,
+          "file": "Qwen3-30B-A3B-UD-IQ1_S.gguf",
+          "quant": "IQ1_S",
+          "shard_set": [
+            "Qwen3-30B-A3B-UD-IQ1_S.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 10865578560,
+          "file": "Qwen3-30B-A3B-UD-IQ2_M.gguf",
+          "quant": "IQ2_M",
+          "shard_set": [
+            "Qwen3-30B-A3B-UD-IQ2_M.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 10362262080,
+          "file": "Qwen3-30B-A3B-UD-IQ2_XXS.gguf",
+          "quant": "IQ2_XXS",
+          "shard_set": [
+            "Qwen3-30B-A3B-UD-IQ2_XXS.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 12888085056,
+          "file": "Qwen3-30B-A3B-UD-IQ3_XXS.gguf",
+          "quant": "IQ3_XXS",
+          "shard_set": [
+            "Qwen3-30B-A3B-UD-IQ3_XXS.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 17310782016,
+          "file": "Qwen3-30B-A3B-IQ4_NL.gguf",
+          "quant": "IQ4_NL",
+          "shard_set": [
+            "Qwen3-30B-A3B-IQ4_NL.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 16378073664,
+          "file": "Qwen3-30B-A3B-IQ4_XS.gguf",
+          "quant": "IQ4_XS",
+          "shard_set": [
+            "Qwen3-30B-A3B-IQ4_XS.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 11258610240,
+          "file": "Qwen3-30B-A3B-Q2_K.gguf",
+          "quant": "Q2_K",
+          "shard_set": [
+            "Qwen3-30B-A3B-Q2_K.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 11331539520,
+          "file": "Qwen3-30B-A3B-Q2_K_L.gguf",
+          "quant": "Q2_K_L",
+          "shard_set": [
+            "Qwen3-30B-A3B-Q2_K_L.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 11814277696,
+          "file": "Qwen3-30B-A3B-UD-Q2_K_XL.gguf",
+          "quant": "Q2_K_XL",
+          "shard_set": [
+            "Qwen3-30B-A3B-UD-Q2_K_XL.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 14711847488,
+          "file": "Qwen3-30B-A3B-Q3_K_M.gguf",
+          "quant": "Q3_K_M",
+          "shard_set": [
+            "Qwen3-30B-A3B-Q3_K_M.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 13292468800,
+          "file": "Qwen3-30B-A3B-Q3_K_S.gguf",
+          "quant": "Q3_K_S",
+          "shard_set": [
+            "Qwen3-30B-A3B-Q3_K_S.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 13833048640,
+          "file": "Qwen3-30B-A3B-UD-Q3_K_XL.gguf",
+          "quant": "Q3_K_XL",
+          "shard_set": [
+            "Qwen3-30B-A3B-UD-Q3_K_XL.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 17379988032,
+          "file": "Qwen3-30B-A3B-Q4_0.gguf",
+          "quant": "Q4_0",
+          "shard_set": [
+            "Qwen3-30B-A3B-Q4_0.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 19192500800,
+          "file": "Qwen3-30B-A3B-Q4_1.gguf",
+          "quant": "Q4_1",
+          "shard_set": [
+            "Qwen3-30B-A3B-Q4_1.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 18556686912,
+          "file": "Qwen3-30B-A3B-Q4_K_M.gguf",
+          "quant": "Q4_K_M",
+          "shard_set": [
+            "Qwen3-30B-A3B-Q4_K_M.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 17456009792,
+          "file": "Qwen3-30B-A3B-Q4_K_S.gguf",
+          "quant": "Q4_K_S",
+          "shard_set": [
+            "Qwen3-30B-A3B-Q4_K_S.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 17715663424,
+          "file": "Qwen3-30B-A3B-UD-Q4_K_XL.gguf",
+          "quant": "Q4_K_XL",
+          "shard_set": [
+            "Qwen3-30B-A3B-UD-Q4_K_XL.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 21725581888,
+          "file": "Qwen3-30B-A3B-Q5_K_M.gguf",
+          "quant": "Q5_K_M",
+          "shard_set": [
+            "Qwen3-30B-A3B-Q5_K_M.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 21080511040,
+          "file": "Qwen3-30B-A3B-Q5_K_S.gguf",
+          "quant": "Q5_K_S",
+          "shard_set": [
+            "Qwen3-30B-A3B-Q5_K_S.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 21740302912,
+          "file": "Qwen3-30B-A3B-UD-Q5_K_XL.gguf",
+          "quant": "Q5_K_XL",
+          "shard_set": [
+            "Qwen3-30B-A3B-UD-Q5_K_XL.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 25092532800,
+          "file": "Qwen3-30B-A3B-Q6_K.gguf",
+          "quant": "Q6_K",
+          "shard_set": [
+            "Qwen3-30B-A3B-Q6_K.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 26340325952,
+          "file": "Qwen3-30B-A3B-UD-Q6_K_XL.gguf",
+          "quant": "Q6_K_XL",
+          "shard_set": [
+            "Qwen3-30B-A3B-UD-Q6_K_XL.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 32483932736,
+          "file": "Qwen3-30B-A3B-Q8_0.gguf",
+          "quant": "Q8_0",
+          "shard_set": [
+            "Qwen3-30B-A3B-Q8_0.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 35989944896,
+          "file": "Qwen3-30B-A3B-UD-Q8_K_XL.gguf",
+          "quant": "Q8_K_XL",
+          "shard_set": [
+            "Qwen3-30B-A3B-UD-Q8_K_XL.gguf"
+          ]
+        }
+      ],
+      "selected_file": "Qwen3-30B-A3B-Q4_K_M.gguf",
+      "selected_shard_set": [
+        "Qwen3-30B-A3B-Q4_K_M.gguf"
+      ],
+      "selection_reason": "default_q4km",
+      "selector": null
+    }
+  }
+}

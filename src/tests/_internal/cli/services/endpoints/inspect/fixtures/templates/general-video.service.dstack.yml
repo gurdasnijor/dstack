@@ -1,0 +1,74 @@
+type: service
+name: general-video
+
+# Stable vLLM-Omni video API endpoint. Select LTX-2, Wan, Helios, or another
+# supported pipeline at apply time with `-e MODEL=...`.
+image: ghcr.io/gurdasnijor/vllm-omni@sha256:8f46deb42329a2cf2e280c656d10734e0c5fb8469a99852db6f620f92f6f64ae
+shell: bash
+
+commands:
+  - |
+    set -euo pipefail
+
+    backend_args=()
+    case "${PIPELINE_BACKEND:-native}" in
+      native)
+        ;;
+      diffusers)
+        backend_args+=(--diffusion-load-format diffusers)
+        ;;
+      *)
+        echo "PIPELINE_BACKEND must be 'native' or 'diffusers'" >&2
+        exit 2
+        ;;
+    esac
+
+    exec vllm serve "$MODEL" \
+      --omni \
+      --host 0.0.0.0 \
+      --port 8000 \
+      "${backend_args[@]}" ${{ run.args }}
+
+port: 8000
+gateway: false
+auth: true
+
+probes:
+  - type: http
+    url: /health
+    interval: 15s
+    timeout: 10s
+    ready_after: 2
+
+env:
+  - MODEL
+  - HF_TOKEN=${{ secrets.HF_TOKEN }}
+  - VLLM_OMNI_SERVER_STORAGE__PATH=/var/tmp/vllm-omni-videos
+
+volumes:
+  # Shared RunPod cache persists model weights. Generated videos remain
+  # ephemeral and must still be downloaded by the client.
+  - name: runpod-hf-cache-us-mo-2
+    path: /root/.cache/huggingface
+
+backends: [runpod]
+regions: [US-MO-2]
+spot_policy: auto
+max_price: 5.00
+max_duration: 2h
+
+retry:
+  on_events: [no-capacity, interruption]
+  duration: 20m
+
+# LTX-2 and Wan2.2-class pipelines fit the initial single-80GB experiment.
+# Override `--gpu` and pass matching vLLM parallel flags after `--` when a
+# model or performance experiment needs two GPUs.
+resources:
+  cpu: 16..
+  memory: 128GB..
+  shm_size: 32GB
+  disk: 250GB..
+  gpu:
+    memory: 80GB..
+    count: 1

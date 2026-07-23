@@ -1,0 +1,60 @@
+type: service
+name: general-vlm
+
+# Model-selectable OpenAI-compatible vLLM endpoint for Transformers vision-
+# language checkpoints. Keep model-specific parsers out of this generic lane;
+# add them after validating the selected model's documented vLLM flags.
+image: vllm/vllm-openai:nightly@sha256:7f2bc168366c77fbd8329368f00310d208531c14ece6c2de31a6611ef99f6ec8
+env:
+  - MODEL
+  - HF_TOKEN=${{ secrets.HF_TOKEN }}
+  - MAX_MODEL_LEN=32768
+
+commands:
+  - |
+    set -eu
+    if [ -z "${MODEL:-}" ]; then
+      echo "MODEL is required, for example org/model" >&2
+      exit 2
+    fi
+
+    exec vllm serve "$MODEL" \
+      --host 0.0.0.0 \
+      --port 8000 \
+      --served-model-name general-vlm \
+      --max-model-len "$MAX_MODEL_LEN" \
+      --gpu-memory-utilization 0.92 ${{ run.args }}
+
+port: 8000
+model: general-vlm
+gateway: false
+auth: true
+
+probes:
+  - type: http
+    url: /health
+    interval: 15s
+    timeout: 10s
+    ready_after: 2
+
+# Keep this profile pooled and uncached: mounting the regional cache would
+# exclude Vast, Lambda, and Verda, while this Transformers lane benefits from
+# broad 96GB capacity more than it benefits from retaining one 72GB checkpoint.
+fleets: [pooled-gpu]
+backends: [vastai, runpod, lambda, verda]
+spot_policy: auto
+max_price: 5.00
+max_duration: 2h
+
+retry:
+  on_events: [no-capacity, interruption]
+  duration: 20m
+
+resources:
+  cpu: x86:16..
+  memory: 128GB..
+  disk: 200GB..
+  shm_size: 16GB
+  gpu:
+    memory: 96GB..
+    count: 1
