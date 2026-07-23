@@ -2,7 +2,7 @@ import os
 import shutil
 import sys
 import tempfile
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import List, TextIO
 
 import yaml
@@ -130,7 +130,7 @@ class EndpointPresetStore:
                     shutil.copytree(source, destination)
                 else:
                     shutil.copy2(source, destination)
-                mapping.local_path = str(Path("assets") / preset.id / destination.name)
+                mapping.local_path = str(PurePosixPath("assets") / preset.id / destination.name)
         except Exception:
             shutil.rmtree(staged_assets, ignore_errors=True)
             raise
