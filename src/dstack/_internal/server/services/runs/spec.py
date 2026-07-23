@@ -11,6 +11,7 @@ from dstack._internal.core.models.runs import LEGACY_REPO_DIR, AnyRunConfigurati
 from dstack._internal.core.models.volumes import InstanceMountPoint
 from dstack._internal.core.services import validate_dstack_resource_name
 from dstack._internal.core.services.diff import ModelDiff, diff_models
+from dstack._internal.core.services.redaction import redact_value
 from dstack._internal.server import settings
 from dstack._internal.server.models import UserModel
 from dstack._internal.server.services.docker import is_valid_docker_volume_target
@@ -61,6 +62,52 @@ _TYPE_SPECIFIC_CONF_UPDATABLE_FIELDS = {
         "commands",
     ],
 }
+
+
+def redact_run_spec_sensitive_values(run_spec: RunSpec) -> None:
+    """
+    Redacts submitted env values and registry credentials before returning
+    a run spec in the API. Keys are kept; pure `${{ secrets.<name> }}`
+    references are preserved since they carry no secret value.
+    """
+    env = run_spec.configuration.env
+    for key, value in env.items():
+        if isinstance(value, str):
+            env[key] = redact_value(value)
+    registry_auth = getattr(run_spec.configuration, "registry_auth", None)
+    if registry_auth is not None and registry_auth.password is not None:
+        _set_model_attr(registry_auth, "password", redact_value(registry_auth.password))
+
+
+def restore_matching_sensitive_values(
+    redacted_run_spec: RunSpec, stored_run_spec: RunSpec, submitted_run_spec: RunSpec
+) -> None:
+    """
+    Restores redacted values in `redacted_run_spec` that the requester provably
+    already knows: env values (and the registry password) equal between the
+    stored spec and the spec the requester just submitted. This keeps
+    plan/apply spec comparison exact for unchanged values without revealing
+    values that differ from the requester's submission.
+    """
+    redacted_env = redacted_run_spec.configuration.env
+    stored_env = stored_run_spec.configuration.env
+    submitted_env = submitted_run_spec.configuration.env
+    for key in redacted_env:
+        if key in stored_env and key in submitted_env and stored_env[key] == submitted_env[key]:
+            redacted_env[key] = stored_env[key]
+    redacted_auth = getattr(redacted_run_spec.configuration, "registry_auth", None)
+    stored_auth = getattr(stored_run_spec.configuration, "registry_auth", None)
+    submitted_auth = getattr(submitted_run_spec.configuration, "registry_auth", None)
+    if redacted_auth is not None and stored_auth is not None and stored_auth == submitted_auth:
+        _set_model_attr(redacted_auth, "password", stored_auth.password)
+
+
+def _set_model_attr(model, field: str, value) -> None:
+    """Sets an attribute on a possibly immutable (response-side) pydantic model."""
+    try:
+        setattr(model, field, value)
+    except TypeError:
+        object.__setattr__(model, field, value)
 
 
 def validate_run_spec_and_set_defaults(

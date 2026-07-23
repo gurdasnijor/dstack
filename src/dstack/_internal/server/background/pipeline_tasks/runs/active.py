@@ -123,7 +123,7 @@ async def process_active_run(context: ActiveContext) -> ActiveResult:
     run_spec = context.run_spec
 
     fleet_id = _detect_fleet_id_from_jobs(run_model)
-    analysis = await _analyze_active_run(run_model)
+    analysis = await _analyze_active_run(run_model, run_spec)
     transition = _get_active_run_transition(run_spec, run_model, analysis)
 
     run_update_map = _build_run_update_map(run_model, run_spec, transition, fleet_id)
@@ -179,11 +179,12 @@ def _detect_fleet_id_from_jobs(run_model: RunModel) -> Optional[uuid.UUID]:
     return None
 
 
-async def _analyze_active_run(run_model: RunModel) -> _RunAnalysis:
+async def _analyze_active_run(run_model: RunModel, run_spec: RunSpec) -> _RunAnalysis:
     run_analysis = _RunAnalysis()
     for replica_num, job_models in group_jobs_by_replica_latest(run_model.jobs):
         replica_analysis = await _analyze_active_run_replica(
             run_model=run_model,
+            run_spec=run_spec,
             replica_num=replica_num,
             job_models=job_models,
         )
@@ -193,12 +194,14 @@ async def _analyze_active_run(run_model: RunModel) -> _RunAnalysis:
 
 async def _analyze_active_run_replica(
     run_model: RunModel,
+    run_spec: RunSpec,
     replica_num: int,
     job_models: List[JobModel],
 ) -> _ReplicaAnalysis:
     contributed_statuses: Set[RunStatus] = set()
     termination_reasons: Set[RunTerminationReason] = set()
     needs_retry = False
+    replica_pending_registration = _is_service_replica_pending_registration(run_spec, job_models)
 
     for job_model in job_models:
         if _job_is_done_or_finishing_done(job_model):
@@ -210,6 +213,11 @@ async def _analyze_active_run_replica(
 
         replica_status = _get_non_terminal_replica_status(job_model)
         if replica_status is not None:
+            if replica_status == RunStatus.RUNNING and replica_pending_registration:
+                # A service replica whose processes run but which the proxy
+                # cannot route to yet must not make the run externally `running`.
+                # The run becomes `running` only when its URL is routable.
+                replica_status = RunStatus.PROVISIONING
             contributed_statuses.add(replica_status)
             continue
 
@@ -252,6 +260,22 @@ def _apply_replica_analysis(
 
     if not replica_analysis.needs_retry:
         analysis.contributed_statuses.update(replica_analysis.contributed_statuses)
+
+
+def _is_service_replica_pending_registration(
+    run_spec: RunSpec, job_models: List[JobModel]
+) -> bool:
+    """
+    Returns True when a service replica runs but is not yet registered to
+    receive requests, i.e. the advertised service URL cannot be routed to it.
+    Registration is tracked on the replica's job 0 (see `_maybe_register_replica`).
+    """
+    if run_spec.configuration.type != "service":
+        return False
+    job0 = next((j for j in job_models if j.job_num == 0), None)
+    if job0 is None:
+        return False
+    return job0.status == JobStatus.RUNNING and not job0.registered
 
 
 def _job_is_done_or_finishing_done(job_model: JobModel) -> bool:

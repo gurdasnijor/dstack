@@ -261,6 +261,7 @@ class TestRunActiveWorker:
             last_processed_at=run.last_processed_at,
             replica_num=1,
             job_provisioning_data=get_job_provisioning_data(),
+            registered=True,
         )
         lock_run(run)
         await session.commit()
@@ -599,6 +600,7 @@ class TestRunActiveWorker:
             session=session,
             run=run,
             status=JobStatus.RUNNING,
+            registered=True,
         )
         lock_run(run)
         await session.commit()
@@ -643,6 +645,7 @@ class TestRunActiveWorker:
             run=run,
             status=JobStatus.RUNNING,
             replica_num=0,
+            registered=True,
         )
         lock_run(run)
         await session.commit()
@@ -695,12 +698,14 @@ class TestRunActiveWorker:
             run=run,
             status=JobStatus.RUNNING,
             replica_num=0,
+            registered=True,
         )
         await create_job(
             session=session,
             run=run,
             status=JobStatus.RUNNING,
             replica_num=1,
+            registered=True,
         )
         lock_run(run)
         await session.commit()
@@ -853,6 +858,7 @@ class TestRunActiveWorker:
             run=run,
             status=JobStatus.RUNNING,
             deployment_num=0,
+            registered=True,
         )
         lock_run(run)
         await session.commit()
@@ -1020,6 +1026,7 @@ class TestRunActiveWorker:
             run=run,
             status=JobStatus.RUNNING,
             replica_num=0,
+            registered=True,
         )
         # Replica belonging to a removed group "old" — manually set job_spec_data
         old_group_job = await create_job(
@@ -1027,6 +1034,7 @@ class TestRunActiveWorker:
             run=run,
             status=JobStatus.RUNNING,
             replica_num=1,
+            registered=True,
         )
         # Patch the job spec to have replica_group="old"
         old_spec = get_job_spec(old_group_job)

@@ -62,6 +62,7 @@ from dstack._internal.server.services.jobs import (
     get_job_spec,
     get_jobs_from_run_spec,
     job_model_to_job_submission,
+    redact_job_spec_sensitive_values,
     remove_job_spec_sensitive_info,
 )
 from dstack._internal.server.services.locking import get_locker, string_to_lock_id
@@ -79,6 +80,8 @@ from dstack._internal.server.services.runs.service_router_worker_sync import (
 from dstack._internal.server.services.runs.spec import (
     can_update_run_spec,
     check_can_update_run_spec,
+    redact_run_spec_sensitive_values,
+    restore_matching_sensitive_values,
     validate_run_spec_and_set_defaults,
 )
 from dstack._internal.server.services.secrets import get_project_secrets_mapping
@@ -551,19 +554,32 @@ async def get_plan(
     current_resource = None
     action = ApplyAction.CREATE
     if effective_run_spec.run_name is not None:
-        current_resource = await get_run_by_name(
+        current_resource_model = await get_run_model_by_name(
             session=session,
             project=project,
             run_name=effective_run_spec.run_name,
         )
-        if current_resource is not None:
+        if current_resource_model is not None:
+            current_resource = run_model_to_run(
+                current_resource_model, return_in_api=True, include_job_connection_info=True
+            )
+            # The update check must compare the stored cleartext spec, not the
+            # API-redacted one, or unchanged sensitive values would look changed.
+            # Parsed into the request-side model class for diffing.
+            current_stored_run_spec = RunSpec.parse_obj(
+                get_run_spec(current_resource_model).dict()
+            )
             # For backward compatibility (current_resource may has been submitted before
             # some fields, e.g., CPUSpec.arch, gpu.vendor were added)
+            _set_run_resources_defaults(current_stored_run_spec)
             _set_run_resources_defaults(current_resource.run_spec)
             if not current_resource.status.is_finished() and can_update_run_spec(
-                current_resource.run_spec, effective_run_spec
+                current_stored_run_spec, effective_run_spec
             ):
                 action = ApplyAction.UPDATE
+            restore_matching_sensitive_values(
+                current_resource.run_spec, current_stored_run_spec, effective_run_spec
+            )
 
     job_plans = await get_job_plans(
         session=session,
@@ -626,16 +642,24 @@ async def apply_plan(
         )
     current_resource = run_model_to_run(current_resource_model, return_in_api=True)
 
+    # The update check must compare the stored cleartext spec, not the
+    # API-redacted one, or unchanged sensitive values would look changed.
+    # Parsed into the request-side model class for diffing.
+    current_stored_run_spec = RunSpec.parse_obj(get_run_spec(current_resource_model).dict())
     # For backward compatibility (current_resource may has been submitted before
     # some fields, e.g., CPUSpec.arch, gpu.vendor were added)
+    _set_run_resources_defaults(current_stored_run_spec)
     _set_run_resources_defaults(current_resource.run_spec)
     try:
-        spec_diff = check_can_update_run_spec(current_resource.run_spec, run_spec)
+        spec_diff = check_can_update_run_spec(current_stored_run_spec, run_spec)
     except ServerClientError:
         # The except is only needed to raise an appropriate error if run is active
         if not current_resource.status.is_finished():
             raise ServerClientError("Cannot override active run. Stop the run first.")
         raise
+    # Match the restore performed by get_plan so the client-provided
+    # current_resource compares equal for unchanged sensitive values.
+    restore_matching_sensitive_values(current_resource.run_spec, current_stored_run_spec, run_spec)
     if not force:
         if plan.current_resource is not None:
             _set_run_resources_defaults(plan.current_resource.run_spec)
@@ -979,12 +1003,16 @@ def run_model_to_run(
     if run_model.service_spec is not None:
         service_spec = ServiceSpec.__response__.parse_raw(run_model.service_spec)
 
-    status_message = _get_run_status_message(run_model, job_models=job_models)
+    status_message = _get_run_status_message(run_model, job_models=job_models, run_spec=run_spec)
     error = _get_run_error(run_model)
     fleet = _get_run_fleet(run_model)
     next_triggered_at = None
     if not run_model.status.is_finished():
         next_triggered_at = _get_next_triggered_at(run_spec)
+    if return_in_api and not include_sensitive:
+        # Submitted env values and registry credentials must never leave the
+        # server through the API. Key names are kept; values are redacted.
+        redact_run_spec_sensitive_values(run_spec)
     run = Run(
         id=run_model.id,
         project_name=run_model.project.name,
@@ -1062,6 +1090,8 @@ def _get_run_jobs_with_submissions(
                 job_spec = get_job_spec(job_model)
                 if not include_sensitive:
                     remove_job_spec_sensitive_info(job_spec)
+                    if return_in_api:
+                        redact_job_spec_sensitive_values(job_spec)
                 job_connection_info: Optional[JobConnectionInfo] = None
                 if include_job_connection_info and job_model.status == JobStatus.RUNNING:
                     job_connection_info = get_job_connection_info(job_model, run_spec)
@@ -1075,7 +1105,9 @@ def _get_run_jobs_with_submissions(
     return jobs
 
 
-def _get_run_status_message(run_model: RunModel, job_models: List[JobModel]) -> str:
+def _get_run_status_message(
+    run_model: RunModel, job_models: List[JobModel], run_spec: Optional[RunSpec] = None
+) -> str:
     if len(job_models) == 0:
         return run_model.status.value
 
@@ -1090,6 +1122,16 @@ def _get_run_status_message(run_model: RunModel, job_models: List[JobModel]) -> 
     if all(job_models[-1].status == JobStatus.PULLING for job_models in job_models_grouped_by_job):
         # Show `pulling`` if last job submission of all jobs is pulling
         return "pulling"
+
+    if (
+        run_spec is not None
+        and run_spec.configuration.type == "service"
+        and not run_model.status.is_finished()
+        and _service_is_pending_registration(job_models_grouped_by_job)
+    ):
+        # The service's processes run, but the proxy cannot route to any
+        # replica yet, so the advertised URL is not ready.
+        return "registering"
 
     if run_model.status in [RunStatus.SUBMITTED, RunStatus.PENDING]:
         # Show `retrying` if any job caused the run to retry
@@ -1106,6 +1148,20 @@ def _get_run_status_message(run_model: RunModel, job_models: List[JobModel]) -> 
                 return "retrying"
 
     return run_model.status.value
+
+
+def _service_is_pending_registration(job_models_grouped_by_job: List[List[JobModel]]) -> bool:
+    """
+    True when at least one replica's job 0 runs unregistered and no replica's
+    job 0 is registered, i.e. the run has running processes but no routable
+    replica. Registration is tracked on job 0 (see `_maybe_register_replica`).
+    """
+    latest_job0_submissions = [
+        job_models[-1] for job_models in job_models_grouped_by_job if job_models[-1].job_num == 0
+    ]
+    if any(j.registered for j in latest_job0_submissions):
+        return False
+    return any(j.status == JobStatus.RUNNING and not j.registered for j in latest_job0_submissions)
 
 
 def _get_last_job_termination_reason(job_models: List[JobModel]) -> Optional[JobTerminationReason]:

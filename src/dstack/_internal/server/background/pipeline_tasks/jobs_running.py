@@ -1035,11 +1035,13 @@ async def _apply_process_result(
             session.add_all(result.new_probe_models)
 
         # Set RunModel.skip_min_processing_interval for fast run transition to RUNNING status.
+        # Service runs stay PROVISIONING until a replica registers, so replica
+        # registration must also trigger fast run processing.
         # Cross-pipeline write is ok: worst case skip_min_processing_interval is overridden.
         if (
             result.job_update_map.get("status") == JobStatus.RUNNING
-            and job_model.run.status != RunStatus.RUNNING
-        ):
+            or result.job_update_map.get("registered")
+        ) and job_model.run.status != RunStatus.RUNNING:
             await session.execute(
                 update(RunModel)
                 .where(RunModel.id == job_model.run_id)

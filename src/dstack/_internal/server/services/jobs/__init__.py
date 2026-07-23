@@ -32,6 +32,7 @@ from dstack._internal.core.models.runs import (
     RunSpec,
 )
 from dstack._internal.core.models.volumes import Volume, VolumeMountPoint, VolumeStatus
+from dstack._internal.core.services.redaction import redact_value
 from dstack._internal.server import settings
 from dstack._internal.server.models import (
     InstanceModel,
@@ -509,6 +510,20 @@ async def get_job_attached_volumes(
 
 def remove_job_spec_sensitive_info(spec: JobSpec):
     spec.ssh_key = None
+
+
+def redact_job_spec_sensitive_values(spec: JobSpec) -> None:
+    """
+    Redacts submitted env values and registry credentials before returning
+    a job spec in the API. Keys are kept; pure `${{ secrets.<name> }}`
+    references are preserved since they carry no secret value.
+    """
+    spec.env = {key: redact_value(value) for key, value in spec.env.items()}
+    if spec.registry_auth is not None and spec.registry_auth.password is not None:
+        spec.registry_auth = RegistryAuth(
+            username=spec.registry_auth.username,
+            password=redact_value(spec.registry_auth.password),
+        )
 
 
 def get_job_connection_info(job_model: JobModel, run_spec: RunSpec) -> JobConnectionInfo:

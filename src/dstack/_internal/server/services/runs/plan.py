@@ -54,6 +54,7 @@ from dstack._internal.server.services.jobs import (
     get_jobs_from_run_spec,
     is_master_job,
     is_multinode_job,
+    redact_job_spec_sensitive_values,
     remove_job_spec_sensitive_info,
 )
 from dstack._internal.server.services.offers import (
@@ -974,6 +975,9 @@ def _get_job_plan(
     job_offers.extend(offer for _, offer in backend_offers)
     job_offers.sort(key=lambda offer: not offer.availability.is_available())
     remove_job_spec_sensitive_info(job.job_spec)
+    # Job plans are returned in the API. Env values and registry credentials
+    # (interpolated from project secrets by the configurator) must not leak.
+    redact_job_spec_sensitive_values(job.job_spec)
     return JobPlan(
         job_spec=job.job_spec,
         offers=job_offers[: (max_offers or _DEFAULT_MAX_OFFERS)],
