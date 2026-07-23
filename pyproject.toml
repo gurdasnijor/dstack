@@ -34,6 +34,9 @@ dependencies = [
     "filelock",
     "psutil",
     "gpuhunt==0.1.27",
+    # Pinned exactly: the deterministic endpoint `inspect_model` stage records
+    # and depends on this version's normalized Hub metadata shape.
+    "huggingface_hub==1.24.0",
     "argcomplete>=3.5.0",
     "ignore-python>=0.2.0",
     "orjson",
