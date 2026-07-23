@@ -1,3 +1,4 @@
+import base64
 import json
 from datetime import datetime
 from typing import AsyncIterator, Generator
@@ -12,7 +13,7 @@ from dstack._internal.proxy.gateway.repo.repo import GatewayProxyRepo
 from dstack._internal.proxy.lib.auth import BaseProxyAuthProvider
 from dstack._internal.proxy.lib.models import ChatModel, EndpointModel, OpenAIChatModelFormat
 from dstack._internal.proxy.lib.repo import BaseProxyRepo
-from dstack._internal.proxy.lib.routers.model_proxy import router
+from dstack._internal.proxy.lib.routers.model_proxy import assets_router, router
 from dstack._internal.proxy.lib.schemas.model_proxy import (
     ChatCompletionsChoice,
     ChatCompletionsChunk,
@@ -120,6 +121,7 @@ def make_endpoint_model(
 def make_http_client(repo: BaseProxyRepo, auth: BaseProxyAuthProvider) -> httpx.AsyncClient:
     app = FastAPI()
     app.state.proxy_dependency_injector = ProxyTestDependencyInjector(repo=repo, auth=auth)
+    app.include_router(assets_router, prefix="/proxy/models")
     app.include_router(router, prefix="/proxy/models")
     return httpx.AsyncClient(transport=httpx.ASGITransport(app=app))
 
@@ -271,7 +273,8 @@ async def test_chat_completions_stream(mock_chat_client) -> None:
 
 
 @pytest.mark.asyncio
-async def test_image_generation_native_and_chat_projection() -> None:
+async def test_image_generation_native_and_chat_projection(tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("DSTACK_PROXY_ASSETS_DIR", str(tmp_path))
     auth = ProxyTestAuthProvider({"test-proj": {"token"}})
     repo = GatewayProxyRepo()
     await repo.set_project(make_project("test-proj"))
@@ -288,11 +291,14 @@ async def test_image_generation_native_and_chat_projection() -> None:
     )
     upstream_requests = []
 
+    image_content = b"\x89PNG\r\n\x1a\nimage"
+    encoded_image = base64.b64encode(image_content).decode()
+
     async def upstream(request: httpx.Request) -> httpx.Response:
         upstream_requests.append(request)
         return httpx.Response(
             200,
-            json={"created": 1, "data": [{"b64_json": "aW1hZ2U="}]},
+            json={"created": 1, "data": [{"b64_json": encoded_image}]},
         )
 
     upstream_client = httpx.AsyncClient(
@@ -324,20 +330,29 @@ async def test_image_generation_native_and_chat_projection() -> None:
     await upstream_client.aclose()
 
     assert native_response.status_code == 200
-    assert native_response.json()["data"][0]["b64_json"] == "aW1hZ2U="
+    assert native_response.json()["data"][0]["b64_json"] == encoded_image
     assert upstream_requests[0].url.path == "/v1/images/generations"
     assert upstream_requests[0].content == (
         b'{"model":"test-image-model","prompt":"A copper teapot","size":"1024x1024"}'
     )
     assert upstream_requests[1].url.path == "/v1/images/generations"
     assert chat_response.status_code == 200
-    assert chat_response.json()["choices"][0]["message"]["content"] == (
-        "![Generated image](data:image/png;base64,aW1hZ2U=)"
+    content = chat_response.json()["choices"][0]["message"]["content"]
+    assert content.startswith(
+        "![Generated image](http://test-host/proxy/models/test-proj/assets/dstack_asset_"
     )
+    assert content.endswith(")")
+    asset_response = await client.get(
+        content.removeprefix("![Generated image](").removesuffix(")")
+    )
+    assert asset_response.status_code == 200
+    assert asset_response.content == image_content
+    assert asset_response.headers["content-type"] == "image/png"
 
 
 @pytest.mark.asyncio
-async def test_image_chat_projection_splits_large_stream_events() -> None:
+async def test_image_chat_projection_splits_large_stream_events(tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("DSTACK_PROXY_ASSETS_DIR", str(tmp_path))
     auth = ProxyTestAuthProvider({"test-proj": {"token"}})
     repo = GatewayProxyRepo()
     await repo.set_project(make_project("test-proj"))
@@ -352,7 +367,8 @@ async def test_image_chat_projection_splits_large_stream_events() -> None:
             request_path="/v1/images/generations",
         )
     )
-    encoded_image = "a" * (256 * 1024)
+    image_content = b"\x89PNG\r\n\x1a\n" + b"a" * (256 * 1024)
+    encoded_image = base64.b64encode(image_content).decode()
 
     async def upstream(request: httpx.Request) -> httpx.Response:
         return httpx.Response(
@@ -389,7 +405,71 @@ async def test_image_chat_projection_splits_large_stream_events() -> None:
     content = "".join(
         json.loads(event)["choices"][0]["delta"].get("content", "") for event in events
     )
-    assert content == f"![Generated image](data:image/png;base64,{encoded_image})"
+    assert content.startswith(
+        "![Generated image](http://test-host/proxy/models/test-proj/assets/dstack_asset_"
+    )
+    asset_response = await client.get(
+        content.removeprefix("![Generated image](").removesuffix(")")
+    )
+    assert asset_response.content == image_content
+
+
+@pytest.mark.asyncio
+async def test_image_chat_projection_uses_configured_public_base_url(
+    tmp_path, monkeypatch
+) -> None:
+    monkeypatch.setenv("DSTACK_PROXY_ASSETS_DIR", str(tmp_path))
+    auth = ProxyTestAuthProvider({"test-proj": {"token"}})
+    repo = GatewayProxyRepo()
+    await repo.set_project(make_project("test-proj"))
+    await repo.set_service(make_service("test-proj", "image-service"))
+    await repo.set_model(
+        make_endpoint_model(
+            "test-proj",
+            "test-image-model",
+            "image-service",
+            modality="image-generation",
+            api="images_generations",
+            request_path="/v1/images/generations",
+        )
+    )
+
+    async def upstream(request: httpx.Request) -> httpx.Response:
+        image_content = b"\x89PNG\r\n\x1a\nimage"
+        return httpx.Response(
+            200,
+            json={
+                "created": 1,
+                "data": [{"b64_json": base64.b64encode(image_content).decode()}],
+            },
+        )
+
+    upstream_client = httpx.AsyncClient(
+        transport=httpx.MockTransport(upstream),
+        base_url="http://image-service",
+    )
+    client = make_http_client(repo, auth)
+    with patch(
+        "dstack._internal.proxy.lib.routers.model_proxy.get_service_replica_client",
+        new=AsyncMock(return_value=upstream_client),
+    ):
+        response = await client.post(
+            "http://test-host/proxy/models/test-proj/chat/completions",
+            headers={
+                "Authorization": "Bearer token",
+                "X-Dstack-Public-Base-URL": "https://dstack.example/proxy/models/test-proj",
+            },
+            json={
+                "model": "test-image-model",
+                "messages": [{"role": "user", "content": "A glass forest"}],
+            },
+        )
+    await upstream_client.aclose()
+
+    content = response.json()["choices"][0]["message"]["content"]
+    assert content.startswith(
+        "![Generated image](https://dstack.example/proxy/models/test-proj/assets/dstack_asset_"
+    )
 
 
 @pytest.mark.asyncio
@@ -594,7 +674,10 @@ async def test_video_generation_wraps_upstream_id_for_status_and_content() -> No
 
 
 @pytest.mark.asyncio
-async def test_synchronous_video_is_exposed_as_completed_video_resource() -> None:
+async def test_synchronous_video_is_exposed_as_completed_video_resource(
+    tmp_path, monkeypatch
+) -> None:
+    monkeypatch.setenv("DSTACK_PROXY_ASSETS_DIR", str(tmp_path))
     auth = ProxyTestAuthProvider({"test-proj": {"token"}})
     repo = GatewayProxyRepo()
     await repo.set_project(make_project("test-proj"))
@@ -657,7 +740,8 @@ async def test_synchronous_video_is_exposed_as_completed_video_resource() -> Non
 
 
 @pytest.mark.asyncio
-async def test_synchronous_video_has_chat_projection() -> None:
+async def test_synchronous_video_has_chat_projection(tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("DSTACK_PROXY_ASSETS_DIR", str(tmp_path))
     auth = ProxyTestAuthProvider({"test-proj": {"token"}})
     repo = GatewayProxyRepo()
     await repo.set_project(make_project("test-proj"))
@@ -692,7 +776,10 @@ async def test_synchronous_video_has_chat_projection() -> None:
     ):
         chat_response = await client.post(
             "http://test-host/proxy/models/test-proj/chat/completions",
-            headers=headers,
+            headers={
+                **headers,
+                "X-Dstack-Public-Base-URL": "https://dstack.example/proxy/models/test-proj",
+            },
             json={
                 "model": "test-video-model",
                 "messages": [{"role": "user", "content": "A glass forest"}],
@@ -702,7 +789,18 @@ async def test_synchronous_video_has_chat_projection() -> None:
     await upstream_client.aclose()
 
     assert chat_response.status_code == 200
-    assert content == "[Generated video](data:video/mp4;base64,Z2VuZXJhdGVkLXZpZGVv)"
+    assert content.startswith(
+        "[Generated video](https://dstack.example/proxy/models/test-proj/assets/dstack_asset_"
+    )
+    asset_id = content.removesuffix(")").rsplit("/", 1)[1]
+    asset_response = await client.get(f"http://test-host/proxy/models/test-proj/assets/{asset_id}")
+    assert asset_response.status_code == 200
+    assert asset_response.content == b"generated-video"
+    assert asset_response.headers["content-type"] == "video/mp4"
+    wrong_project_response = await client.get(
+        f"http://test-host/proxy/models/other-project/assets/{asset_id}"
+    )
+    assert wrong_project_response.status_code == 404
 
 
 @pytest.mark.asyncio
