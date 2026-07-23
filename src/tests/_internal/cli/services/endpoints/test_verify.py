@@ -124,6 +124,33 @@ class TestBuildVerifiedEndpointPreset:
         assert preset.service.probes[0].url == "/health"
         assert preset.validations[0].benchmark.workload.api == "images_generations"
 
+    def test_tightens_gpu_floor_to_successfully_validated_memory(self):
+        run = get_running_image_service_run()
+        validated_gpu = (
+            run.jobs[0]
+            .job_submissions[0]
+            .job_runtime_data.offer.instance.resources.gpus[0]
+        )
+        validated_gpu.memory_mib = 40 * 1024
+
+        preset = build_verified_endpoint_preset(
+            run=run,
+            endpoint_configuration=EndpointConfiguration(
+                name="juggernaut-build",
+                model={
+                    "repo": "eniora/Juggernaut_XL_Ragnarok",
+                    "source": "huggingface",
+                    "modality": "image-generation",
+                },
+                env=["HF_TOKEN"],
+            ),
+            report=get_successful_image_report(run),
+        )
+
+        assert preset.service.resources.gpu.memory.min == 40
+        assert preset.service.resources.gpu.memory.max is None
+        assert preset.validations[0].replicas[0].resources[0].gpu.memory.min == 40
+
     def test_rejects_non_chat_service_without_probe(self):
         run = get_running_image_service_run()
         run.run_spec.configuration.probes = None

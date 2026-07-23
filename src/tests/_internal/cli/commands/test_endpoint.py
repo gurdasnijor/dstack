@@ -91,6 +91,43 @@ class TestEndpointPresetLocalCommands:
         assert exit_code == 0
         assert "Operation interrupted by user" in capsys.readouterr().out
 
+    def test_create_reports_exact_model_before_base(self, tmp_path, capsys):
+        configuration_path = tmp_path / "endpoint.dstack.yml"
+        configuration_path.write_text(
+            "type: endpoint\nname: juggernaut\nmodel: eniora/Juggernaut_XL_Ragnarok\n"
+        )
+        preset = get_endpoint_preset().copy(
+            update={
+                "base": "stabilityai/stable-diffusion-xl-base-1.0",
+                "model": "eniora/Juggernaut_XL_Ragnarok",
+                "api_model_name": "eniora/Juggernaut_XL_Ragnarok",
+            }
+        )
+        result = SimpleNamespace(
+            preset=preset,
+            path=tmp_path / "preset.yaml",
+            final_run_name="juggernaut-build-1",
+        )
+
+        with (
+            patch("dstack.api.Client.from_config"),
+            patch(
+                "dstack._internal.cli.commands.endpoint.create_endpoint_preset",
+                return_value=result,
+            ),
+        ):
+            assert (
+                run_dstack_cli(
+                    ["endpoint", "preset", "create", "-f", str(configuration_path)],
+                    home_dir=tmp_path,
+                )
+                == 0
+            )
+
+        output = " ".join(capsys.readouterr().out.split())
+        assert "for eniora/Juggernaut_XL_Ragnarok" in output
+        assert "(base: stabilityai/stable-diffusion-xl-base-1.0)" in output
+
     def test_lists_and_deletes_preset_without_api_client(self, tmp_path, capsys):
         preset = get_endpoint_preset()
         EndpointPresetStore(tmp_path / ".dstack" / "presets").save(preset)

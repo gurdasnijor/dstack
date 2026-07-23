@@ -320,14 +320,13 @@ def _build_service_router_config(
 def _get_service_spec(
     configuration: ServiceConfiguration, service_url: str, model_url: str
 ) -> ServiceSpec:
-    service_spec = ServiceSpec(url=service_url)
+    service_spec = ServiceSpec(url=service_url, options=get_service_options(configuration))
     if configuration.model is not None:
         service_spec.model = ServiceModelSpec(
             name=configuration.model.name,
             base_url=model_url,
             type=configuration.model.type,
         )
-        service_spec.options = get_service_options(configuration)
     return service_spec
 
 

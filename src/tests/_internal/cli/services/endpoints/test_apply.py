@@ -12,6 +12,7 @@ from dstack._internal.cli.services.endpoints.apply import (
 )
 from dstack._internal.cli.services.endpoints.verify import build_verified_endpoint_preset
 from dstack._internal.core.models.instances import InstanceAvailability
+from dstack._internal.core.models.services import endpoint_metadata_from_tags
 from tests._internal.cli.endpoint_presets import (
     get_endpoint_preset,
     get_running_image_service_run,
@@ -108,6 +109,16 @@ class TestBuildService:
         assert service.env["HF_TOKEN"] == "token"
         assert [fleet.format() for fleet in service.fleets] == ["gpu-fleet"]
         assert service.max_price == 1
+        assert service.resources.gpu.memory.min == 48
+        assert service.resources.gpu.memory.max == 48
+        metadata = endpoint_metadata_from_tags(service.tags)
+        assert metadata is not None
+        assert metadata.base == "Qwen/Qwen3.5-27B"
+        assert metadata.model == "community/Qwen3.5-27B-GPTQ-Int4"
+        assert metadata.api_model_name == "Qwen/Qwen3.5-27B"
+        assert metadata.modality == "text-generation"
+        assert metadata.api == "chat_completions"
+        assert metadata.context_length == 32768
 
 
 class TestSelectPlan:

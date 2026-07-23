@@ -1,6 +1,6 @@
 import hashlib
 import json
-from typing import Any
+from typing import Any, cast
 
 import gpuhunt
 
@@ -14,7 +14,7 @@ from dstack._internal.core.models.configurations import ServiceConfiguration
 from dstack._internal.core.models.envs import EnvSentinel
 from dstack._internal.core.models.instances import Resources
 from dstack._internal.core.models.profiles import ProfileParams
-from dstack._internal.core.models.resources import ResourcesSpec
+from dstack._internal.core.models.resources import Memory, Range, ResourcesSpec
 from dstack._internal.utils.common import format_mib_as_gb, get_current_datetime
 
 
@@ -41,6 +41,7 @@ def build_endpoint_preset(
         benchmark=benchmark,
     )
     set_service_gpu_vendors_from_validations(service, [validation])
+    tighten_service_gpu_requirements_from_validations(service, [validation])
     return EndpointPreset(
         base=base_model,
         id=make_endpoint_preset_id(
@@ -172,10 +173,57 @@ def set_service_gpu_vendors_from_validations(
             group_resources.gpu.vendor = validation_vendor
 
 
+def tighten_service_gpu_requirements_from_validations(
+    service: ServiceConfiguration,
+    validations: list[EndpointPresetValidation],
+) -> None:
+    """Prevent a preset from advertising a GPU floor below successful evidence."""
+    for group_num, group in enumerate(service.replica_groups):
+        resources = group.resources
+        if resources is None or not _requires_gpu(resources):
+            continue
+        validated_gpus = [
+            validation_resources.gpu
+            for validation in validations
+            for validation_resources in validation.replicas[group_num].resources
+            if validation_resources.gpu is not None
+            and validation_resources.gpu.count.min is not None
+            and validation_resources.gpu.count.min > 0
+        ]
+        if not validated_gpus:
+            continue
+        validated_gpu = min(
+            validated_gpus,
+            key=lambda gpu: (
+                cast(int, gpu.count.min)
+                * int(cast(Memory, gpu.memory.min) if gpu.memory is not None else 0),
+                cast(int, gpu.count.min),
+            ),
+        )
+        validated_count = cast(int, validated_gpu.count.min)
+        group_resources = _get_service_group_resources(service, group_num)
+        if group_resources.gpu is None:
+            continue
+        _raise_range_floor(group_resources.gpu.count, validated_count)
+        if validated_gpu.memory is not None and validated_gpu.memory.min is not None:
+            validated_memory = cast(Memory, validated_gpu.memory.min)
+            if group_resources.gpu.memory is None:
+                group_resources.gpu.memory = Range[Memory](min=validated_memory, max=None)
+            else:
+                _raise_range_floor(group_resources.gpu.memory, validated_memory)
+
+
 def _env_item_to_preset_data(key: str, value: str | EnvSentinel) -> str:
     if isinstance(value, EnvSentinel):
         return key
     return f"{key}={value}"
+
+
+def _raise_range_floor(value: Range, floor: int | float) -> None:
+    if value.min is None or value.min < floor:
+        value.min = floor
+    if value.max is not None and value.max < floor:
+        value.max = None
 
 
 def _get_validation_group_gpu_vendor(

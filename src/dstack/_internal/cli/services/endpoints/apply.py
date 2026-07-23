@@ -11,12 +11,19 @@ from dstack._internal.cli.services.endpoints.output import (
     format_endpoint_benchmark,
     format_endpoint_context_length,
 )
+from dstack._internal.cli.services.endpoints.presets import (
+    tighten_service_gpu_requirements_from_validations,
+)
 from dstack._internal.cli.services.endpoints.store import EndpointPresetStore
 from dstack._internal.core.errors import CLIError
 from dstack._internal.core.models.configurations import ServiceConfiguration
 from dstack._internal.core.models.profiles import ProfileParams
 from dstack._internal.core.models.repos.base import Repo
 from dstack._internal.core.models.runs import RunPlan
+from dstack._internal.core.models.services import (
+    ServiceEndpointMetadata,
+    endpoint_metadata_to_tags,
+)
 from dstack.api import Client
 
 
@@ -150,6 +157,22 @@ def _build_service(
         value = getattr(configuration, field)
         if value is not None:
             setattr(service, field, value)
+    tighten_service_gpu_requirements_from_validations(service, preset.validations)
+    workload = preset.validations[0].benchmark.workload
+    assert preset.api_model_name is not None
+    metadata = ServiceEndpointMetadata(
+        base=preset.base,
+        model=preset.model,
+        api_model_name=preset.api_model_name,
+        source=preset.source,
+        revision=preset.revision,
+        modality=preset.modality,
+        context_length=preset.context_length,
+        api=workload.api,
+        request_path=workload.request_path,
+        output_unit=workload.output_unit,
+    )
+    service.tags = {**(service.tags or {}), **endpoint_metadata_to_tags(metadata)}
     return service
 
 

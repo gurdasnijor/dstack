@@ -370,6 +370,27 @@ class TestBuildPrompt:
         assert "- model_revision: fe71bb49" in prompt
         assert "- requested_modality: image-generation" in prompt
 
+    def test_requires_service_first_fast_path_and_safe_process_control(self):
+        prompt = _build_prompt(
+            configuration=EndpointConfiguration(
+                name="juggernaut",
+                model={
+                    "repo": "eniora/Juggernaut_XL_Ragnarok",
+                    "modality": "image-generation",
+                },
+            ),
+            build_name="juggernaut-build",
+            allowed_fleets=("gpu-fleet",),
+        )
+
+        assert "Submit the candidate final service directly" in prompt
+        assert "Do not load the same model once in a task and again in a" in prompt
+        assert "`pkill -f`, `pgrep -f`, or `killall`" in prompt
+        assert "Retry an identical submission at most once" in prompt
+        assert "skip optional CUDA extensions" in prompt
+        assert "POSIX `. file`" in prompt
+        assert "instead of `source`" in prompt
+
 
 class TestCleanupRuns:
     @pytest.mark.asyncio

@@ -108,7 +108,12 @@ $ dstack endpoint preset create -f endpoint.dstack.yml
 
 </div>
 
-This command executes entirely locally and uses the locally installed `claude` CLI along with `dstack`'s bundled skills. The agent uses a `dstack` task to find the best serving configuration for the available fleet offers. It then submits the configuration as a `dstack` service for a final benchmark. The validated preset is saved locally under `~/.dstack/presets`.
+This command executes entirely locally and uses the locally installed `claude`
+CLI along with `dstack`'s bundled skills. When model metadata and runtime
+documentation establish a complete serving recipe, the agent submits and
+validates the candidate service directly. It uses an exploratory `dstack` task
+only when an important runtime assumption requires interactive diagnosis. The
+validated preset is saved locally under `~/.dstack/presets`.
 
 ??? info "Claude configuration"
     Preset creation uses the existing `claude` login. To use an Anthropic API key instead, set:
@@ -141,7 +146,12 @@ $ dstack endpoint preset list
 
 </div>
 
-Presets are grouped by base model. Each preset contains an optimized serving configuration for a specific model variant, along with its hardware requirements, validation, and benchmark data.
+Presets are grouped by base model. Each preset contains an optimized serving
+configuration for a specific model variant, along with its hardware
+requirements, validation, and benchmark data. Its GPU count and memory floors
+cannot be lower than the least demanding hardware on which the final service
+was successfully validated. Backend and instance selection remain dynamic
+within that validated envelope.
 
 Pass `-v` to include validation resources and all benchmark metrics, or `--json`
 to output complete preset objects.
@@ -178,6 +188,13 @@ Non-chat endpoints expose the serving runtime's native HTTP API through the
 normal dstack service URL. For example, a vLLM-Omni image preset uses
 `POST /v1/images/generations`; the exact path and measured workload are shown by
 `dstack endpoint preset list -v` or `dstack endpoint preset get ID`.
+
+Applying a preset also carries its validated capability metadata into the run.
+The run API exposes it under `service.options.endpoint`, including the exact
+model and revision, source, modality, API identifier, request path, output unit,
+and base model. The CLI also reconstructs this object from the submitted run
+metadata when connected to an older server, so `dstack ps --json` has a stable
+shape during server upgrades.
 
 ## Delete presets
 
