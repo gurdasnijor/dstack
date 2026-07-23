@@ -349,10 +349,22 @@ async def test_image_generation_native_and_chat_projection(tmp_path, monkeypatch
     assert asset_response.content == image_content
     assert asset_response.headers["content-type"] == "image/png"
     assert asset_response.headers["access-control-allow-origin"] == "*"
+    assert asset_response.headers["access-control-allow-private-network"] == "true"
     assert asset_response.headers["access-control-expose-headers"] == (
         "Content-Length, Content-Type"
     )
     assert asset_response.headers["x-content-type-options"] == "nosniff"
+    preflight_response = await client.options(
+        content.removeprefix("![Generated image](").removesuffix(")"),
+        headers={
+            "Origin": "https://ai.example",
+            "Access-Control-Request-Method": "GET",
+            "Access-Control-Request-Private-Network": "true",
+        },
+    )
+    assert preflight_response.status_code == 204
+    assert preflight_response.headers["access-control-allow-methods"] == "GET, OPTIONS"
+    assert preflight_response.headers["access-control-allow-private-network"] == "true"
 
 
 @pytest.mark.asyncio
