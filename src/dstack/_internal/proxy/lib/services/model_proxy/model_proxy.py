@@ -8,16 +8,19 @@ from dstack._internal.proxy.lib.services.model_proxy.clients.tgi import TGIChatC
 
 
 def get_chat_client(model: ChatModel, http_client: httpx.AsyncClient) -> ChatCompletionsClient:
-    if model.format_spec.format == "tgi":
+    format_spec = model.format_spec
+    if format_spec is None:
+        raise UnexpectedProxyError(f"Model {model.name} does not declare a chat format")
+    if format_spec.format == "tgi":
         return TGIChatCompletions(
             http_client=http_client,
-            chat_template=model.format_spec.chat_template,
-            eos_token=model.format_spec.eos_token,
+            chat_template=format_spec.chat_template,
+            eos_token=format_spec.eos_token,
         )
-    elif model.format_spec.format == "openai":
+    elif format_spec.format == "openai":
         return OpenAIChatCompletions(
             http_client=http_client,
-            prefix=model.format_spec.prefix,
+            prefix=format_spec.prefix,
         )
     else:
-        raise UnexpectedProxyError(f"Unsupported model format {model.format_spec.format}")
+        raise UnexpectedProxyError(f"Unsupported model format {format_spec.format}")

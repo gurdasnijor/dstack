@@ -7,14 +7,14 @@ from aiorwlock import RWLock
 from pydantic import BaseModel
 
 from dstack._internal.proxy.gateway.models import GlobalProxyConfig, ModelEntrypoint
-from dstack._internal.proxy.lib.models import ChatModel, Project, Service
+from dstack._internal.proxy.lib.models import EndpointModel, Project, Service
 from dstack._internal.proxy.lib.repo import BaseProxyRepo
 from dstack._internal.utils.common import run_async
 
 
 class State(BaseModel):
     services: dict[str, dict[str, Service]] = {}
-    models: dict[str, dict[str, ChatModel]] = {}
+    models: dict[str, dict[str, EndpointModel]] = {}
     entrypoints: dict[str, ModelEntrypoint] = {}
     projects: dict[str, Project] = {}
     config: GlobalProxyConfig = GlobalProxyConfig()
@@ -60,15 +60,15 @@ class GatewayProxyRepo(BaseProxyRepo):
             if not project_services:
                 self._state.services.pop(project_name, None)
 
-    async def list_models(self, project_name: str) -> list[ChatModel]:
+    async def list_models(self, project_name: str) -> list[EndpointModel]:
         async with self.reader():
             return list(self._state.models.get(project_name, {}).values())
 
-    async def get_model(self, project_name: str, name: str) -> Optional[ChatModel]:
+    async def get_model(self, project_name: str, name: str) -> Optional[EndpointModel]:
         async with self.reader():
             return self._state.models.get(project_name, {}).get(name)
 
-    async def set_model(self, model: ChatModel) -> None:
+    async def set_model(self, model: EndpointModel) -> None:
         async with self.writer():
             self._state.models.setdefault(model.project_name, {})[model.name] = model
 

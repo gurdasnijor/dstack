@@ -49,7 +49,7 @@ class GatewayClient:
         has_router_replica: bool = False,
         router: Optional[AnyServiceRouterConfig] = None,
     ):
-        if "openai" in options:
+        if "openai" in options or "endpoint" in options:
             entrypoint = f"gateway.{domain.split('.', maxsplit=1)[1]}"
             await self.register_openai_entrypoint(project, entrypoint, gateway_https)
 

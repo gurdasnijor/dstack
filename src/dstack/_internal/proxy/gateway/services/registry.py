@@ -7,6 +7,7 @@ from typing import Iterable, Optional
 import dstack._internal.proxy.gateway.schemas.registry as schemas
 from dstack._internal.core.models.instances import SSHConnectionParams
 from dstack._internal.core.models.routers import AnyServiceRouterConfig, RouterType
+from dstack._internal.core.models.services import ServiceEndpointMetadata
 from dstack._internal.proxy.gateway import models as gateway_models
 from dstack._internal.proxy.gateway.const import SERVICE_ALREADY_REGISTERED_ERROR_TEMPLATE
 from dstack._internal.proxy.gateway.repo.repo import GatewayProxyRepo
@@ -49,8 +50,11 @@ async def register_service(
     service_conn_pool: ServiceConnectionPool,
     has_router_replica: bool = False,
     router: Optional[AnyServiceRouterConfig] = None,
+    endpoint: Optional[ServiceEndpointMetadata] = None,
 ) -> None:
-    cors_enabled = model is not None and model.type == "chat" and model.format == "openai"
+    cors_enabled = (
+        model is not None and model.type == "chat" and model.format == "openai"
+    ) or endpoint is not None
     service = models.Service(
         project_name=project_name,
         run_name=run_name,
@@ -90,14 +94,29 @@ async def register_service(
         )
         await repo.set_service(service)
 
-        if model is not None:
+        if model is not None or endpoint is not None:
+            format_spec = model_schema_to_format_spec(model) if model is not None else None
+            if endpoint is not None:
+                model_name = endpoint.api_model_name
+            else:
+                assert model is not None
+                model_name = model.name
             await repo.set_model(
-                models.ChatModel(
+                models.EndpointModel(
                     project_name=project_name,
-                    name=model.name,
+                    name=model_name,
                     created_at=datetime.now(),
                     run_name=run_name,
-                    format_spec=model_schema_to_format_spec(model),
+                    format_spec=format_spec,
+                    base=endpoint.base if endpoint is not None else None,
+                    model=endpoint.model if endpoint is not None else None,
+                    source=endpoint.source if endpoint is not None else None,
+                    revision=endpoint.revision if endpoint is not None else None,
+                    modality=endpoint.modality if endpoint is not None else "text-generation",
+                    context_length=endpoint.context_length if endpoint is not None else None,
+                    api=endpoint.api if endpoint is not None else "chat_completions",
+                    request_path=endpoint.request_path if endpoint is not None else None,
+                    output_unit=endpoint.output_unit if endpoint is not None else None,
                 ),
             )
 

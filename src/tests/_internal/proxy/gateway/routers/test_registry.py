@@ -12,7 +12,11 @@ from dstack._internal.proxy.gateway.app import make_app
 from dstack._internal.proxy.gateway.repo.repo import GatewayProxyRepo
 from dstack._internal.proxy.gateway.services.nginx import Nginx
 from dstack._internal.proxy.gateway.testing.common import Mocks
-from dstack._internal.proxy.lib.models import ChatModel, OpenAIChatModelFormat
+from dstack._internal.proxy.lib.models import (
+    ChatModel,
+    EndpointModel,
+    OpenAIChatModelFormat,
+)
 
 
 def make_client(
@@ -80,6 +84,22 @@ def sample_model_options(name: str = "test-model") -> dict:
                 "format": "openai",
                 "prefix": "/v1",
             }
+        }
+    }
+
+
+def sample_endpoint_options() -> dict:
+    return {
+        "endpoint": {
+            "base": "Efficient-Large-Model/SANA-WM_bidirectional",
+            "model": "Efficient-Large-Model/SANA-WM_bidirectional",
+            "api_model_name": "sana-wm",
+            "source": "huggingface",
+            "revision": "90e0ff3b",
+            "modality": "video-generation",
+            "api": "videos",
+            "request_path": "/v1/videos",
+            "output_unit": "video",
         }
     }
 
@@ -211,6 +231,38 @@ class TestRegisterService:
                 created_at=datetime(2024, 12, 12, 0, 30),
                 run_name="test-run",
                 format_spec=OpenAIChatModelFormat(prefix="/v1"),
+            )
+        ]
+
+    @freeze_time(datetime(2024, 12, 12, 0, 30))
+    async def test_register_with_endpoint_metadata(
+        self, tmp_path: Path, system_mocks: Mocks
+    ) -> None:
+        repo = GatewayProxyRepo()
+        client = make_client(tmp_path, repo=repo)
+        resp = await client.post(
+            "/api/registry/test-proj/services/register",
+            json=register_service_payload(
+                run_name="test-run",
+                options=sample_endpoint_options(),
+            ),
+        )
+
+        assert resp.status_code == 200
+        assert await repo.list_models("test-proj") == [
+            EndpointModel(
+                project_name="test-proj",
+                name="sana-wm",
+                created_at=datetime(2024, 12, 12, 0, 30),
+                run_name="test-run",
+                base="Efficient-Large-Model/SANA-WM_bidirectional",
+                model="Efficient-Large-Model/SANA-WM_bidirectional",
+                source="huggingface",
+                revision="90e0ff3b",
+                modality="video-generation",
+                api="videos",
+                request_path="/v1/videos",
+                output_unit="video",
             )
         ]
 

@@ -16,10 +16,14 @@ from dstack._internal.core.models.runs import (
     ServiceSpec,
     get_service_port,
 )
-from dstack._internal.core.models.services import AnyModel
+from dstack._internal.core.models.services import (
+    ENDPOINT_METADATA_OPTION_KEY,
+    AnyModel,
+    ServiceEndpointMetadata,
+)
 from dstack._internal.proxy.lib.models import (
     AnyModelFormat,
-    ChatModel,
+    EndpointModel,
     OpenAIChatModelFormat,
     Project,
     Replica,
@@ -140,36 +144,65 @@ class ServerProxyRepo(BaseProxyRepo):
             router=router,
         )
 
-    async def list_models(self, project_name: str) -> List[ChatModel]:
+    async def list_models(self, project_name: str) -> List[EndpointModel]:
         res = await self.session.execute(
             select(RunModel)
             .join(RunModel.project)
+            .join(JobModel, JobModel.run_id == RunModel.id)
             .where(
                 ProjectModel.name == project_name,
                 RunModel.gateway_id.is_(None),
                 RunModel.service_spec.is_not(None),
                 RunModel.status == RunStatus.RUNNING,
+                JobModel.status == JobStatus.RUNNING,
+                JobModel.registered == True,
+                JobModel.job_num == 0,
             )
+            .distinct()
         )
         models = []
         for run in res.scalars().all():
             service_spec: ServiceSpec = ServiceSpec.__response__.parse_raw(run.service_spec)
             model_spec = service_spec.model
             model_options_obj = service_spec.options.get("openai", {}).get("model")
-            if model_spec is None or model_options_obj is None:
+            endpoint_options_obj = service_spec.options.get(ENDPOINT_METADATA_OPTION_KEY)
+            if endpoint_options_obj is None and (model_spec is None or model_options_obj is None):
                 continue
-            model_options = pydantic.parse_obj_as(AnyModel, model_options_obj)  # type: ignore[arg-type]
-            model = ChatModel(
+            model_options = None
+            if model_options_obj is not None:
+                model_options = pydantic.parse_obj_as(AnyModel, model_options_obj)  # type: ignore[arg-type]
+            endpoint = None
+            if endpoint_options_obj is not None:
+                endpoint = ServiceEndpointMetadata.parse_obj(endpoint_options_obj)
+            if endpoint is not None:
+                model_name = endpoint.api_model_name
+            else:
+                assert model_spec is not None
+                model_name = model_spec.name
+            model = EndpointModel(
                 project_name=project_name,
-                name=model_spec.name,
+                name=model_name,
                 created_at=run.submitted_at,
                 run_name=run.run_name,
-                format_spec=_model_options_to_format_spec(model_options),
+                format_spec=(
+                    _model_options_to_format_spec(model_options)
+                    if model_options is not None
+                    else None
+                ),
+                base=endpoint.base if endpoint is not None else None,
+                model=endpoint.model if endpoint is not None else None,
+                source=endpoint.source if endpoint is not None else None,
+                revision=endpoint.revision if endpoint is not None else None,
+                modality=endpoint.modality if endpoint is not None else "text-generation",
+                context_length=endpoint.context_length if endpoint is not None else None,
+                api=endpoint.api if endpoint is not None else "chat_completions",
+                request_path=endpoint.request_path if endpoint is not None else None,
+                output_unit=endpoint.output_unit if endpoint is not None else None,
             )
             models.append(model)
         return models
 
-    async def get_model(self, project_name: str, name: str) -> Optional[ChatModel]:
+    async def get_model(self, project_name: str, name: str) -> Optional[EndpointModel]:
         models = await self.list_models(project_name)
         models = [m for m in models if m.name == name]
         if not models:

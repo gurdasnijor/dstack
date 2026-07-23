@@ -13,7 +13,7 @@ from dstack._internal.proxy.gateway.models import ACMESettings, GlobalProxyConfi
 from dstack._internal.proxy.gateway.repo.repo import GatewayProxyRepo, State
 from dstack._internal.proxy.lib.models import (
     AnyModelFormat,
-    ChatModel,
+    EndpointModel,
     OpenAIChatModelFormat,
     Project,
     Replica,
@@ -48,14 +48,14 @@ def parse_state_v1(state_v1: dict, keys_dir: Path) -> State:
 
 def get_services_models(
     state_v1: dict,
-) -> tuple[dict[str, dict[str, Service]], dict[str, dict[str, ChatModel]]]:
+) -> tuple[dict[str, dict[str, Service]], dict[str, dict[str, EndpointModel]]]:
     service_id_to_project_name = {}
     for project_name, project_services in state_v1.get("store", {}).get("projects", {}).items():
         for service_id in project_services:
             service_id_to_project_name[service_id] = project_name
 
     services: dict[str, dict[str, Service]] = {}
-    models: dict[str, dict[str, ChatModel]] = {}
+    models: dict[str, dict[str, EndpointModel]] = {}
     for service in state_v1.get("store", {}).get("services", {}).values():
         project_name = service_id_to_project_name[service["id"]]
         replicas = []
@@ -103,7 +103,7 @@ def parse_replica(replica: dict) -> Replica:
 
 def parse_model(
     project_name: str, run_name: str, model: dict, openai_index: dict
-) -> Optional[ChatModel]:
+) -> Optional[EndpointModel]:
     created_ts = (
         openai_index.get(project_name, {}).get("chat", {}).get(model["name"], {}).get("created")
     )
@@ -117,7 +117,7 @@ def parse_model(
         )
     else:
         format_spec = OpenAIChatModelFormat(prefix=model["prefix"])
-    return ChatModel(
+    return EndpointModel(
         project_name=project_name,
         name=model["name"],
         created_at=datetime.fromtimestamp(created_ts),
