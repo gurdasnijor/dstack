@@ -24,9 +24,14 @@ from dstack._internal.cli.services.endpoints.agent import (
     print_endpoint_progress,
     run_endpoint_agent,
 )
+from dstack._internal.cli.services.endpoints.inspect.service import (
+    InspectionResult,
+    inspect_endpoint_model,
+)
 from dstack._internal.cli.services.endpoints.presets import endpoint_preset_to_data
 from dstack._internal.cli.services.endpoints.prompt import (
     format_endpoint_constraints,
+    format_model_inspection,
     get_endpoint_agent_system_prompt,
 )
 from dstack._internal.cli.services.endpoints.store import EndpointPresetStore
@@ -123,10 +128,16 @@ async def _create_endpoint_preset(
             workspace=workspace,
             token=token,
         )
+        inspection_data = _run_inspection_stage(
+            configuration=configuration,
+            workspace=workspace,
+            agent_session=agent_session,
+        )
         prompt = _build_prompt(
             configuration=configuration,
             build_name=build_name,
             allowed_fleets=allowed_fleets,
+            inspection_data=inspection_data,
         )
         if agent_session.debug:
             agent_session.write_prompt(prompt)
@@ -253,6 +264,7 @@ def _build_prompt(
     configuration: EndpointConfiguration,
     build_name: str,
     allowed_fleets: Sequence[str],
+    inspection_data: Optional[dict] = None,
 ) -> str:
     context_lines = [f"- service_model_name: {configuration.model.api_model_name}"]
     context_lines.append(f"- model_source: {configuration.model.source_type}")
@@ -265,12 +277,15 @@ def _build_prompt(
         context_lines.append(f"- model_locator: {configuration.model.exact_repo}")
     if configuration.context_length is not None:
         context_lines.append(f"- context_length: {configuration.context_length}")
+    inspection_block = ""
+    if inspection_data is not None:
+        inspection_block = "\n" + format_model_inspection(inspection_data) + "\n"
     return f"""{get_endpoint_agent_system_prompt()}
 
 Endpoint context:
 - endpoint_name: {build_name}
 {chr(10).join(context_lines)}
-
+{inspection_block}
 {
         format_endpoint_constraints(
             configuration,
@@ -279,6 +294,74 @@ Endpoint context:
         )
     }
 """
+
+
+_HF_TOKEN_ENV_NAMES = ("HF_TOKEN", "HUGGING_FACE_HUB_TOKEN", "HUGGINGFACE_TOKEN")
+
+
+def _get_hf_token(configuration: EndpointConfiguration) -> Optional[str]:
+    endpoint_env = configuration.env.as_dict()
+    for name in _HF_TOKEN_ENV_NAMES:
+        value = endpoint_env.get(name) or os.getenv(name)
+        if isinstance(value, str) and value:
+            return value
+    return None
+
+
+def _run_inspection_stage(
+    *,
+    configuration: EndpointConfiguration,
+    workspace: EndpointAgentWorkspace,
+    agent_session: EndpointAgentSession,
+) -> Optional[dict]:
+    """Run deterministic model inspection and persist its snapshot and evidence.
+
+    Returns the compact evidence object for the agent prompt, or ``None`` when
+    inspection does not apply or failed (the agent then follows the research
+    path with an explicit note).
+    """
+    result: InspectionResult = inspect_endpoint_model(
+        configuration,
+        token=_get_hf_token(configuration),
+    )
+    if result.skipped_reason is not None:
+        print_endpoint_progress(
+            f"Deterministic model inspection skipped: {result.skipped_reason}",
+            agent_session=agent_session,
+        )
+        return None
+    if result.error is not None or result.inspection is None:
+        print_endpoint_progress(
+            f"Deterministic model inspection unavailable: "
+            f"{result.error or 'no inspection produced'}. "
+            "Continuing on the agent research path.",
+            agent_session=agent_session,
+        )
+        return None
+    assert result.snapshot is not None
+    inspection_data = result.inspection.to_data()
+    try:
+        _write_json(agent_session.path / "inspection-snapshot.json", result.snapshot.to_data())
+        _write_json(agent_session.path / "inspection.json", inspection_data)
+        _write_json(workspace.path / "inspection.json", inspection_data)
+    except OSError as e:
+        warn(f"Could not persist model inspection output: {e}")
+    candidates = ", ".join(
+        f"{candidate.runtime} ({candidate.evidence_level.value})"
+        for candidate in result.inspection.candidates
+    )
+    print_endpoint_progress(
+        f"Deterministic inspection pinned {result.inspection.model} at "
+        f"{result.inspection.revision[:12]}: modality={result.inspection.modality}, "
+        f"classification={result.inspection.classification}, "
+        f"candidates=[{candidates or 'none'}].",
+        agent_session=agent_session,
+    )
+    return inspection_data
+
+
+def _write_json(path: Path, data: dict) -> None:
+    path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
 async def _cleanup_runs(

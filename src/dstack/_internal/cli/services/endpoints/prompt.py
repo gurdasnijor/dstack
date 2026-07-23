@@ -37,6 +37,31 @@ def format_endpoint_constraints(
     return "\n".join(lines)
 
 
+def format_model_inspection(inspection_data: dict[str, Any]) -> str:
+    """Render the compact deterministic-inspection evidence block for the agent."""
+    compact = {key: value for key, value in inspection_data.items() if key != "ir"}
+    return "\n".join(
+        [
+            "Deterministic model inspection (evidence object):",
+            "```json",
+            json.dumps(compact, indent=2, sort_keys=True),
+            "```",
+            "",
+            "The full Model Shape IR and raw metadata snapshot are in "
+            "`inspection.json` in this workspace.",
+            "Interpret this object exactly as described in the "
+            "`/dstack-prototyping` skill section "
+            '"Interpreting the inspection evidence object": take the '
+            "highest-confidence candidate through service-first validation, do "
+            "not research alternate frameworks until it fails or the evidence "
+            "names a material ambiguity, record why any lower-ranked candidate "
+            "is tried, never override a negative result without new evidence, "
+            "and always run the listed smoke test — metadata classification is "
+            "not runtime validation.",
+        ]
+    )
+
+
 def _format_constraint_value(value: Any) -> str:
     data = _constraint_value_to_data(value)
     if isinstance(data, (bool, dict, list)):
