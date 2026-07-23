@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from typing import AsyncIterator, Generator
 from unittest.mock import AsyncMock, patch
@@ -333,6 +334,62 @@ async def test_image_generation_native_and_chat_projection() -> None:
     assert chat_response.json()["choices"][0]["message"]["content"] == (
         "![Generated image](data:image/png;base64,aW1hZ2U=)"
     )
+
+
+@pytest.mark.asyncio
+async def test_image_chat_projection_splits_large_stream_events() -> None:
+    auth = ProxyTestAuthProvider({"test-proj": {"token"}})
+    repo = GatewayProxyRepo()
+    await repo.set_project(make_project("test-proj"))
+    await repo.set_service(make_service("test-proj", "image-service"))
+    await repo.set_model(
+        make_endpoint_model(
+            "test-proj",
+            "test-image-model",
+            "image-service",
+            modality="image-generation",
+            api="images_generations",
+            request_path="/v1/images/generations",
+        )
+    )
+    encoded_image = "a" * (256 * 1024)
+
+    async def upstream(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={"created": 1, "data": [{"b64_json": encoded_image}]},
+        )
+
+    upstream_client = httpx.AsyncClient(
+        transport=httpx.MockTransport(upstream),
+        base_url="http://image-service",
+    )
+    client = make_http_client(repo, auth)
+    with patch(
+        "dstack._internal.proxy.lib.routers.model_proxy.get_service_replica_client",
+        new=AsyncMock(return_value=upstream_client),
+    ):
+        response = await client.post(
+            "http://test-host/proxy/models/test-proj/chat/completions",
+            headers={"Authorization": "Bearer token"},
+            json={
+                "model": "test-image-model",
+                "messages": [{"role": "user", "content": "A glass forest"}],
+                "stream": True,
+            },
+        )
+    await upstream_client.aclose()
+
+    events = [
+        line.removeprefix("data:")
+        for line in response.text.splitlines()
+        if line.startswith("data:") and line != "data: [DONE]"
+    ]
+    assert max(map(len, events)) < 128 * 1024
+    content = "".join(
+        json.loads(event)["choices"][0]["delta"].get("content", "") for event in events
+    )
+    assert content == f"![Generated image](data:image/png;base64,{encoded_image})"
 
 
 @pytest.mark.asyncio

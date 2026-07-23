@@ -31,6 +31,8 @@ from dstack._internal.proxy.lib.services.service_connection import (
 
 router = APIRouter(dependencies=[Depends(ProxyAuth(auto_enforce=True))])
 
+_STREAM_CONTENT_CHUNK_CHARS = 16 * 1024
+
 
 @router.get("/{project_name}/models")
 async def get_models(
@@ -275,22 +277,37 @@ def _projected_chat_response(model_name: str, content: str) -> ChatCompletionsRe
 async def _single_response_stream(
     response: ChatCompletionsResponse,
 ) -> AsyncIterator[bytes]:
-    chunk = ChatCompletionsChunk(
+    content = response.choices[0].message.content
+    for offset in range(0, len(content), _STREAM_CONTENT_CHUNK_CHARS):
+        delta = {"content": content[offset : offset + _STREAM_CONTENT_CHUNK_CHARS]}
+        if offset == 0:
+            delta["role"] = "assistant"
+        chunk = ChatCompletionsChunk(
+            id=response.id,
+            choices=[
+                ChatCompletionsChunkChoice(
+                    finish_reason=None,
+                    index=0,
+                    delta=delta,
+                )
+            ],
+            created=response.created,
+            model=response.model,
+        )
+        yield f"data:{chunk.json()}\n\n".encode()
+    final_chunk = ChatCompletionsChunk(
         id=response.id,
         choices=[
             ChatCompletionsChunkChoice(
                 finish_reason="stop",
                 index=0,
-                delta={
-                    "role": "assistant",
-                    "content": response.choices[0].message.content,
-                },
+                delta={},
             )
         ],
         created=response.created,
         model=response.model,
     )
-    yield f"data:{chunk.json()}\n\n".encode()
+    yield f"data:{final_chunk.json()}\n\n".encode()
     yield b"data: [DONE]\n\n"
 
 
