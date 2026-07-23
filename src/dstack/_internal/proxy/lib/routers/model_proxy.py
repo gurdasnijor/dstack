@@ -1,10 +1,6 @@
 import base64
 import json
-import os
-import secrets
 import time
-from dataclasses import dataclass
-from pathlib import Path
 from typing import AsyncIterator, Optional
 from urllib.parse import urlparse
 
@@ -28,6 +24,12 @@ from dstack._internal.proxy.lib.schemas.model_proxy import (
     Model,
     ModelsResponse,
 )
+from dstack._internal.proxy.lib.services.generated_assets import (
+    ASSET_ID_PREFIX,
+    CACHED_VIDEO_ID_PREFIX,
+    GeneratedAssetStore,
+    StoredAsset,
+)
 from dstack._internal.proxy.lib.services.model_proxy.model_proxy import get_chat_client
 from dstack._internal.proxy.lib.services.service_connection import (
     ServiceConnectionPool,
@@ -38,18 +40,6 @@ router = APIRouter(dependencies=[Depends(ProxyAuth(auto_enforce=True))])
 assets_router = APIRouter()
 
 _STREAM_CONTENT_CHUNK_CHARS = 16 * 1024
-_MAX_STORED_ASSETS = 32
-_ASSET_ID_PREFIX = "dstack_asset_"
-_CACHED_VIDEO_ID_PREFIX = "dstack_cached_"
-
-
-@dataclass(frozen=True)
-class _StoredAsset:
-    project_name: str
-    model_name: str
-    content: bytes
-    media_type: str
-    created_at: int
 
 
 @assets_router.get(
@@ -155,10 +145,10 @@ async def post_videos(
     if _is_video_response(response):
         video_id = _store_asset(
             project_name,
-            model.name,
+            model,
             response.content,
             response.headers.get("content-type", "video/mp4").split(";", 1)[0],
-            prefix=_CACHED_VIDEO_ID_PREFIX,
+            prefix=CACHED_VIDEO_ID_PREFIX,
         )
         return _stored_video_metadata_response(
             video_id,
@@ -323,7 +313,7 @@ async def _generate_image_content(
             )
         asset_id = _store_asset(
             project_name,
-            model.name,
+            model,
             content,
             _image_media_type(content),
         )
@@ -344,7 +334,7 @@ async def _generate_video_content(
         media_type = response.headers.get("content-type", "video/mp4").split(";", 1)[0]
         asset_id = _store_asset(
             project_name,
-            model.name,
+            model,
             response.content,
             media_type,
         )
@@ -426,7 +416,7 @@ async def _get_video_resource(
     repo: BaseProxyRepo,
     service_conn_pool: ServiceConnectionPool,
 ) -> Response:
-    if video_id.startswith(_CACHED_VIDEO_ID_PREFIX):
+    if video_id.startswith(CACHED_VIDEO_ID_PREFIX):
         video = _get_stored_asset(project_name, video_id)
         if suffix:
             return Response(content=video.content, media_type=video.media_type)
@@ -551,81 +541,27 @@ def _is_video_response(response: httpx.Response) -> bool:
 
 def _store_asset(
     project_name: str,
-    model_name: str,
+    model: EndpointModel,
     content: bytes,
     media_type: str,
     *,
-    prefix: str = _ASSET_ID_PREFIX,
+    prefix: str = ASSET_ID_PREFIX,
 ) -> str:
-    asset_id = f"{prefix}{secrets.token_urlsafe(18)}"
-    asset = _StoredAsset(
+    return GeneratedAssetStore().store(
         project_name=project_name,
-        model_name=model_name,
+        model_name=model.name,
         content=content,
         media_type=media_type,
-        created_at=int(time.time()),
+        prefix=prefix,
+        model_revision=model.revision,
     )
-    root = _generated_assets_dir()
-    root.mkdir(parents=True, exist_ok=True)
-    content_path, metadata_path = _asset_paths(root, asset_id)
-    content_path.write_bytes(asset.content)
-    metadata_path.write_text(
-        json.dumps(
-            {
-                "project_name": asset.project_name,
-                "model_name": asset.model_name,
-                "media_type": asset.media_type,
-                "created_at": asset.created_at,
-            }
-        )
-    )
-    _prune_stored_assets(root)
-    return asset_id
 
 
-def _get_stored_asset(project_name: str, asset_id: str) -> _StoredAsset:
-    if not asset_id.startswith((_ASSET_ID_PREFIX, _CACHED_VIDEO_ID_PREFIX)):
-        raise ProxyError("Asset not found", status.HTTP_404_NOT_FOUND)
-    root = _generated_assets_dir()
-    content_path, metadata_path = _asset_paths(root, asset_id)
-    try:
-        metadata = json.loads(metadata_path.read_text())
-        content = content_path.read_bytes()
-        asset = _StoredAsset(content=content, **metadata)
-    except (FileNotFoundError, json.JSONDecodeError, TypeError):
-        raise ProxyError("Asset not found", status.HTTP_404_NOT_FOUND)
-    if asset.project_name != project_name:
+def _get_stored_asset(project_name: str, asset_id: str) -> StoredAsset:
+    asset = GeneratedAssetStore().get(project_name, asset_id)
+    if asset is None:
         raise ProxyError("Asset not found", status.HTTP_404_NOT_FOUND)
     return asset
-
-
-def _generated_assets_dir() -> Path:
-    configured = os.getenv("DSTACK_PROXY_ASSETS_DIR")
-    if configured:
-        return Path(configured).expanduser().resolve()
-    server_dir = Path(os.getenv("DSTACK_SERVER_DIR", "~/.dstack/server")).expanduser()
-    return (server_dir / "data" / "generated-assets").resolve()
-
-
-def _asset_paths(root: Path, asset_id: str) -> tuple[Path, Path]:
-    if not asset_id or any(character not in _ASSET_ID_CHARS for character in asset_id):
-        raise ProxyError("Asset not found", status.HTTP_404_NOT_FOUND)
-    return root / f"{asset_id}.bin", root / f"{asset_id}.json"
-
-
-_ASSET_ID_CHARS = frozenset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")
-
-
-def _prune_stored_assets(root: Path) -> None:
-    metadata_files = sorted(
-        root.glob("*.json"),
-        key=lambda path: path.stat().st_mtime,
-        reverse=True,
-    )
-    for metadata_path in metadata_files[_MAX_STORED_ASSETS:]:
-        content_path = metadata_path.with_suffix(".bin")
-        metadata_path.unlink(missing_ok=True)
-        content_path.unlink(missing_ok=True)
 
 
 def _asset_url(request: Request, project_name: str, asset_id: str) -> str:
@@ -672,7 +608,7 @@ def _asset_headers() -> dict[str, str]:
 
 def _stored_video_metadata_response(
     video_id: str,
-    video: _StoredAsset,
+    video: StoredAsset,
 ) -> Response:
     return Response(
         content=json.dumps(
