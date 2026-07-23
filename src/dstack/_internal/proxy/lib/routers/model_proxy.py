@@ -1,6 +1,8 @@
 import base64
 import json
+import re
 import time
+from dataclasses import dataclass
 from typing import AsyncIterator, Optional
 from urllib.parse import urlparse
 
@@ -40,6 +42,27 @@ router = APIRouter(dependencies=[Depends(ProxyAuth(auto_enforce=True))])
 assets_router = APIRouter()
 
 _STREAM_CONTENT_CHUNK_CHARS = 16 * 1024
+_MAX_REFERENCE_IMAGE_BYTES = 20 * 1024 * 1024
+_DATA_IMAGE_URL_PATTERN = re.compile(
+    r"^data:(image/(?:gif|jpeg|png|webp));base64,(.+)$",
+    re.IGNORECASE | re.DOTALL,
+)
+
+
+@dataclass(frozen=True)
+class _ReferenceImage:
+    content: bytes
+    media_type: str
+
+    @property
+    def filename(self) -> str:
+        extension = {
+            "image/gif": "gif",
+            "image/jpeg": "jpg",
+            "image/png": "png",
+            "image/webp": "webp",
+        }[self.media_type]
+        return f"reference.{extension}"
 
 
 @assets_router.get(
@@ -290,6 +313,16 @@ async def _generate_image_content(
     request: Request,
     project_name: str,
 ) -> str:
+    reference_images = _last_user_reference_images(body)
+    if reference_images:
+        response = await _post_image_edit(
+            model,
+            _last_user_prompt(body),
+            reference_images,
+            http_client,
+        )
+        return _image_response_content(model, response, request, project_name)
+
     payload = {
         "model": model.name,
         "prompt": _last_user_prompt(body),
@@ -297,6 +330,38 @@ async def _generate_image_content(
         "response_format": "b64_json",
     }
     response = await _post_json(http_client, _request_path(model), payload)
+    return _image_response_content(model, response, request, project_name)
+
+
+async def _post_image_edit(
+    model: EndpointModel,
+    prompt: str,
+    reference_images: list[_ReferenceImage],
+    http_client: httpx.AsyncClient,
+) -> httpx.Response:
+    files = [
+        ("image", (image.filename, image.content, image.media_type)) for image in reference_images
+    ]
+    return await _request(
+        http_client,
+        "POST",
+        _image_edit_path(model),
+        data={
+            "model": model.name,
+            "prompt": prompt,
+            "size": "auto",
+            "response_format": "b64_json",
+        },
+        files=files,
+    )
+
+
+def _image_response_content(
+    model: EndpointModel,
+    response: httpx.Response,
+    request: Request,
+    project_name: str,
+) -> str:
     data = _response_json(response).get("data", [])
     if not data:
         raise ProxyError("Image endpoint returned no images", status.HTTP_502_BAD_GATEWAY)
@@ -655,6 +720,17 @@ def _request_path(model: EndpointModel) -> str:
     )
 
 
+def _image_edit_path(model: EndpointModel) -> str:
+    path = _request_path(model)
+    generation_suffix = "/images/generations"
+    if not path.endswith(generation_suffix):
+        raise ProxyError(
+            f"Model {model.name} does not declare an OpenAI image generation path",
+            status.HTTP_422_UNPROCESSABLE_ENTITY,
+        )
+    return f"{path.removesuffix(generation_suffix)}/images/edits"
+
+
 def _require_api(model: EndpointModel, supported: set[str]) -> None:
     if model.api not in supported:
         raise ProxyError(
@@ -696,6 +772,58 @@ def _last_user_prompt(body: ChatCompletionsRequest) -> str:
             if prompt:
                 return prompt
     raise ProxyError("Request has no user text prompt", status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+
+def _last_user_reference_images(body: ChatCompletionsRequest) -> list[_ReferenceImage]:
+    for message in reversed(body.messages):
+        if message.role != "user":
+            continue
+        if not isinstance(message.content, list):
+            return []
+        return [
+            _decode_reference_image(url)
+            for part in message.content
+            if isinstance(part, dict)
+            and part.get("type") == "image_url"
+            and (url := _image_part_url(part))
+        ]
+    return []
+
+
+def _image_part_url(part: dict) -> Optional[str]:
+    image_url = part.get("image_url")
+    if isinstance(image_url, str):
+        return image_url
+    if isinstance(image_url, dict) and isinstance(image_url.get("url"), str):
+        return image_url["url"]
+    return None
+
+
+def _decode_reference_image(url: str) -> _ReferenceImage:
+    match = _DATA_IMAGE_URL_PATTERN.fullmatch(url)
+    if match is None:
+        raise ProxyError(
+            "Reference images must be base64 data image URLs",
+            status.HTTP_422_UNPROCESSABLE_ENTITY,
+        )
+    media_type, encoded = match.groups()
+    if len(encoded) > (_MAX_REFERENCE_IMAGE_BYTES * 4 // 3) + 4:
+        raise ProxyError(
+            f"Reference image exceeds {_MAX_REFERENCE_IMAGE_BYTES // (1024 * 1024)} MiB",
+            status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+        )
+    try:
+        content = base64.b64decode(encoded, validate=True)
+    except (ValueError, TypeError):
+        raise ProxyError(
+            "Reference image contains invalid base64", status.HTTP_422_UNPROCESSABLE_ENTITY
+        )
+    if len(content) > _MAX_REFERENCE_IMAGE_BYTES:
+        raise ProxyError(
+            f"Reference image exceeds {_MAX_REFERENCE_IMAGE_BYTES // (1024 * 1024)} MiB",
+            status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+        )
+    return _ReferenceImage(content=content, media_type=media_type.lower())
 
 
 def _response_json(response: httpx.Response) -> dict:
