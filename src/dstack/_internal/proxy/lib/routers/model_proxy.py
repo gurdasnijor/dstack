@@ -61,7 +61,12 @@ async def get_generated_asset(project_name: str, asset_id: str) -> Response:
     return Response(
         content=asset.content,
         media_type=asset.media_type,
-        headers={"Cache-Control": "private, max-age=86400"},
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Expose-Headers": "Content-Length, Content-Type",
+            "Cache-Control": "private, max-age=86400",
+            "X-Content-Type-Options": "nosniff",
+        },
     )
 
 
