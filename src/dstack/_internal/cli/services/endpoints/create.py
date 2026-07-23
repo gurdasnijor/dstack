@@ -61,6 +61,7 @@ from dstack._internal.cli.services.endpoints.verify import (
     load_endpoint_agent_report,
 )
 from dstack._internal.cli.utils.common import console, warn
+from dstack._internal.compat import IS_WINDOWS
 from dstack._internal.core.errors import CLIError, ConfigurationError
 from dstack._internal.core.models.envs import EnvSentinel
 from dstack._internal.core.models.fleets import FleetStatus
@@ -144,6 +145,12 @@ async def _create_endpoint_preset(
         allowed_fleets=list(allowed_fleets),
     )
     controlled = not _legacy_agent_shell_enabled()
+    if controlled and IS_WINDOWS:
+        raise CLIError(
+            "The controlled endpoint agent requires a POSIX platform (its controller "
+            "transport uses Unix domain sockets). On Windows, explicitly opt into the "
+            f"legacy development shell with {_LEGACY_SHELL_ENV}=1."
+        )
     recorder.record("mutation_surface", controlled=controlled)
     report: Optional[AgentFinalReport] = None
     preset: Optional[EndpointPreset] = None

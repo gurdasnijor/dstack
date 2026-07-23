@@ -23,6 +23,7 @@ from dstack._internal.cli.services.endpoints.controller import (
     ControllerError,
     EndpointController,
 )
+from dstack._internal.core.errors import CLIError
 
 CONTROLLER_SOCKET_ENV = "DSTACK_ENDPOINT_CONTROLLER_SOCKET"
 CONTROLLER_TOKEN_ENV = "DSTACK_ENDPOINT_CONTROLLER_TOKEN"
@@ -59,7 +60,13 @@ class EndpointControllerServer:
         self._server: Optional[asyncio.AbstractServer] = None
 
     async def __aenter__(self) -> "EndpointControllerServer":
-        self._server = await asyncio.start_unix_server(
+        # Resolved dynamically: asyncio.start_unix_server does not exist in the
+        # Windows typeshed, and the controlled agent is POSIX-only (create.py
+        # refuses controlled mode on Windows before this point).
+        start_unix_server = getattr(asyncio, "start_unix_server", None)
+        if start_unix_server is None:
+            raise CLIError("the endpoint controller transport requires POSIX Unix domain sockets")
+        self._server = await start_unix_server(
             self._handle, path=str(self.socket_path), limit=_MAX_REQUEST_BYTES
         )
         return self

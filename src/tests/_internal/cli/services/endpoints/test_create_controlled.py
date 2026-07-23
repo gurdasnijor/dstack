@@ -289,6 +289,22 @@ class TestControlledCreateFlow:
         assert baseline["succeeded"] is False
 
     @pytest.mark.asyncio
+    async def test_controlled_mode_refuses_windows_instead_of_degrading(
+        self, context, monkeypatch, tmp_path
+    ):
+        agent_session = _agent_session(tmp_path)
+        monkeypatch.setattr("dstack._internal.cli.services.endpoints.create.IS_WINDOWS", True)
+
+        with pytest.raises(CLIError, match="POSIX platform"):
+            await _create_endpoint_preset(
+                api=context.api,
+                configuration=context.configuration,
+                source_configuration=context.source_configuration,
+                store=context.store,
+                agent_session=agent_session,
+            )
+
+    @pytest.mark.asyncio
     async def test_agent_crash_still_cleans_up_runs(self, context, monkeypatch, tmp_path):
         agent_session = _agent_session(tmp_path)
 
