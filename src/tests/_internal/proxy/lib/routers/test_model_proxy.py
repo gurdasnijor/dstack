@@ -393,6 +393,90 @@ async def test_image_chat_projection_splits_large_stream_events() -> None:
 
 
 @pytest.mark.asyncio
+async def test_background_task_for_media_model_uses_ready_text_model() -> None:
+    auth = ProxyTestAuthProvider({"test-proj": {"token"}})
+    repo = GatewayProxyRepo()
+    await repo.set_project(make_project("test-proj"))
+    await repo.set_service(make_service("test-proj", "image-service"))
+    await repo.set_service(make_service("test-proj", "text-service"))
+    await repo.set_model(
+        make_endpoint_model(
+            "test-proj",
+            "test-image-model",
+            "image-service",
+            modality="image-generation",
+            api="images_generations",
+            request_path="/v1/images/generations",
+        )
+    )
+    await repo.set_model(
+        make_endpoint_model(
+            "test-proj",
+            "test-text-model",
+            "text-service",
+            modality="text-generation",
+            api="chat_completions",
+            request_path="/v1/chat/completions",
+        )
+    )
+    upstream_requests = []
+
+    async def upstream(request: httpx.Request) -> httpx.Response:
+        upstream_requests.append(request)
+        return httpx.Response(
+            200,
+            json={
+                "id": "chatcmpl-task",
+                "object": "chat.completion",
+                "created": 1,
+                "model": "test-text-model",
+                "choices": [
+                    {
+                        "index": 0,
+                        "message": {
+                            "role": "assistant",
+                            "content": '{"title":"Glass Forest"}',
+                        },
+                        "finish_reason": "stop",
+                    }
+                ],
+                "usage": {
+                    "prompt_tokens": 10,
+                    "completion_tokens": 5,
+                    "total_tokens": 15,
+                },
+            },
+        )
+
+    upstream_client = httpx.AsyncClient(
+        transport=httpx.MockTransport(upstream),
+        base_url="http://text-service",
+    )
+    client = make_http_client(repo, auth)
+    with patch(
+        "dstack._internal.proxy.lib.routers.model_proxy.get_service_replica_client",
+        new=AsyncMock(return_value=upstream_client),
+    ):
+        response = await client.post(
+            "http://test-host/proxy/models/test-proj/chat/completions",
+            headers={
+                "Authorization": "Bearer token",
+                "X-OpenWebUI-Task": "title_generation",
+            },
+            json={
+                "model": "test-image-model",
+                "messages": [{"role": "user", "content": "Generate a title"}],
+            },
+        )
+    await upstream_client.aclose()
+
+    assert response.status_code == 200
+    assert response.json()["model"] == "test-text-model"
+    assert upstream_requests[0].url.path == "/v1/chat/completions"
+    assert json.loads(upstream_requests[0].content)["model"] == "test-text-model"
+
+
+@pytest.mark.asyncio
 async def test_endpoint_chat_stream_is_forwarded_without_buffering() -> None:
     auth = ProxyTestAuthProvider({"test-proj": {"token"}})
     repo = GatewayProxyRepo()
@@ -507,6 +591,118 @@ async def test_video_generation_wraps_upstream_id_for_status_and_content() -> No
         "/v1/videos/upstream-job",
         "/v1/videos/upstream-job/content",
     ]
+
+
+@pytest.mark.asyncio
+async def test_synchronous_video_is_exposed_as_completed_video_resource() -> None:
+    auth = ProxyTestAuthProvider({"test-proj": {"token"}})
+    repo = GatewayProxyRepo()
+    await repo.set_project(make_project("test-proj"))
+    await repo.set_service(make_service("test-proj", "video-service"))
+    await repo.set_model(
+        make_endpoint_model(
+            "test-proj",
+            "test-video-model",
+            "video-service",
+            modality="video-generation",
+            api="video_generations",
+            request_path="/v1/videos/sync",
+        )
+    )
+
+    async def upstream(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            content=b"generated-video",
+            headers={"content-type": "video/mp4"},
+        )
+
+    upstream_client = httpx.AsyncClient(
+        transport=httpx.MockTransport(upstream),
+        base_url="http://video-service",
+    )
+    client = make_http_client(repo, auth)
+    headers = {"Authorization": "Bearer token"}
+    with patch(
+        "dstack._internal.proxy.lib.routers.model_proxy.get_service_replica_client",
+        new=AsyncMock(return_value=upstream_client),
+    ):
+        create_response = await client.post(
+            "http://test-host/proxy/models/test-proj/videos",
+            headers=headers,
+            json={
+                "model": "test-video-model",
+                "prompt": "A glass forest",
+                "num_frames": 25,
+            },
+        )
+        video = create_response.json()
+        status_response = await client.get(
+            f"http://test-host/proxy/models/test-proj/videos/{video['id']}",
+            headers=headers,
+        )
+        content_response = await client.get(
+            f"http://test-host/proxy/models/test-proj/videos/{video['id']}/content",
+            headers=headers,
+        )
+    await upstream_client.aclose()
+
+    assert create_response.status_code == 200
+    assert video["status"] == "completed"
+    assert video["model"] == "test-video-model"
+    assert video["id"].startswith("dstack_cached_")
+    assert status_response.json() == video
+    assert content_response.content == b"generated-video"
+    assert content_response.headers["content-type"] == "video/mp4"
+
+
+@pytest.mark.asyncio
+async def test_synchronous_video_has_chat_projection() -> None:
+    auth = ProxyTestAuthProvider({"test-proj": {"token"}})
+    repo = GatewayProxyRepo()
+    await repo.set_project(make_project("test-proj"))
+    await repo.set_service(make_service("test-proj", "video-service"))
+    await repo.set_model(
+        make_endpoint_model(
+            "test-proj",
+            "test-video-model",
+            "video-service",
+            modality="video-generation",
+            api="video_generations",
+            request_path="/v1/videos/sync",
+        )
+    )
+
+    async def upstream(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            content=b"generated-video",
+            headers={"content-type": "video/mp4"},
+        )
+
+    upstream_client = httpx.AsyncClient(
+        transport=httpx.MockTransport(upstream),
+        base_url="http://video-service",
+    )
+    client = make_http_client(repo, auth)
+    headers = {"Authorization": "Bearer token"}
+    with patch(
+        "dstack._internal.proxy.lib.routers.model_proxy.get_service_replica_client",
+        new=AsyncMock(return_value=upstream_client),
+    ):
+        chat_response = await client.post(
+            "http://test-host/proxy/models/test-proj/chat/completions",
+            headers=headers,
+            json={
+                "model": "test-video-model",
+                "messages": [{"role": "user", "content": "A glass forest"}],
+            },
+        )
+        content = chat_response.json()["choices"][0]["message"]["content"]
+    await upstream_client.aclose()
+
+    assert chat_response.status_code == 200
+    assert content == "[Generated video](data:video/mp4;base64,Z2VuZXJhdGVkLXZpZGVv)"
 
 
 @pytest.mark.asyncio

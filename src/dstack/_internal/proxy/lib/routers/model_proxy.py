@@ -1,6 +1,9 @@
 import base64
 import json
+import secrets
 import time
+from collections import OrderedDict
+from dataclasses import dataclass
 from typing import AsyncIterator, Optional
 
 import httpx
@@ -32,6 +35,15 @@ from dstack._internal.proxy.lib.services.service_connection import (
 router = APIRouter(dependencies=[Depends(ProxyAuth(auto_enforce=True))])
 
 _STREAM_CONTENT_CHUNK_CHARS = 16 * 1024
+_MAX_STORED_VIDEOS = 32
+
+
+@dataclass(frozen=True)
+class _StoredVideo:
+    model_name: str
+    content: bytes
+    media_type: str
+    created_at: int
 
 
 @router.get("/{project_name}/models")
@@ -63,10 +75,14 @@ async def get_models(
 async def post_chat_completions(
     project_name: str,
     body: ChatCompletionsRequest,
+    request: Request,
     repo: Annotated[BaseProxyRepo, Depends(get_proxy_repo)],
     service_conn_pool: Annotated[ServiceConnectionPool, Depends(get_service_connection_pool)],
 ):
     model = await repo.get_model(project_name, body.model)
+    if _is_background_task(request) and model is not None and not _is_text_model(model):
+        model = await _get_background_task_model(project_name, repo)
+        body = body.copy(update={"model": model.name})
     model, service = await _resolve_model_service(project_name, body.model, model, repo)
     http_client = await get_service_replica_client(service, repo, service_conn_pool)
     if model.format_spec is None:
@@ -111,6 +127,9 @@ async def post_videos(
     model, service = await _resolve_model_service(project_name, model_name, model, repo)
     _require_api(model, {"videos", "video_generations"})
     response = await _request_endpoint(model, service, "POST", body, repo, service_conn_pool)
+    if _is_video_response(response):
+        video_id = _store_video(request, model.name, response)
+        return _stored_video_metadata_response(video_id, _get_stored_video(request, video_id))
     return _video_create_response(model, response)
 
 
@@ -118,20 +137,36 @@ async def post_videos(
 async def get_video(
     project_name: str,
     video_id: str,
+    request: Request,
     repo: Annotated[BaseProxyRepo, Depends(get_proxy_repo)],
     service_conn_pool: Annotated[ServiceConnectionPool, Depends(get_service_connection_pool)],
 ) -> Response:
-    return await _get_video_resource(project_name, video_id, "", repo, service_conn_pool)
+    return await _get_video_resource(
+        project_name,
+        video_id,
+        "",
+        request,
+        repo,
+        service_conn_pool,
+    )
 
 
 @router.get("/{project_name}/videos/{video_id}/content")
 async def get_video_content(
     project_name: str,
     video_id: str,
+    request: Request,
     repo: Annotated[BaseProxyRepo, Depends(get_proxy_repo)],
     service_conn_pool: Annotated[ServiceConnectionPool, Depends(get_service_connection_pool)],
 ) -> Response:
-    return await _get_video_resource(project_name, video_id, "/content", repo, service_conn_pool)
+    return await _get_video_resource(
+        project_name,
+        video_id,
+        "/content",
+        request,
+        repo,
+        service_conn_pool,
+    )
 
 
 async def _post_endpoint_chat(
@@ -145,7 +180,12 @@ async def _post_endpoint_chat(
     if model.api == "images_generations":
         content = await _generate_image_content(model, body, http_client)
     elif model.api in {"videos", "video_generations"}:
-        content = await _generate_video_content(model, body, http_client, project_name)
+        content = await _generate_video_content(
+            model,
+            body,
+            http_client,
+            project_name,
+        )
     else:
         raise ProxyError(
             f"Model {model.name} uses unsupported API {model.api!r}",
@@ -242,6 +282,10 @@ async def _generate_video_content(
 ) -> str:
     payload = {"model": model.name, "prompt": _last_user_prompt(body)}
     response = await _post_json(http_client, _request_path(model), payload)
+    if _is_video_response(response):
+        media_type = response.headers.get("content-type", "video/mp4").split(";", 1)[0]
+        content = base64.b64encode(response.content).decode()
+        return f"[Generated video](data:{media_type};base64,{content})"
     result = _response_json(response)
     url = result.get("url") or result.get("video_url")
     if url is None and result.get("data"):
@@ -315,9 +359,15 @@ async def _get_video_resource(
     project_name: str,
     video_id: str,
     suffix: str,
+    request: Request,
     repo: BaseProxyRepo,
     service_conn_pool: ServiceConnectionPool,
 ) -> Response:
+    if video_id.startswith("dstack_cached_"):
+        video = _get_stored_video(request, video_id)
+        if suffix:
+            return Response(content=video.content, media_type=video.media_type)
+        return _stored_video_metadata_response(video_id, video)
     model_name, upstream_id = _decode_video_id(video_id)
     model = await repo.get_model(project_name, model_name)
     model, service = await _resolve_model_service(project_name, model_name, model, repo)
@@ -404,6 +454,82 @@ def _video_resource_response(video_id: str, response: httpx.Response) -> Respons
     return Response(
         content=json.dumps(result),
         status_code=response.status_code,
+        media_type="application/json",
+    )
+
+
+def _is_background_task(request: Request) -> bool:
+    return bool(request.headers.get("X-OpenWebUI-Task", "").strip())
+
+
+def _is_text_model(model: EndpointModel) -> bool:
+    return model.api in {"chat_completions", "completions"}
+
+
+async def _get_background_task_model(
+    project_name: str,
+    repo: BaseProxyRepo,
+) -> EndpointModel:
+    models = sorted(
+        (model for model in await repo.list_models(project_name) if _is_text_model(model)),
+        key=lambda model: model.name.casefold(),
+    )
+    if not models:
+        raise ProxyError(
+            "No ready text-generation model is available for this background task",
+            status.HTTP_503_SERVICE_UNAVAILABLE,
+        )
+    return models[0]
+
+
+def _is_video_response(response: httpx.Response) -> bool:
+    return response.headers.get("content-type", "").split(";", 1)[0].startswith("video/")
+
+
+def _get_video_store(request: Request) -> OrderedDict[str, _StoredVideo]:
+    store = getattr(request.app.state, "dstack_generated_videos", None)
+    if store is None:
+        store = OrderedDict()
+        request.app.state.dstack_generated_videos = store
+    return store
+
+
+def _store_video(request: Request, model_name: str, response: httpx.Response) -> str:
+    video_id = f"dstack_cached_{secrets.token_urlsafe(18)}"
+    media_type = response.headers.get("content-type", "video/mp4").split(";", 1)[0]
+    store = _get_video_store(request)
+    store[video_id] = _StoredVideo(
+        model_name=model_name,
+        content=response.content,
+        media_type=media_type,
+        created_at=int(time.time()),
+    )
+    while len(store) > _MAX_STORED_VIDEOS:
+        store.popitem(last=False)
+    return video_id
+
+
+def _get_stored_video(request: Request, video_id: str) -> _StoredVideo:
+    video = _get_video_store(request).get(video_id)
+    if video is None:
+        raise ProxyError("Video not found", status.HTTP_404_NOT_FOUND)
+    return video
+
+
+def _stored_video_metadata_response(
+    video_id: str,
+    video: _StoredVideo,
+) -> Response:
+    return Response(
+        content=json.dumps(
+            {
+                "id": video_id,
+                "object": "video",
+                "status": "completed",
+                "model": video.model_name,
+                "created_at": video.created_at,
+            }
+        ),
         media_type="application/json",
     )
 
