@@ -25,6 +25,16 @@ class ChatCompletionsRequest(CoreModel):
     tools: List[Any] = []
     tool_choice: Union[Literal["none", "auto"], Dict] = {}
     user: Optional[str] = None
+    # dstack extensions: optional diffusion controls for image-generation models.
+    # Forwarded to the backend image endpoints only when explicitly set, so the
+    # model keeps its own defaults otherwise. These let clients (e.g. OpenWebUI
+    # advanced/custom parameters) tune generation and, in particular, how much a
+    # reference image conditions image-to-image edits. `seed` (above) is
+    # forwarded the same way. Text/chat models ignore these fields.
+    strength: Optional[float] = None
+    guidance_scale: Optional[float] = None
+    num_inference_steps: Optional[int] = None
+    negative_prompt: Optional[str] = None
 
 
 class ChatCompletionsChoice(CoreModel):

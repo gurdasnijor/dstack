@@ -429,6 +429,11 @@ async def test_image_chat_projection_uses_reference_image_edit(tmp_path, monkeyp
                         ],
                     }
                 ],
+                "strength": 0.45,
+                "seed": 1234,
+                "guidance_scale": 6.5,
+                "num_inference_steps": 30,
+                "negative_prompt": "blurry",
             },
         )
     await upstream_client.aclose()
@@ -447,6 +452,17 @@ async def test_image_chat_projection_uses_reference_image_edit(tmp_path, monkeyp
     assert b'name="image"; filename="reference.png"' in upstream_request.content
     assert b"Content-Type: image/png" in upstream_request.content
     assert reference_content in upstream_request.content
+    # Diffusion controls are forwarded as multipart form fields for img2img.
+    assert b'name="strength"' in upstream_request.content
+    assert b"0.45" in upstream_request.content
+    assert b'name="seed"' in upstream_request.content
+    assert b"1234" in upstream_request.content
+    assert b'name="guidance_scale"' in upstream_request.content
+    assert b"6.5" in upstream_request.content
+    assert b'name="num_inference_steps"' in upstream_request.content
+    assert b"30" in upstream_request.content
+    assert b'name="negative_prompt"' in upstream_request.content
+    assert b"blurry" in upstream_request.content
 
     content = response.json()["choices"][0]["message"]["content"]
     asset_response = await client.get(
@@ -454,6 +470,149 @@ async def test_image_chat_projection_uses_reference_image_edit(tmp_path, monkeyp
     )
     assert asset_response.status_code == 200
     assert asset_response.content == generated_content
+
+
+@pytest.mark.asyncio
+async def test_image_chat_projection_forwards_diffusion_controls_to_generation(
+    tmp_path, monkeypatch
+) -> None:
+    monkeypatch.setenv("DSTACK_PROXY_ASSETS_DIR", str(tmp_path))
+    auth = ProxyTestAuthProvider({"test-proj": {"token"}})
+    repo = GatewayProxyRepo()
+    await repo.set_project(make_project("test-proj"))
+    await repo.set_service(make_service("test-proj", "image-service"))
+    await repo.set_model(
+        make_endpoint_model(
+            "test-proj",
+            "test-image-model",
+            "image-service",
+            modality="image-generation",
+            api="images_generations",
+            request_path="/v1/images/generations",
+        )
+    )
+    generated_content = b"\x89PNG\r\n\x1a\ngenerated"
+    upstream_requests = []
+
+    async def upstream(request: httpx.Request) -> httpx.Response:
+        upstream_requests.append(request)
+        return httpx.Response(
+            200,
+            json={
+                "created": 1,
+                "data": [{"b64_json": base64.b64encode(generated_content).decode()}],
+            },
+        )
+
+    upstream_client = httpx.AsyncClient(
+        transport=httpx.MockTransport(upstream),
+        base_url="http://image-service",
+    )
+    client = make_http_client(repo, auth)
+    with patch(
+        "dstack._internal.proxy.lib.routers.model_proxy.get_service_replica_client",
+        new=AsyncMock(return_value=upstream_client),
+    ):
+        response = await client.post(
+            "http://test-host/proxy/models/test-proj/chat/completions",
+            headers={"Authorization": "Bearer token"},
+            json={
+                "model": "test-image-model",
+                "messages": [{"role": "user", "content": "A glass forest"}],
+                # strength only applies to img2img and must be dropped here.
+                "strength": 0.4,
+                "seed": 99,
+                "guidance_scale": 7.0,
+                "num_inference_steps": 25,
+                "negative_prompt": "lowres",
+            },
+        )
+    await upstream_client.aclose()
+
+    assert response.status_code == 200
+    assert len(upstream_requests) == 1
+    upstream_request = upstream_requests[0]
+    assert upstream_request.url.path == "/v1/images/generations"
+    payload = json.loads(upstream_request.content)
+    assert payload["seed"] == 99
+    assert payload["guidance_scale"] == 7.0
+    assert payload["num_inference_steps"] == 25
+    assert payload["negative_prompt"] == "lowres"
+    # Text-to-image has no reference image, so strength is not forwarded.
+    assert "strength" not in payload
+
+
+@pytest.mark.asyncio
+async def test_image_chat_projection_omits_unset_diffusion_controls(tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("DSTACK_PROXY_ASSETS_DIR", str(tmp_path))
+    auth = ProxyTestAuthProvider({"test-proj": {"token"}})
+    repo = GatewayProxyRepo()
+    await repo.set_project(make_project("test-proj"))
+    await repo.set_service(make_service("test-proj", "image-service"))
+    await repo.set_model(
+        make_endpoint_model(
+            "test-proj",
+            "test-image-model",
+            "image-service",
+            modality="image-generation",
+            api="images_generations",
+            request_path="/v1/images/generations",
+        )
+    )
+    reference_content = b"\x89PNG\r\n\x1a\nreference"
+    upstream_requests = []
+
+    async def upstream(request: httpx.Request) -> httpx.Response:
+        upstream_requests.append(request)
+        return httpx.Response(
+            200,
+            json={
+                "created": 1,
+                "data": [{"b64_json": base64.b64encode(b"generated").decode()}],
+            },
+        )
+
+    upstream_client = httpx.AsyncClient(
+        transport=httpx.MockTransport(upstream),
+        base_url="http://image-service",
+    )
+    client = make_http_client(repo, auth)
+    with patch(
+        "dstack._internal.proxy.lib.routers.model_proxy.get_service_replica_client",
+        new=AsyncMock(return_value=upstream_client),
+    ):
+        response = await client.post(
+            "http://test-host/proxy/models/test-proj/chat/completions",
+            headers={"Authorization": "Bearer token"},
+            json={
+                "model": "test-image-model",
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": "Paint this as a watercolor"},
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": (
+                                        "data:image/png;base64,"
+                                        + base64.b64encode(reference_content).decode()
+                                    )
+                                },
+                            },
+                        ],
+                    }
+                ],
+            },
+        )
+    await upstream_client.aclose()
+
+    assert response.status_code == 200
+    upstream_request = upstream_requests[0]
+    assert upstream_request.url.path == "/v1/images/edits"
+    # No controls set -> the backend keeps its own defaults; none are forwarded.
+    for field in (b"strength", b"seed", b"guidance_scale", b"num_inference_steps"):
+        assert b'name="' + field + b'"' not in upstream_request.content
 
 
 @pytest.mark.asyncio
