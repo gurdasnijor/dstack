@@ -1,0 +1,11 @@
+{
+  "behaviors": [
+    "model shape IR",
+    "GGUF quant/file selection",
+    "gguf-parser output normalization",
+    "runtime fingerprints",
+    "deterministic frontier ordering"
+  ],
+  "commit": "e9ce1b951c9bf08adf57d6576cef5a4897ada3ac",
+  "reference": "github.com/gurdasnijor/dh"
+}

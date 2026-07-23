@@ -1,0 +1,61 @@
+type: service
+name: general-gguf
+
+# Reusable OpenAI-compatible llama.cpp endpoint for text and supported
+# multimodal GGUF repositories. `-hf` selects Q4_K_M by default and downloads
+# a matching multimodal projector when the repository provides one.
+image: ghcr.io/ggml-org/llama.cpp:server-cuda@sha256:b19cec9fe85f11d001f8911d87bc20a0479bfaf8ab99fd8dcef2258a4fd8c0ab
+env:
+  - MODEL_REPO
+  - HF_TOKEN=${{ secrets.HF_TOKEN }}
+  - HF_HOME=/root/.cache/huggingface
+  - CONTEXT_SIZE=32768
+
+commands:
+  - |
+    set -eu
+    if [ -z "${MODEL_REPO:-}" ]; then
+      echo "MODEL_REPO is required, for example org/model-GGUF:Q4_K_M" >&2
+      exit 2
+    fi
+
+    exec /app/llama-server \
+      --hf-repo "$MODEL_REPO" \
+      --alias general-gguf \
+      --host 0.0.0.0 \
+      --port 8080 \
+      --ctx-size "$CONTEXT_SIZE" \
+      --n-gpu-layers 999 \
+      --jinja ${{ run.args }}
+
+port: 8080
+model: general-gguf
+gateway: false
+auth: true
+
+probes:
+  - type: http
+    url: /health
+    interval: 15s
+    timeout: 10s
+    ready_after: 2
+
+# Small and medium GGUFs download quickly enough that this endpoint stays
+# provider-pooled instead of being bound to the regional RunPod volume.
+fleets: [pooled-gpu]
+backends: [vastai, runpod, lambda, verda]
+spot_policy: auto
+max_price: 2.50
+max_duration: 2h
+
+retry:
+  on_events: [no-capacity, interruption]
+  duration: 20m
+
+resources:
+  cpu: x86:8..
+  memory: 64GB..
+  disk: 100GB..
+  gpu:
+    memory: 24GB..
+    count: 1

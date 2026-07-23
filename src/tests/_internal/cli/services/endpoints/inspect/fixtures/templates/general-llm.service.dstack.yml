@@ -1,0 +1,54 @@
+type: service
+name: general-llm
+
+# Stable, pool-wide OpenAI-compatible endpoint for LAN and tailnet clients.
+# The public model alias and service name intentionally stay independent of the
+# backing checkpoint so clients do not need reconfiguration when it is updated.
+image: vllm/vllm-openai:nightly@sha256:7f2bc168366c77fbd8329368f00310d208531c14ece6c2de31a6611ef99f6ec8
+
+env:
+  - HF_TOKEN=${{ secrets.HF_TOKEN }}
+
+commands:
+  - |
+    vllm serve Qwen/Qwen3.5-27B-FP8 \
+      --host 0.0.0.0 \
+      --port 8000 \
+      --served-model-name general-llm \
+      --default-chat-template-kwargs '{"enable_thinking":false}' \
+      --max-model-len 65536 \
+      --gpu-memory-utilization 0.92 \
+      --kv-cache-dtype fp8 \
+      --language-model-only \
+      --reasoning-parser qwen3 \
+      --enable-auto-tool-choice \
+      --tool-call-parser qwen3_coder
+
+port: 8000
+model: general-llm
+gateway: false
+auth: true
+
+volumes:
+  - name: runpod-hf-cache-us-mo-2
+    path: /root/.cache/huggingface
+
+# FP8 lets suitable 80GB+ accelerators in the cache's RunPod region compete.
+backends: [runpod]
+regions: [US-MO-2]
+spot_policy: auto
+max_price: 2.50
+max_duration: 2h
+
+retry:
+  on_events: [no-capacity, interruption]
+  duration: 20m
+
+resources:
+  cpu: 8..
+  memory: 64GB..
+  shm_size: 16GB
+  disk: 150GB..
+  gpu:
+    memory: 80GB..
+    count: 1

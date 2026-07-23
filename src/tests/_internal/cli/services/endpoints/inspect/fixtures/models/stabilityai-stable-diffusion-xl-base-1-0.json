@@ -1,0 +1,541 @@
+{
+  "files": {
+    "model_index.json": {
+      "_class_name": "StableDiffusionXLPipeline",
+      "_diffusers_version": "0.19.0.dev0",
+      "add_watermarker": null,
+      "force_zeros_for_empty_prompt": true,
+      "scheduler": [
+        "diffusers",
+        "EulerDiscreteScheduler"
+      ],
+      "text_encoder": [
+        "transformers",
+        "CLIPTextModel"
+      ],
+      "text_encoder_2": [
+        "transformers",
+        "CLIPTextModelWithProjection"
+      ],
+      "tokenizer": [
+        "transformers",
+        "CLIPTokenizer"
+      ],
+      "tokenizer_2": [
+        "transformers",
+        "CLIPTokenizer"
+      ],
+      "unet": [
+        "diffusers",
+        "UNet2DConditionModel"
+      ],
+      "vae": [
+        "diffusers",
+        "AutoencoderKL"
+      ]
+    },
+    "text_encoder/config.json": {
+      "architectures": [
+        "CLIPTextModel"
+      ],
+      "attention_dropout": 0.0,
+      "bos_token_id": 0,
+      "dropout": 0.0,
+      "eos_token_id": 2,
+      "hidden_act": "quick_gelu",
+      "hidden_size": 768,
+      "initializer_factor": 1.0,
+      "initializer_range": 0.02,
+      "intermediate_size": 3072,
+      "layer_norm_eps": 1e-05,
+      "max_position_embeddings": 77,
+      "model_type": "clip_text_model",
+      "num_attention_heads": 12,
+      "num_hidden_layers": 12,
+      "pad_token_id": 1,
+      "projection_dim": 768,
+      "torch_dtype": "float16",
+      "transformers_version": "4.32.0.dev0",
+      "vocab_size": 49408
+    },
+    "text_encoder_2/config.json": {
+      "architectures": [
+        "CLIPTextModelWithProjection"
+      ],
+      "attention_dropout": 0.0,
+      "bos_token_id": 0,
+      "dropout": 0.0,
+      "eos_token_id": 2,
+      "hidden_act": "gelu",
+      "hidden_size": 1280,
+      "initializer_factor": 1.0,
+      "initializer_range": 0.02,
+      "intermediate_size": 5120,
+      "layer_norm_eps": 1e-05,
+      "max_position_embeddings": 77,
+      "model_type": "clip_text_model",
+      "num_attention_heads": 20,
+      "num_hidden_layers": 32,
+      "pad_token_id": 1,
+      "projection_dim": 1280,
+      "torch_dtype": "float16",
+      "transformers_version": "4.32.0.dev0",
+      "vocab_size": 49408
+    },
+    "unet/config.json": {
+      "_class_name": "UNet2DConditionModel",
+      "_diffusers_version": "0.19.0.dev0",
+      "act_fn": "silu",
+      "addition_embed_type": "text_time",
+      "addition_embed_type_num_heads": 64,
+      "addition_time_embed_dim": 256,
+      "attention_head_dim": [
+        5,
+        10,
+        20
+      ],
+      "block_out_channels": [
+        320,
+        640,
+        1280
+      ],
+      "center_input_sample": false,
+      "class_embed_type": null,
+      "class_embeddings_concat": false,
+      "conv_in_kernel": 3,
+      "conv_out_kernel": 3,
+      "cross_attention_dim": 2048,
+      "cross_attention_norm": null,
+      "down_block_types": [
+        "DownBlock2D",
+        "CrossAttnDownBlock2D",
+        "CrossAttnDownBlock2D"
+      ],
+      "downsample_padding": 1,
+      "dual_cross_attention": false,
+      "encoder_hid_dim": null,
+      "encoder_hid_dim_type": null,
+      "flip_sin_to_cos": true,
+      "freq_shift": 0,
+      "in_channels": 4,
+      "layers_per_block": 2,
+      "mid_block_only_cross_attention": null,
+      "mid_block_scale_factor": 1,
+      "mid_block_type": "UNetMidBlock2DCrossAttn",
+      "norm_eps": 1e-05,
+      "norm_num_groups": 32,
+      "num_attention_heads": null,
+      "num_class_embeds": null,
+      "only_cross_attention": false,
+      "out_channels": 4,
+      "projection_class_embeddings_input_dim": 2816,
+      "resnet_out_scale_factor": 1.0,
+      "resnet_skip_time_act": false,
+      "resnet_time_scale_shift": "default",
+      "sample_size": 128,
+      "time_cond_proj_dim": null,
+      "time_embedding_act_fn": null,
+      "time_embedding_dim": null,
+      "time_embedding_type": "positional",
+      "timestep_post_act": null,
+      "transformer_layers_per_block": [
+        1,
+        2,
+        10
+      ],
+      "up_block_types": [
+        "CrossAttnUpBlock2D",
+        "CrossAttnUpBlock2D",
+        "UpBlock2D"
+      ],
+      "upcast_attention": null,
+      "use_linear_projection": true
+    },
+    "vae/config.json": {
+      "_class_name": "AutoencoderKL",
+      "_diffusers_version": "0.20.0.dev0",
+      "_name_or_path": "../sdxl-vae/",
+      "act_fn": "silu",
+      "block_out_channels": [
+        128,
+        256,
+        512,
+        512
+      ],
+      "down_block_types": [
+        "DownEncoderBlock2D",
+        "DownEncoderBlock2D",
+        "DownEncoderBlock2D",
+        "DownEncoderBlock2D"
+      ],
+      "force_upcast": true,
+      "in_channels": 3,
+      "latent_channels": 4,
+      "layers_per_block": 2,
+      "norm_num_groups": 32,
+      "out_channels": 3,
+      "sample_size": 1024,
+      "scaling_factor": 0.13025,
+      "up_block_types": [
+        "UpDecoderBlock2D",
+        "UpDecoderBlock2D",
+        "UpDecoderBlock2D",
+        "UpDecoderBlock2D"
+      ]
+    },
+    "vae_1_0/config.json": {
+      "_class_name": "AutoencoderKL",
+      "_diffusers_version": "0.19.0.dev0",
+      "act_fn": "silu",
+      "block_out_channels": [
+        128,
+        256,
+        512,
+        512
+      ],
+      "down_block_types": [
+        "DownEncoderBlock2D",
+        "DownEncoderBlock2D",
+        "DownEncoderBlock2D",
+        "DownEncoderBlock2D"
+      ],
+      "force_upcast": true,
+      "in_channels": 3,
+      "latent_channels": 4,
+      "layers_per_block": 2,
+      "norm_num_groups": 32,
+      "out_channels": 3,
+      "sample_size": 1024,
+      "scaling_factor": 0.13025,
+      "up_block_types": [
+        "UpDecoderBlock2D",
+        "UpDecoderBlock2D",
+        "UpDecoderBlock2D",
+        "UpDecoderBlock2D"
+      ]
+    },
+    "vae_decoder/config.json": {
+      "_class_name": "AutoencoderKL",
+      "_diffusers_version": "0.19.0.dev0",
+      "act_fn": "silu",
+      "block_out_channels": [
+        128,
+        256,
+        512,
+        512
+      ],
+      "down_block_types": [
+        "DownEncoderBlock2D",
+        "DownEncoderBlock2D",
+        "DownEncoderBlock2D",
+        "DownEncoderBlock2D"
+      ],
+      "force_upcast": true,
+      "in_channels": 3,
+      "latent_channels": 4,
+      "layers_per_block": 2,
+      "norm_num_groups": 32,
+      "out_channels": 3,
+      "sample_size": 1024,
+      "scaling_factor": 0.13025,
+      "up_block_types": [
+        "UpDecoderBlock2D",
+        "UpDecoderBlock2D",
+        "UpDecoderBlock2D",
+        "UpDecoderBlock2D"
+      ]
+    },
+    "vae_encoder/config.json": {
+      "_class_name": "AutoencoderKL",
+      "_diffusers_version": "0.19.0.dev0",
+      "act_fn": "silu",
+      "block_out_channels": [
+        128,
+        256,
+        512,
+        512
+      ],
+      "down_block_types": [
+        "DownEncoderBlock2D",
+        "DownEncoderBlock2D",
+        "DownEncoderBlock2D",
+        "DownEncoderBlock2D"
+      ],
+      "force_upcast": true,
+      "in_channels": 3,
+      "latent_channels": 4,
+      "layers_per_block": 2,
+      "norm_num_groups": 32,
+      "out_channels": 3,
+      "sample_size": 1024,
+      "scaling_factor": 0.13025,
+      "up_block_types": [
+        "UpDecoderBlock2D",
+        "UpDecoderBlock2D",
+        "UpDecoderBlock2D",
+        "UpDecoderBlock2D"
+      ]
+    }
+  },
+  "fixture_schema": 1,
+  "model_info": {
+    "library_name": "diffusers",
+    "pipeline_tag": "text-to-image",
+    "safetensors": {
+      "parameters": {
+        "F32": 2567463684
+      },
+      "total": 2567463684
+    },
+    "siblings": [
+      {
+        "rfilename": ".gitattributes",
+        "size": 1562
+      },
+      {
+        "rfilename": "01.png",
+        "size": 4608613
+      },
+      {
+        "rfilename": "LICENSE.md",
+        "size": 14109
+      },
+      {
+        "rfilename": "README.md",
+        "size": 8668
+      },
+      {
+        "rfilename": "comparison.png",
+        "size": 130252
+      },
+      {
+        "rfilename": "model_index.json",
+        "size": 609
+      },
+      {
+        "rfilename": "pipeline.png",
+        "size": 80188
+      },
+      {
+        "rfilename": "scheduler/scheduler_config.json",
+        "size": 479
+      },
+      {
+        "rfilename": "sd_xl_base_1.0.safetensors",
+        "size": 6938078334
+      },
+      {
+        "rfilename": "sd_xl_base_1.0_0.9vae.safetensors",
+        "size": 6938078334
+      },
+      {
+        "rfilename": "sd_xl_offset_example-lora_1.0.safetensors",
+        "size": 49553604
+      },
+      {
+        "rfilename": "text_encoder/config.json",
+        "size": 565
+      },
+      {
+        "rfilename": "text_encoder/flax_model.msgpack",
+        "size": 492248682
+      },
+      {
+        "rfilename": "text_encoder/model.fp16.safetensors",
+        "size": 246144152
+      },
+      {
+        "rfilename": "text_encoder/model.onnx",
+        "size": 492587457
+      },
+      {
+        "rfilename": "text_encoder/model.safetensors",
+        "size": 492265168
+      },
+      {
+        "rfilename": "text_encoder/openvino_model.bin",
+        "size": 492242672
+      },
+      {
+        "rfilename": "text_encoder/openvino_model.xml",
+        "size": 1057789
+      },
+      {
+        "rfilename": "text_encoder_2/config.json",
+        "size": 575
+      },
+      {
+        "rfilename": "text_encoder_2/flax_model.msgpack",
+        "size": 2778657095
+      },
+      {
+        "rfilename": "text_encoder_2/model.fp16.safetensors",
+        "size": 1389382176
+      },
+      {
+        "rfilename": "text_encoder_2/model.onnx",
+        "size": 1041992
+      },
+      {
+        "rfilename": "text_encoder_2/model.onnx_data",
+        "size": 2778639360
+      },
+      {
+        "rfilename": "text_encoder_2/model.safetensors",
+        "size": 2778702264
+      },
+      {
+        "rfilename": "text_encoder_2/openvino_model.bin",
+        "size": 2778640120
+      },
+      {
+        "rfilename": "text_encoder_2/openvino_model.xml",
+        "size": 2790191
+      },
+      {
+        "rfilename": "tokenizer/merges.txt",
+        "size": 524619
+      },
+      {
+        "rfilename": "tokenizer/special_tokens_map.json",
+        "size": 472
+      },
+      {
+        "rfilename": "tokenizer/tokenizer_config.json",
+        "size": 737
+      },
+      {
+        "rfilename": "tokenizer/vocab.json",
+        "size": 1059962
+      },
+      {
+        "rfilename": "tokenizer_2/merges.txt",
+        "size": 524619
+      },
+      {
+        "rfilename": "tokenizer_2/special_tokens_map.json",
+        "size": 460
+      },
+      {
+        "rfilename": "tokenizer_2/tokenizer_config.json",
+        "size": 725
+      },
+      {
+        "rfilename": "tokenizer_2/vocab.json",
+        "size": 1059962
+      },
+      {
+        "rfilename": "unet/config.json",
+        "size": 1680
+      },
+      {
+        "rfilename": "unet/diffusion_flax_model.msgpack",
+        "size": 10269915611
+      },
+      {
+        "rfilename": "unet/diffusion_pytorch_model.fp16.safetensors",
+        "size": 5135149760
+      },
+      {
+        "rfilename": "unet/diffusion_pytorch_model.safetensors",
+        "size": 10270077736
+      },
+      {
+        "rfilename": "unet/model.onnx",
+        "size": 7293842
+      },
+      {
+        "rfilename": "unet/model.onnx_data",
+        "size": 10269854720
+      },
+      {
+        "rfilename": "unet/openvino_model.bin",
+        "size": 10269856428
+      },
+      {
+        "rfilename": "unet/openvino_model.xml",
+        "size": 22577438
+      },
+      {
+        "rfilename": "vae/config.json",
+        "size": 642
+      },
+      {
+        "rfilename": "vae/diffusion_flax_model.msgpack",
+        "size": 334623853
+      },
+      {
+        "rfilename": "vae/diffusion_pytorch_model.fp16.safetensors",
+        "size": 167335342
+      },
+      {
+        "rfilename": "vae/diffusion_pytorch_model.safetensors",
+        "size": 334643268
+      },
+      {
+        "rfilename": "vae_1_0/config.json",
+        "size": 607
+      },
+      {
+        "rfilename": "vae_1_0/diffusion_pytorch_model.fp16.safetensors",
+        "size": 167335342
+      },
+      {
+        "rfilename": "vae_1_0/diffusion_pytorch_model.safetensors",
+        "size": 334643268
+      },
+      {
+        "rfilename": "vae_decoder/config.json",
+        "size": 607
+      },
+      {
+        "rfilename": "vae_decoder/model.onnx",
+        "size": 198093688
+      },
+      {
+        "rfilename": "vae_decoder/openvino_model.bin",
+        "size": 197961232
+      },
+      {
+        "rfilename": "vae_decoder/openvino_model.xml",
+        "size": 992181
+      },
+      {
+        "rfilename": "vae_encoder/config.json",
+        "size": 607
+      },
+      {
+        "rfilename": "vae_encoder/model.onnx",
+        "size": 136775724
+      },
+      {
+        "rfilename": "vae_encoder/openvino_model.bin",
+        "size": 136655184
+      },
+      {
+        "rfilename": "vae_encoder/openvino_model.xml",
+        "size": 849965
+      }
+    ],
+    "tags": [
+      "diffusers",
+      "onnx",
+      "safetensors",
+      "text-to-image",
+      "stable-diffusion",
+      "arxiv:2307.01952",
+      "arxiv:2211.01324",
+      "arxiv:2108.01073",
+      "arxiv:2112.10752",
+      "license:openrail++",
+      "endpoints_compatible",
+      "diffusers:StableDiffusionXLPipeline",
+      "deploy:azure",
+      "deploy:sagemaker",
+      "region:us"
+    ]
+  },
+  "repo": "stabilityai/stable-diffusion-xl-base-1.0",
+  "requested_revision": null,
+  "revision": "462165984030d82259a11f4367a4eed129e94a7b"
+}

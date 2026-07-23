@@ -1,0 +1,1616 @@
+{
+  "bartowski-qwen2-5-7b-instruct-gguf": {
+    "components": [
+      {
+        "checkpoint_bytes": 4683074240,
+        "dtype": "unknown",
+        "files": [
+          "Qwen2.5-7B-Instruct-Q4_K_M.gguf"
+        ],
+        "name": "root",
+        "params": null,
+        "residency_confidence": "low",
+        "resident_weight_bytes": 4683074240,
+        "source_variant": null
+      }
+    ],
+    "diffusion_arch": null,
+    "gguf": {
+      "available_quants": [
+        {
+          "checkpoint_bytes": 15237853600,
+          "file": "Qwen2.5-7B-Instruct-f16.gguf",
+          "quant": "F16",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-f16.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 2780342976,
+          "file": "Qwen2.5-7B-Instruct-IQ2_M.gguf",
+          "quant": "IQ2_M",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-IQ2_M.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 3574012608,
+          "file": "Qwen2.5-7B-Instruct-IQ3_M.gguf",
+          "quant": "IQ3_M",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-IQ3_M.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 3346256576,
+          "file": "Qwen2.5-7B-Instruct-IQ3_XS.gguf",
+          "quant": "IQ3_XS",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-IQ3_XS.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 4218473152,
+          "file": "Qwen2.5-7B-Instruct-IQ4_XS.gguf",
+          "quant": "IQ4_XS",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-IQ4_XS.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 3015940800,
+          "file": "Qwen2.5-7B-Instruct-Q2_K.gguf",
+          "quant": "Q2_K",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q2_K.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 3548164800,
+          "file": "Qwen2.5-7B-Instruct-Q2_K_L.gguf",
+          "quant": "Q2_K_L",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q2_K_L.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 4088459968,
+          "file": "Qwen2.5-7B-Instruct-Q3_K_L.gguf",
+          "quant": "Q3_K_L",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q3_K_L.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 3808391872,
+          "file": "Qwen2.5-7B-Instruct-Q3_K_M.gguf",
+          "quant": "Q3_K_M",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q3_K_M.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 3492369088,
+          "file": "Qwen2.5-7B-Instruct-Q3_K_S.gguf",
+          "quant": "Q3_K_S",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q3_K_S.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 4565332672,
+          "file": "Qwen2.5-7B-Instruct-Q3_K_XL.gguf",
+          "quant": "Q3_K_XL",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q3_K_XL.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 4444121792,
+          "file": "Qwen2.5-7B-Instruct-Q4_0.gguf",
+          "quant": "Q4_0",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q4_0.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 4431391424,
+          "file": "Qwen2.5-7B-Instruct-Q4_0_4_4.gguf",
+          "quant": "Q4_0_4_4",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q4_0_4_4.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 4431391424,
+          "file": "Qwen2.5-7B-Instruct-Q4_0_4_8.gguf",
+          "quant": "Q4_0_4_8",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q4_0_4_8.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 4431391424,
+          "file": "Qwen2.5-7B-Instruct-Q4_0_8_8.gguf",
+          "quant": "Q4_0_8_8",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q4_0_8_8.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 5087564480,
+          "file": "Qwen2.5-7B-Instruct-Q4_K_L.gguf",
+          "quant": "Q4_K_L",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q4_K_L.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 4683074240,
+          "file": "Qwen2.5-7B-Instruct-Q4_K_M.gguf",
+          "quant": "Q4_K_M",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q4_K_M.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 4457769664,
+          "file": "Qwen2.5-7B-Instruct-Q4_K_S.gguf",
+          "quant": "Q4_K_S",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q4_K_S.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 5781197504,
+          "file": "Qwen2.5-7B-Instruct-Q5_K_L.gguf",
+          "quant": "Q5_K_L",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q5_K_L.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 5444831936,
+          "file": "Qwen2.5-7B-Instruct-Q5_K_M.gguf",
+          "quant": "Q5_K_M",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q5_K_M.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 5315177152,
+          "file": "Qwen2.5-7B-Instruct-Q5_K_S.gguf",
+          "quant": "Q5_K_S",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q5_K_S.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 6254199488,
+          "file": "Qwen2.5-7B-Instruct-Q6_K.gguf",
+          "quant": "Q6_K",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q6_K.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 6518182592,
+          "file": "Qwen2.5-7B-Instruct-Q6_K_L.gguf",
+          "quant": "Q6_K_L",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q6_K_L.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 8098525888,
+          "file": "Qwen2.5-7B-Instruct-Q8_0.gguf",
+          "quant": "Q8_0",
+          "shard_set": [
+            "Qwen2.5-7B-Instruct-Q8_0.gguf"
+          ]
+        }
+      ],
+      "selected_file": "Qwen2.5-7B-Instruct-Q4_K_M.gguf",
+      "selected_shard_set": [
+        "Qwen2.5-7B-Instruct-Q4_K_M.gguf"
+      ],
+      "selection_reason": "default_q4km",
+      "selector": null
+    },
+    "ir_version": 2,
+    "library": "gguf",
+    "modality": "gguf",
+    "model": "bartowski/Qwen2.5-7B-Instruct-GGUF",
+    "pipeline_class": null,
+    "quantization": {
+      "bits": null,
+      "config": {},
+      "method": "gguf:Q4_K_M"
+    },
+    "revision": "8911e8a47f92bac19d6f5c64a2e2095bd2f7d031",
+    "sha_pinned": true,
+    "sources": {
+      "component_configs": [],
+      "config": null,
+      "gguf_parser": false,
+      "safetensors_headers": false
+    },
+    "text_arch": null
+  },
+  "lzyvegetable-flux-1-schnell": {
+    "components": [
+      {
+        "checkpoint_bytes": 246144352,
+        "dtype": "bf16",
+        "files": [
+          "text_encoder/model.safetensors"
+        ],
+        "name": "text_encoder",
+        "params": null,
+        "residency_confidence": "medium",
+        "resident_weight_bytes": 246144352,
+        "source_variant": null
+      },
+      {
+        "checkpoint_bytes": 9524648584,
+        "dtype": "bf16",
+        "files": [
+          "text_encoder_2/model-00001-of-00002.safetensors",
+          "text_encoder_2/model-00002-of-00002.safetensors"
+        ],
+        "name": "text_encoder_2",
+        "params": null,
+        "residency_confidence": "medium",
+        "resident_weight_bytes": 9524648584,
+        "source_variant": null
+      },
+      {
+        "checkpoint_bytes": 23782494032,
+        "dtype": "unknown",
+        "files": [
+          "transformer/diffusion_pytorch_model-00001-of-00003.safetensors",
+          "transformer/diffusion_pytorch_model-00002-of-00003.safetensors",
+          "transformer/diffusion_pytorch_model-00003-of-00003.safetensors"
+        ],
+        "name": "transformer",
+        "params": null,
+        "residency_confidence": "medium",
+        "resident_weight_bytes": 23782494032,
+        "source_variant": null
+      },
+      {
+        "checkpoint_bytes": 167666902,
+        "dtype": "unknown",
+        "files": [
+          "vae/diffusion_pytorch_model.safetensors"
+        ],
+        "name": "vae",
+        "params": null,
+        "residency_confidence": "medium",
+        "resident_weight_bytes": 167666902,
+        "source_variant": null
+      }
+    ],
+    "diffusion_arch": {
+      "components_order": [
+        "text_encoder",
+        "text_encoder_2",
+        "transformer",
+        "vae"
+      ],
+      "default_sample_size": null,
+      "latent_channels": 16,
+      "text_encoder_hidden_size": 4096,
+      "text_encoder_hidden_source": "config",
+      "transformer": {
+        "hidden_size": 3072,
+        "num_layers": 19,
+        "params": null,
+        "patch_size": 1,
+        "temporal_patch_size": 1
+      },
+      "vae_spatial_factor": 8,
+      "vae_temporal_factor": 1
+    },
+    "gguf": null,
+    "ir_version": 2,
+    "library": "diffusers",
+    "modality": "image",
+    "model": "lzyvegetable/FLUX.1-schnell",
+    "pipeline_class": "FluxPipeline",
+    "quantization": {
+      "bits": null,
+      "config": {},
+      "method": null
+    },
+    "revision": "cb2d0f958483a378c26558405a06224a6889b9f4",
+    "sha_pinned": true,
+    "sources": {
+      "component_configs": [
+        "text_encoder/config.json",
+        "text_encoder_2/config.json",
+        "transformer/config.json",
+        "vae/config.json"
+      ],
+      "config": "model_index.json",
+      "gguf_parser": false,
+      "safetensors_headers": false
+    },
+    "text_arch": null
+  },
+  "neuralmagic-meta-llama-3-1-8b-instruct-fp8": {
+    "components": [
+      {
+        "checkpoint_bytes": 9081287016,
+        "dtype": "bf16",
+        "files": [
+          "model-00001-of-00002.safetensors",
+          "model-00002-of-00002.safetensors"
+        ],
+        "name": "root",
+        "params": 8030261696,
+        "residency_confidence": "medium",
+        "resident_weight_bytes": 9081287016,
+        "source_variant": null
+      }
+    ],
+    "diffusion_arch": null,
+    "gguf": null,
+    "ir_version": 2,
+    "library": "transformers",
+    "modality": "text",
+    "model": "neuralmagic/Meta-Llama-3.1-8B-Instruct-FP8",
+    "pipeline_class": null,
+    "quantization": {
+      "bits": 8,
+      "config": {
+        "config_groups": {
+          "group_0": {
+            "input_activations": {
+              "block_structure": null,
+              "dynamic": false,
+              "group_size": null,
+              "num_bits": 8,
+              "observer": "minmax",
+              "observer_kwargs": {},
+              "strategy": "tensor",
+              "symmetric": true,
+              "type": "float"
+            },
+            "output_activations": null,
+            "targets": [
+              "Linear"
+            ],
+            "weights": {
+              "block_structure": null,
+              "dynamic": false,
+              "group_size": null,
+              "num_bits": 8,
+              "observer": "minmax",
+              "observer_kwargs": {},
+              "strategy": "tensor",
+              "symmetric": true,
+              "type": "float"
+            }
+          }
+        },
+        "format": "naive-quantized",
+        "global_compression_ratio": 1.4590163747613412,
+        "ignore": [
+          "lm_head"
+        ],
+        "kv_cache_scheme": null,
+        "quant_method": "compressed-tensors",
+        "quantization_status": "frozen"
+      },
+      "method": "fp8"
+    },
+    "revision": "12fd6884d2585dd4d020373e7f39f74507b31866",
+    "sha_pinned": true,
+    "sources": {
+      "component_configs": [],
+      "config": "config.json",
+      "gguf_parser": false,
+      "safetensors_headers": false
+    },
+    "text_arch": {
+      "architectures": [
+        "LlamaForCausalLM"
+      ],
+      "attention_types": [
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full"
+      ],
+      "head_dim": 128,
+      "hidden_size": 4096,
+      "hybrid": false,
+      "linear_state_size": 8192,
+      "linear_state_source": "fallback",
+      "max_position_embeddings": 131072,
+      "moe": null,
+      "num_heads": 32,
+      "num_kv_heads": 8,
+      "num_layers": 32,
+      "sliding_window": null
+    }
+  },
+  "qwen-qwen2-5-7b-instruct": {
+    "components": [
+      {
+        "checkpoint_bytes": 15231271888,
+        "dtype": "bf16",
+        "files": [
+          "model-00001-of-00004.safetensors",
+          "model-00002-of-00004.safetensors",
+          "model-00003-of-00004.safetensors",
+          "model-00004-of-00004.safetensors"
+        ],
+        "name": "root",
+        "params": 7615616512,
+        "residency_confidence": "high",
+        "resident_weight_bytes": 15231233024,
+        "source_variant": null
+      }
+    ],
+    "diffusion_arch": null,
+    "gguf": null,
+    "ir_version": 2,
+    "library": "transformers",
+    "modality": "text",
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "pipeline_class": null,
+    "quantization": {
+      "bits": null,
+      "config": {},
+      "method": null
+    },
+    "revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+    "sha_pinned": true,
+    "sources": {
+      "component_configs": [],
+      "config": "config.json",
+      "gguf_parser": false,
+      "safetensors_headers": false
+    },
+    "text_arch": {
+      "architectures": [
+        "Qwen2ForCausalLM"
+      ],
+      "attention_types": [
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full"
+      ],
+      "head_dim": 128,
+      "hidden_size": 3584,
+      "hybrid": false,
+      "linear_state_size": 7168,
+      "linear_state_source": "fallback",
+      "max_position_embeddings": 32768,
+      "moe": null,
+      "num_heads": 28,
+      "num_kv_heads": 4,
+      "num_layers": 28,
+      "sliding_window": 131072
+    }
+  },
+  "qwen-qwen2-5-7b-instruct-awq": {
+    "components": [
+      {
+        "checkpoint_bytes": 5570829760,
+        "dtype": "fp16",
+        "files": [
+          "model-00001-of-00002.safetensors",
+          "model-00002-of-00002.safetensors"
+        ],
+        "name": "root",
+        "params": 7615616512,
+        "residency_confidence": "medium",
+        "resident_weight_bytes": 5570829760,
+        "source_variant": null
+      }
+    ],
+    "diffusion_arch": null,
+    "gguf": null,
+    "ir_version": 2,
+    "library": "transformers",
+    "modality": "text",
+    "model": "Qwen/Qwen2.5-7B-Instruct-AWQ",
+    "pipeline_class": null,
+    "quantization": {
+      "bits": 4,
+      "config": {
+        "bits": 4,
+        "group_size": 128,
+        "modules_to_not_convert": null,
+        "quant_method": "awq",
+        "version": "gemm",
+        "zero_point": true
+      },
+      "method": "awq"
+    },
+    "revision": "b25037543e9394b818fdfca67ab2a00ecc7dd641",
+    "sha_pinned": true,
+    "sources": {
+      "component_configs": [],
+      "config": "config.json",
+      "gguf_parser": false,
+      "safetensors_headers": false
+    },
+    "text_arch": {
+      "architectures": [
+        "Qwen2ForCausalLM"
+      ],
+      "attention_types": [
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full"
+      ],
+      "head_dim": 128,
+      "hidden_size": 3584,
+      "hybrid": false,
+      "linear_state_size": 7168,
+      "linear_state_source": "fallback",
+      "max_position_embeddings": 32768,
+      "moe": null,
+      "num_heads": 28,
+      "num_kv_heads": 4,
+      "num_layers": 28,
+      "sliding_window": 131072
+    }
+  },
+  "qwen-qwen2-5-vl-7b-instruct": {
+    "components": [
+      {
+        "checkpoint_bytes": 16584414560,
+        "dtype": "bf16",
+        "files": [
+          "model-00001-of-00005.safetensors",
+          "model-00002-of-00005.safetensors",
+          "model-00003-of-00005.safetensors",
+          "model-00004-of-00005.safetensors",
+          "model-00005-of-00005.safetensors"
+        ],
+        "name": "root",
+        "params": 8292166656,
+        "residency_confidence": "high",
+        "resident_weight_bytes": 16584333312,
+        "source_variant": null
+      }
+    ],
+    "diffusion_arch": null,
+    "gguf": null,
+    "ir_version": 2,
+    "library": "transformers",
+    "modality": "vlm",
+    "model": "Qwen/Qwen2.5-VL-7B-Instruct",
+    "pipeline_class": null,
+    "quantization": {
+      "bits": null,
+      "config": {},
+      "method": null
+    },
+    "revision": "cc594898137f460bfe9f0759e9844b3ce807cfb5",
+    "sha_pinned": true,
+    "sources": {
+      "component_configs": [],
+      "config": "config.json",
+      "gguf_parser": false,
+      "safetensors_headers": false
+    },
+    "text_arch": {
+      "architectures": [
+        "Qwen2_5_VLForConditionalGeneration"
+      ],
+      "attention_types": [
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full"
+      ],
+      "head_dim": 128,
+      "hidden_size": 3584,
+      "hybrid": false,
+      "linear_state_size": 7168,
+      "linear_state_source": "fallback",
+      "max_position_embeddings": 128000,
+      "moe": null,
+      "num_heads": 28,
+      "num_kv_heads": 4,
+      "num_layers": 28,
+      "sliding_window": 32768
+    }
+  },
+  "qwen-qwen3-30b-a3b": {
+    "components": [
+      {
+        "checkpoint_bytes": 61066575648,
+        "dtype": "bf16",
+        "files": [
+          "model-00001-of-00016.safetensors",
+          "model-00002-of-00016.safetensors",
+          "model-00003-of-00016.safetensors",
+          "model-00004-of-00016.safetensors",
+          "model-00005-of-00016.safetensors",
+          "model-00006-of-00016.safetensors",
+          "model-00007-of-00016.safetensors",
+          "model-00008-of-00016.safetensors",
+          "model-00009-of-00016.safetensors",
+          "model-00010-of-00016.safetensors",
+          "model-00011-of-00016.safetensors",
+          "model-00012-of-00016.safetensors",
+          "model-00013-of-00016.safetensors",
+          "model-00014-of-00016.safetensors",
+          "model-00015-of-00016.safetensors",
+          "model-00016-of-00016.safetensors"
+        ],
+        "name": "root",
+        "params": 30532122624,
+        "residency_confidence": "high",
+        "resident_weight_bytes": 61064245248,
+        "source_variant": null
+      }
+    ],
+    "diffusion_arch": null,
+    "gguf": null,
+    "ir_version": 2,
+    "library": "transformers",
+    "modality": "text",
+    "model": "Qwen/Qwen3-30B-A3B",
+    "pipeline_class": null,
+    "quantization": {
+      "bits": null,
+      "config": {},
+      "method": null
+    },
+    "revision": "ad44e777bcd18fa416d9da3bd8f70d33ebb85d39",
+    "sha_pinned": true,
+    "sources": {
+      "component_configs": [],
+      "config": "config.json",
+      "gguf_parser": false,
+      "safetensors_headers": false
+    },
+    "text_arch": {
+      "architectures": [
+        "Qwen3MoeForCausalLM"
+      ],
+      "attention_types": [
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full"
+      ],
+      "head_dim": 128,
+      "hidden_size": 2048,
+      "hybrid": false,
+      "linear_state_size": 4096,
+      "linear_state_source": "fallback",
+      "max_position_embeddings": 40960,
+      "moe": {
+        "active_params": null,
+        "num_experts": 128,
+        "total_params": 30532122624
+      },
+      "num_heads": 32,
+      "num_kv_heads": 4,
+      "num_layers": 48,
+      "sliding_window": null
+    }
+  },
+  "qwen-qwen3-5-9b": {
+    "components": [
+      {
+        "checkpoint_bytes": 19306310880,
+        "dtype": "unknown",
+        "files": [
+          "model.safetensors-00001-of-00004.safetensors",
+          "model.safetensors-00002-of-00004.safetensors",
+          "model.safetensors-00003-of-00004.safetensors",
+          "model.safetensors-00004-of-00004.safetensors"
+        ],
+        "name": "root",
+        "params": 9653104368,
+        "residency_confidence": "high",
+        "resident_weight_bytes": 19306216416,
+        "source_variant": null
+      }
+    ],
+    "diffusion_arch": null,
+    "gguf": null,
+    "ir_version": 2,
+    "library": "transformers",
+    "modality": "vlm",
+    "model": "Qwen/Qwen3.5-9B",
+    "pipeline_class": null,
+    "quantization": {
+      "bits": null,
+      "config": {},
+      "method": null
+    },
+    "revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+    "sha_pinned": true,
+    "sources": {
+      "component_configs": [],
+      "config": "config.json",
+      "gguf_parser": false,
+      "safetensors_headers": false
+    },
+    "text_arch": {
+      "architectures": [
+        "Qwen3_5ForConditionalGeneration"
+      ],
+      "attention_types": [
+        "linear",
+        "linear",
+        "linear",
+        "full",
+        "linear",
+        "linear",
+        "linear",
+        "full",
+        "linear",
+        "linear",
+        "linear",
+        "full",
+        "linear",
+        "linear",
+        "linear",
+        "full",
+        "linear",
+        "linear",
+        "linear",
+        "full",
+        "linear",
+        "linear",
+        "linear",
+        "full",
+        "linear",
+        "linear",
+        "linear",
+        "full",
+        "linear",
+        "linear",
+        "linear",
+        "full"
+      ],
+      "head_dim": 256,
+      "hidden_size": 4096,
+      "hybrid": true,
+      "linear_state_size": 8192,
+      "linear_state_source": "fallback",
+      "max_position_embeddings": 262144,
+      "moe": null,
+      "num_heads": 16,
+      "num_kv_heads": 4,
+      "num_layers": 32,
+      "sliding_window": null
+    }
+  },
+  "qwen-qwen3-8b": {
+    "components": [
+      {
+        "checkpoint_bytes": 16381516776,
+        "dtype": "bf16",
+        "files": [
+          "model-00001-of-00005.safetensors",
+          "model-00002-of-00005.safetensors",
+          "model-00003-of-00005.safetensors",
+          "model-00004-of-00005.safetensors",
+          "model-00005-of-00005.safetensors"
+        ],
+        "name": "root",
+        "params": 8190735360,
+        "residency_confidence": "high",
+        "resident_weight_bytes": 16381470720,
+        "source_variant": null
+      }
+    ],
+    "diffusion_arch": null,
+    "gguf": null,
+    "ir_version": 2,
+    "library": "transformers",
+    "modality": "text",
+    "model": "Qwen/Qwen3-8B",
+    "pipeline_class": null,
+    "quantization": {
+      "bits": null,
+      "config": {},
+      "method": null
+    },
+    "revision": "b968826d9c46dd6066d109eabc6255188de91218",
+    "sha_pinned": true,
+    "sources": {
+      "component_configs": [],
+      "config": "config.json",
+      "gguf_parser": false,
+      "safetensors_headers": false
+    },
+    "text_arch": {
+      "architectures": [
+        "Qwen3ForCausalLM"
+      ],
+      "attention_types": [
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full"
+      ],
+      "head_dim": 128,
+      "hidden_size": 4096,
+      "hybrid": false,
+      "linear_state_size": 8192,
+      "linear_state_source": "fallback",
+      "max_position_embeddings": 40960,
+      "moe": null,
+      "num_heads": 32,
+      "num_kv_heads": 8,
+      "num_layers": 36,
+      "sliding_window": null
+    }
+  },
+  "stabilityai-stable-diffusion-xl-base-1-0": {
+    "components": [
+      {
+        "checkpoint_bytes": 492265168,
+        "dtype": "fp16",
+        "files": [
+          "text_encoder/model.safetensors"
+        ],
+        "name": "text_encoder",
+        "params": null,
+        "residency_confidence": "medium",
+        "resident_weight_bytes": 492265168,
+        "source_variant": null
+      },
+      {
+        "checkpoint_bytes": 2778702264,
+        "dtype": "fp16",
+        "files": [
+          "text_encoder_2/model.safetensors"
+        ],
+        "name": "text_encoder_2",
+        "params": null,
+        "residency_confidence": "medium",
+        "resident_weight_bytes": 2778702264,
+        "source_variant": null
+      },
+      {
+        "checkpoint_bytes": 10270077736,
+        "dtype": "unknown",
+        "files": [
+          "unet/diffusion_pytorch_model.safetensors"
+        ],
+        "name": "unet",
+        "params": null,
+        "residency_confidence": "medium",
+        "resident_weight_bytes": 10270077736,
+        "source_variant": null
+      },
+      {
+        "checkpoint_bytes": 334643268,
+        "dtype": "unknown",
+        "files": [
+          "vae/diffusion_pytorch_model.safetensors"
+        ],
+        "name": "vae",
+        "params": null,
+        "residency_confidence": "medium",
+        "resident_weight_bytes": 334643268,
+        "source_variant": null
+      }
+    ],
+    "diffusion_arch": {
+      "components_order": [
+        "text_encoder",
+        "text_encoder_2",
+        "unet",
+        "vae"
+      ],
+      "default_sample_size": 128,
+      "latent_channels": 4,
+      "text_encoder_hidden_size": 1280,
+      "text_encoder_hidden_source": "config",
+      "transformer": {
+        "hidden_size": 1280,
+        "num_layers": null,
+        "params": null,
+        "patch_size": 1,
+        "temporal_patch_size": 1
+      },
+      "vae_spatial_factor": 8,
+      "vae_temporal_factor": 1
+    },
+    "gguf": null,
+    "ir_version": 2,
+    "library": "diffusers",
+    "modality": "image",
+    "model": "stabilityai/stable-diffusion-xl-base-1.0",
+    "pipeline_class": "StableDiffusionXLPipeline",
+    "quantization": {
+      "bits": null,
+      "config": {},
+      "method": null
+    },
+    "revision": "462165984030d82259a11f4367a4eed129e94a7b",
+    "sha_pinned": true,
+    "sources": {
+      "component_configs": [
+        "text_encoder/config.json",
+        "text_encoder_2/config.json",
+        "unet/config.json",
+        "vae/config.json",
+        "vae_1_0/config.json",
+        "vae_decoder/config.json",
+        "vae_encoder/config.json"
+      ],
+      "config": "model_index.json",
+      "gguf_parser": false,
+      "safetensors_headers": false
+    },
+    "text_arch": null
+  },
+  "stabilityai-triposr": {
+    "components": [
+      {
+        "checkpoint_bytes": 1677246742,
+        "dtype": "unknown",
+        "files": [
+          "model.ckpt"
+        ],
+        "name": "root",
+        "params": null,
+        "residency_confidence": "low",
+        "resident_weight_bytes": 1677246742,
+        "source_variant": null
+      }
+    ],
+    "diffusion_arch": null,
+    "gguf": null,
+    "ir_version": 2,
+    "library": "unknown",
+    "modality": "research",
+    "model": "stabilityai/TripoSR",
+    "pipeline_class": null,
+    "quantization": {
+      "bits": null,
+      "config": {},
+      "method": null
+    },
+    "revision": "5b521936b01fbe1890f6f9baed0254ab6351c04a",
+    "sha_pinned": true,
+    "sources": {
+      "component_configs": [],
+      "config": null,
+      "gguf_parser": false,
+      "safetensors_headers": false
+    },
+    "text_arch": null
+  },
+  "unsloth-qwen3-30b-a3b-gguf": {
+    "components": [
+      {
+        "checkpoint_bytes": 18556686912,
+        "dtype": "unknown",
+        "files": [
+          "Qwen3-30B-A3B-Q4_K_M.gguf"
+        ],
+        "name": "root",
+        "params": null,
+        "residency_confidence": "low",
+        "resident_weight_bytes": 18556686912,
+        "source_variant": null
+      }
+    ],
+    "diffusion_arch": null,
+    "gguf": {
+      "available_quants": [
+        {
+          "checkpoint_bytes": 61095803424,
+          "file": "BF16/Qwen3-30B-A3B-BF16-00001-of-00002.gguf",
+          "quant": "BF16",
+          "shard_set": [
+            "BF16/Qwen3-30B-A3B-BF16-00001-of-00002.gguf",
+            "BF16/Qwen3-30B-A3B-BF16-00002-of-00002.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 9666859584,
+          "file": "Qwen3-30B-A3B-UD-IQ1_M.gguf",
+          "quant": "IQ1_M",
+          "shard_set": [
+            "Qwen3-30B-A3B-UD-IQ1_M.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 9043300928,
+          "file": "Qwen3-30B-A3B-UD-IQ1_S.gguf",
+          "quant": "IQ1_S",
+          "shard_set": [
+            "Qwen3-30B-A3B-UD-IQ1_S.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 10865578560,
+          "file": "Qwen3-30B-A3B-UD-IQ2_M.gguf",
+          "quant": "IQ2_M",
+          "shard_set": [
+            "Qwen3-30B-A3B-UD-IQ2_M.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 10362262080,
+          "file": "Qwen3-30B-A3B-UD-IQ2_XXS.gguf",
+          "quant": "IQ2_XXS",
+          "shard_set": [
+            "Qwen3-30B-A3B-UD-IQ2_XXS.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 12888085056,
+          "file": "Qwen3-30B-A3B-UD-IQ3_XXS.gguf",
+          "quant": "IQ3_XXS",
+          "shard_set": [
+            "Qwen3-30B-A3B-UD-IQ3_XXS.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 17310782016,
+          "file": "Qwen3-30B-A3B-IQ4_NL.gguf",
+          "quant": "IQ4_NL",
+          "shard_set": [
+            "Qwen3-30B-A3B-IQ4_NL.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 16378073664,
+          "file": "Qwen3-30B-A3B-IQ4_XS.gguf",
+          "quant": "IQ4_XS",
+          "shard_set": [
+            "Qwen3-30B-A3B-IQ4_XS.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 11258610240,
+          "file": "Qwen3-30B-A3B-Q2_K.gguf",
+          "quant": "Q2_K",
+          "shard_set": [
+            "Qwen3-30B-A3B-Q2_K.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 11331539520,
+          "file": "Qwen3-30B-A3B-Q2_K_L.gguf",
+          "quant": "Q2_K_L",
+          "shard_set": [
+            "Qwen3-30B-A3B-Q2_K_L.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 11814277696,
+          "file": "Qwen3-30B-A3B-UD-Q2_K_XL.gguf",
+          "quant": "Q2_K_XL",
+          "shard_set": [
+            "Qwen3-30B-A3B-UD-Q2_K_XL.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 14711847488,
+          "file": "Qwen3-30B-A3B-Q3_K_M.gguf",
+          "quant": "Q3_K_M",
+          "shard_set": [
+            "Qwen3-30B-A3B-Q3_K_M.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 13292468800,
+          "file": "Qwen3-30B-A3B-Q3_K_S.gguf",
+          "quant": "Q3_K_S",
+          "shard_set": [
+            "Qwen3-30B-A3B-Q3_K_S.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 13833048640,
+          "file": "Qwen3-30B-A3B-UD-Q3_K_XL.gguf",
+          "quant": "Q3_K_XL",
+          "shard_set": [
+            "Qwen3-30B-A3B-UD-Q3_K_XL.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 17379988032,
+          "file": "Qwen3-30B-A3B-Q4_0.gguf",
+          "quant": "Q4_0",
+          "shard_set": [
+            "Qwen3-30B-A3B-Q4_0.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 19192500800,
+          "file": "Qwen3-30B-A3B-Q4_1.gguf",
+          "quant": "Q4_1",
+          "shard_set": [
+            "Qwen3-30B-A3B-Q4_1.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 18556686912,
+          "file": "Qwen3-30B-A3B-Q4_K_M.gguf",
+          "quant": "Q4_K_M",
+          "shard_set": [
+            "Qwen3-30B-A3B-Q4_K_M.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 17456009792,
+          "file": "Qwen3-30B-A3B-Q4_K_S.gguf",
+          "quant": "Q4_K_S",
+          "shard_set": [
+            "Qwen3-30B-A3B-Q4_K_S.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 17715663424,
+          "file": "Qwen3-30B-A3B-UD-Q4_K_XL.gguf",
+          "quant": "Q4_K_XL",
+          "shard_set": [
+            "Qwen3-30B-A3B-UD-Q4_K_XL.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 21725581888,
+          "file": "Qwen3-30B-A3B-Q5_K_M.gguf",
+          "quant": "Q5_K_M",
+          "shard_set": [
+            "Qwen3-30B-A3B-Q5_K_M.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 21080511040,
+          "file": "Qwen3-30B-A3B-Q5_K_S.gguf",
+          "quant": "Q5_K_S",
+          "shard_set": [
+            "Qwen3-30B-A3B-Q5_K_S.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 21740302912,
+          "file": "Qwen3-30B-A3B-UD-Q5_K_XL.gguf",
+          "quant": "Q5_K_XL",
+          "shard_set": [
+            "Qwen3-30B-A3B-UD-Q5_K_XL.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 25092532800,
+          "file": "Qwen3-30B-A3B-Q6_K.gguf",
+          "quant": "Q6_K",
+          "shard_set": [
+            "Qwen3-30B-A3B-Q6_K.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 26340325952,
+          "file": "Qwen3-30B-A3B-UD-Q6_K_XL.gguf",
+          "quant": "Q6_K_XL",
+          "shard_set": [
+            "Qwen3-30B-A3B-UD-Q6_K_XL.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 32483932736,
+          "file": "Qwen3-30B-A3B-Q8_0.gguf",
+          "quant": "Q8_0",
+          "shard_set": [
+            "Qwen3-30B-A3B-Q8_0.gguf"
+          ]
+        },
+        {
+          "checkpoint_bytes": 35989944896,
+          "file": "Qwen3-30B-A3B-UD-Q8_K_XL.gguf",
+          "quant": "Q8_K_XL",
+          "shard_set": [
+            "Qwen3-30B-A3B-UD-Q8_K_XL.gguf"
+          ]
+        }
+      ],
+      "selected_file": "Qwen3-30B-A3B-Q4_K_M.gguf",
+      "selected_shard_set": [
+        "Qwen3-30B-A3B-Q4_K_M.gguf"
+      ],
+      "selection_reason": "default_q4km",
+      "selector": null
+    },
+    "ir_version": 2,
+    "library": "gguf",
+    "modality": "gguf",
+    "model": "unsloth/Qwen3-30B-A3B-GGUF",
+    "pipeline_class": null,
+    "quantization": {
+      "bits": null,
+      "config": {},
+      "method": "gguf:Q4_K_M"
+    },
+    "revision": "d5b1d57bd0b504ac62ae6c725904e96ef228dc74",
+    "sha_pinned": true,
+    "sources": {
+      "component_configs": [],
+      "config": "config.json",
+      "gguf_parser": false,
+      "safetensors_headers": false
+    },
+    "text_arch": {
+      "architectures": [
+        "Qwen3MoeForCausalLM"
+      ],
+      "attention_types": [
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full",
+        "full"
+      ],
+      "head_dim": 128,
+      "hidden_size": 2048,
+      "hybrid": false,
+      "linear_state_size": 4096,
+      "linear_state_source": "fallback",
+      "max_position_embeddings": 40960,
+      "moe": {
+        "active_params": null,
+        "num_experts": 128,
+        "total_params": null
+      },
+      "num_heads": 32,
+      "num_kv_heads": 4,
+      "num_layers": 48,
+      "sliding_window": null
+    }
+  },
+  "wan-ai-wan2-2-t2v-a14b-diffusers": {
+    "components": [
+      {
+        "checkpoint_bytes": 11361851208,
+        "dtype": "bf16",
+        "files": [
+          "text_encoder/model-00001-of-00003.safetensors",
+          "text_encoder/model-00002-of-00003.safetensors",
+          "text_encoder/model-00003-of-00003.safetensors"
+        ],
+        "name": "text_encoder",
+        "params": null,
+        "residency_confidence": "medium",
+        "resident_weight_bytes": 11361851208,
+        "source_variant": null
+      },
+      {
+        "checkpoint_bytes": 57154077760,
+        "dtype": "unknown",
+        "files": [
+          "transformer/diffusion_pytorch_model-00001-of-00012.safetensors",
+          "transformer/diffusion_pytorch_model-00002-of-00012.safetensors",
+          "transformer/diffusion_pytorch_model-00003-of-00012.safetensors",
+          "transformer/diffusion_pytorch_model-00004-of-00012.safetensors",
+          "transformer/diffusion_pytorch_model-00005-of-00012.safetensors",
+          "transformer/diffusion_pytorch_model-00006-of-00012.safetensors",
+          "transformer/diffusion_pytorch_model-00007-of-00012.safetensors",
+          "transformer/diffusion_pytorch_model-00008-of-00012.safetensors",
+          "transformer/diffusion_pytorch_model-00009-of-00012.safetensors",
+          "transformer/diffusion_pytorch_model-00010-of-00012.safetensors",
+          "transformer/diffusion_pytorch_model-00011-of-00012.safetensors",
+          "transformer/diffusion_pytorch_model-00012-of-00012.safetensors"
+        ],
+        "name": "transformer",
+        "params": null,
+        "residency_confidence": "medium",
+        "resident_weight_bytes": 57154077760,
+        "source_variant": null
+      },
+      {
+        "checkpoint_bytes": 57154077760,
+        "dtype": "unknown",
+        "files": [
+          "transformer_2/diffusion_pytorch_model-00001-of-00012.safetensors",
+          "transformer_2/diffusion_pytorch_model-00002-of-00012.safetensors",
+          "transformer_2/diffusion_pytorch_model-00003-of-00012.safetensors",
+          "transformer_2/diffusion_pytorch_model-00004-of-00012.safetensors",
+          "transformer_2/diffusion_pytorch_model-00005-of-00012.safetensors",
+          "transformer_2/diffusion_pytorch_model-00006-of-00012.safetensors",
+          "transformer_2/diffusion_pytorch_model-00007-of-00012.safetensors",
+          "transformer_2/diffusion_pytorch_model-00008-of-00012.safetensors",
+          "transformer_2/diffusion_pytorch_model-00009-of-00012.safetensors",
+          "transformer_2/diffusion_pytorch_model-00010-of-00012.safetensors",
+          "transformer_2/diffusion_pytorch_model-00011-of-00012.safetensors",
+          "transformer_2/diffusion_pytorch_model-00012-of-00012.safetensors"
+        ],
+        "name": "transformer_2",
+        "params": null,
+        "residency_confidence": "medium",
+        "resident_weight_bytes": 57154077760,
+        "source_variant": null
+      },
+      {
+        "checkpoint_bytes": 507591892,
+        "dtype": "unknown",
+        "files": [
+          "vae/diffusion_pytorch_model.safetensors"
+        ],
+        "name": "vae",
+        "params": null,
+        "residency_confidence": "medium",
+        "resident_weight_bytes": 507591892,
+        "source_variant": null
+      }
+    ],
+    "diffusion_arch": {
+      "components_order": [
+        "text_encoder",
+        "transformer",
+        "transformer_2",
+        "vae"
+      ],
+      "default_sample_size": null,
+      "latent_channels": 16,
+      "text_encoder_hidden_size": 4096,
+      "text_encoder_hidden_source": "config",
+      "transformer": {
+        "hidden_size": 5120,
+        "num_layers": 40,
+        "params": null,
+        "patch_size": 2,
+        "temporal_patch_size": 1
+      },
+      "vae_spatial_factor": 8,
+      "vae_temporal_factor": 4
+    },
+    "gguf": null,
+    "ir_version": 2,
+    "library": "diffusers",
+    "modality": "video",
+    "model": "Wan-AI/Wan2.2-T2V-A14B-Diffusers",
+    "pipeline_class": "WanPipeline",
+    "quantization": {
+      "bits": null,
+      "config": {},
+      "method": null
+    },
+    "revision": "5be7df9619b54f4e2667b2755bc6a756675b5cd7",
+    "sha_pinned": true,
+    "sources": {
+      "component_configs": [
+        "text_encoder/config.json",
+        "transformer/config.json",
+        "transformer_2/config.json",
+        "vae/config.json"
+      ],
+      "config": "model_index.json",
+      "gguf_parser": false,
+      "safetensors_headers": false
+    },
+    "text_arch": null
+  }
+}

@@ -1,0 +1,2477 @@
+{
+  "bartowski-qwen2-5-7b-instruct-gguf": {
+    "cases": {
+      "offline": {
+        "launchable_order": [
+          "full-offload-llama-cpp-none-base",
+          "cpu-only-llama-cpp-none-base"
+        ],
+        "star": "full-offload-llama-cpp-none-base",
+        "tiers": [
+          {
+            "capability_path": [
+              "llama.cpp",
+              null,
+              "base"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "low",
+            "disk_bytes": 41578403200,
+            "gpu_count": 0,
+            "host_ram_bytes": 6225123488,
+            "id": "cpu-only-llama-cpp-none-base",
+            "launchable": true,
+            "min_compute_capability": null,
+            "notes": [
+              "gguf-parser unavailable; selected-file fallback is a low-confidence floor",
+              "no text architecture was available; KV memory is omitted",
+              "pre-7.0 support is low confidence"
+            ],
+            "resources": {
+              "disk": "39GB..",
+              "memory": "6GB.."
+            },
+            "star": false,
+            "strategy": "cpu-only",
+            "vram_per_gpu_bytes": null
+          },
+          {
+            "capability_path": [
+              "llama.cpp",
+              null,
+              "base"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "low",
+            "disk_bytes": 41578403200,
+            "gpu_count": 1,
+            "host_ram_bytes": 1542049248,
+            "id": "full-offload-llama-cpp-none-base",
+            "launchable": true,
+            "min_compute_capability": null,
+            "notes": [
+              "gguf-parser unavailable; selected-file fallback is a low-confidence floor",
+              "no text architecture was available; KV memory is omitted",
+              "pre-7.0 support is low confidence"
+            ],
+            "resources": {
+              "disk": "39GB..",
+              "gpu": {
+                "count": 1,
+                "memory": "6GB.."
+              },
+              "memory": "2GB.."
+            },
+            "star": true,
+            "strategy": "full-offload",
+            "vram_per_gpu_bytes": 5756816064
+          }
+        ]
+      },
+      "parser": {
+        "launchable_order": [
+          "partial-8-llama-cpp-none-base",
+          "partial-16-llama-cpp-none-base",
+          "partial-24-llama-cpp-none-base",
+          "full-offload-llama-cpp-none-base",
+          "cpu-only-llama-cpp-none-base"
+        ],
+        "star": "partial-8-llama-cpp-none-base",
+        "tiers": [
+          {
+            "capability_path": [
+              "llama.cpp",
+              null,
+              "base"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "high",
+            "disk_bytes": 41578403200,
+            "gpu_count": 0,
+            "host_ram_bytes": 1092703512,
+            "id": "cpu-only-llama-cpp-none-base",
+            "launchable": true,
+            "min_compute_capability": null,
+            "notes": [
+              "memory values reported by gguf-parser",
+              "pre-7.0 support is low confidence"
+            ],
+            "resources": {
+              "disk": "39GB..",
+              "memory": "2GB.."
+            },
+            "star": false,
+            "strategy": "cpu-only",
+            "vram_per_gpu_bytes": null
+          },
+          {
+            "capability_path": [
+              "llama.cpp",
+              null,
+              "base"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "high",
+            "disk_bytes": 41578403200,
+            "gpu_count": 1,
+            "host_ram_bytes": 320951576,
+            "id": "full-offload-llama-cpp-none-base",
+            "launchable": true,
+            "min_compute_capability": null,
+            "notes": [
+              "memory values reported by gguf-parser",
+              "pre-7.0 support is low confidence"
+            ],
+            "resources": {
+              "disk": "39GB..",
+              "gpu": {
+                "count": 1,
+                "memory": "6GB.."
+              },
+              "memory": "1GB.."
+            },
+            "star": false,
+            "strategy": "full-offload",
+            "vram_per_gpu_bytes": 6214481920
+          },
+          {
+            "capability_path": [
+              "llama.cpp",
+              null,
+              "base"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "high",
+            "disk_bytes": 41578403200,
+            "gpu_count": 1,
+            "host_ram_bytes": 958485784,
+            "id": "partial-16-llama-cpp-none-base",
+            "launchable": true,
+            "min_compute_capability": null,
+            "notes": [
+              "memory values reported by gguf-parser",
+              "pre-7.0 support is low confidence"
+            ],
+            "resources": {
+              "disk": "39GB..",
+              "gpu": {
+                "count": 1,
+                "memory": "4GB.."
+              },
+              "memory": "1GB.."
+            },
+            "star": false,
+            "strategy": "partial:16",
+            "vram_per_gpu_bytes": 3324119040
+          },
+          {
+            "capability_path": [
+              "llama.cpp",
+              null,
+              "base"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "high",
+            "disk_bytes": 41578403200,
+            "gpu_count": 1,
+            "host_ram_bytes": 891376920,
+            "id": "partial-24-llama-cpp-none-base",
+            "launchable": true,
+            "min_compute_capability": null,
+            "notes": [
+              "memory values reported by gguf-parser",
+              "pre-7.0 support is low confidence"
+            ],
+            "resources": {
+              "disk": "39GB..",
+              "gpu": {
+                "count": 1,
+                "memory": "5GB.."
+              },
+              "memory": "1GB.."
+            },
+            "star": false,
+            "strategy": "partial:24",
+            "vram_per_gpu_bytes": 4701140992
+          },
+          {
+            "capability_path": [
+              "llama.cpp",
+              null,
+              "base"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "high",
+            "disk_bytes": 41578403200,
+            "gpu_count": 1,
+            "host_ram_bytes": 1025594648,
+            "id": "partial-8-llama-cpp-none-base",
+            "launchable": true,
+            "min_compute_capability": null,
+            "notes": [
+              "memory values reported by gguf-parser",
+              "pre-7.0 support is low confidence"
+            ],
+            "resources": {
+              "disk": "39GB..",
+              "gpu": {
+                "count": 1,
+                "memory": "2GB.."
+              },
+              "memory": "1GB.."
+            },
+            "star": true,
+            "strategy": "partial:8",
+            "vram_per_gpu_bytes": 1956358144
+          }
+        ]
+      }
+    },
+    "lane": "general-gguf",
+    "pipeline_backend": null,
+    "workload": {
+      "batch": 8,
+      "cfg": null,
+      "cfg_mode": null,
+      "context": 32768,
+      "engine_key": "llama.cpp",
+      "frames": null,
+      "height": null,
+      "image_tokens": null,
+      "images_per_prompt": null,
+      "kv_dtype": "auto",
+      "modality": "gguf",
+      "prompt_tokens": null,
+      "provenance": {
+        "batch": "default",
+        "context": "default",
+        "kv_dtype": "template"
+      },
+      "width": null
+    }
+  },
+  "lzyvegetable-flux-1-schnell": {
+    "cases": {
+      "offline": {
+        "launchable_order": [
+          "offload-vllm-omni-none-base",
+          "offload-tiling-vllm-omni-none-base",
+          "resident-vllm-omni-none-base"
+        ],
+        "star": "offload-vllm-omni-none-base",
+        "tiers": [
+          {
+            "capability_path": [
+              "vllm-omni",
+              null,
+              "base"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "medium",
+            "disk_bytes": 99654162460,
+            "gpu_count": 1,
+            "host_ram_bytes": 38166791081,
+            "id": "offload-tiling-vllm-omni-none-base",
+            "launchable": true,
+            "min_compute_capability": 8.0,
+            "notes": [],
+            "resources": {
+              "disk": "93GB..",
+              "gpu": {
+                "compute_capability": 8.0,
+                "count": 1,
+                "memory": "26GB.."
+              },
+              "memory": "36GB.."
+            },
+            "star": false,
+            "strategy": "offload+tiling",
+            "vram_per_gpu_bytes": 27441919014
+          },
+          {
+            "capability_path": [
+              "vllm-omni",
+              null,
+              "base"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "medium",
+            "disk_bytes": 99654162460,
+            "gpu_count": 1,
+            "host_ram_bytes": 38166791081,
+            "id": "offload-vllm-omni-none-base",
+            "launchable": true,
+            "min_compute_capability": 8.0,
+            "notes": [],
+            "resources": {
+              "disk": "93GB..",
+              "gpu": {
+                "compute_capability": 8.0,
+                "count": 1,
+                "memory": "26GB.."
+              },
+              "memory": "36GB.."
+            },
+            "star": true,
+            "strategy": "offload",
+            "vram_per_gpu_bytes": 27441919014
+          },
+          {
+            "capability_path": [
+              "vllm-omni",
+              null,
+              "base"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "medium",
+            "disk_bytes": 99654162460,
+            "gpu_count": 1,
+            "host_ram_bytes": 38166791081,
+            "id": "resident-vllm-omni-none-base",
+            "launchable": true,
+            "min_compute_capability": 8.0,
+            "notes": [],
+            "resources": {
+              "disk": "93GB..",
+              "gpu": {
+                "compute_capability": 8.0,
+                "count": 1,
+                "memory": "35GB.."
+              },
+              "memory": "36GB.."
+            },
+            "star": false,
+            "strategy": "resident",
+            "vram_per_gpu_bytes": 37212711950
+          }
+        ]
+      }
+    },
+    "lane": "general-image",
+    "pipeline_backend": "diffusers",
+    "workload": {
+      "batch": null,
+      "cfg": true,
+      "cfg_mode": "distilled",
+      "context": null,
+      "engine_key": "vllm-omni:diffusers",
+      "frames": 1,
+      "height": 1024,
+      "image_tokens": null,
+      "images_per_prompt": 1,
+      "kv_dtype": null,
+      "modality": "image",
+      "prompt_tokens": 256,
+      "provenance": {
+        "cfg": "default",
+        "cfg_mode": "runtime registry",
+        "frames": "model config",
+        "height": "default",
+        "images_per_prompt": "default",
+        "prompt_tokens": "default",
+        "width": "default"
+      },
+      "width": 1024
+    }
+  },
+  "neuralmagic-meta-llama-3-1-8b-instruct-fp8": {
+    "cases": {
+      "offline": {
+        "launchable_order": [
+          "tp-16-vllm-fp8-native",
+          "tp-8-vllm-fp8-native",
+          "tp-4-vllm-fp8-native",
+          "tp-2-vllm-fp8-native",
+          "tp-1-vllm-fp8-native"
+        ],
+        "star": "tp-16-vllm-fp8-native",
+        "tiers": [
+          {
+            "capability_path": [
+              "vllm",
+              "fp8",
+              "native"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "low",
+            "disk_bytes": 50374828752,
+            "gpu_count": 1,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-1-vllm-fp8-native",
+            "launchable": true,
+            "min_compute_capability": 8.9,
+            "notes": [
+              "runtime settings are defaults; no template was resolved"
+            ],
+            "resources": {
+              "disk": "47GB..",
+              "gpu": {
+                "compute_capability": 8.9,
+                "count": 1,
+                "memory": "54GB.."
+              },
+              "memory": "32GB.."
+            },
+            "star": false,
+            "strategy": "tp=1",
+            "vram_per_gpu_bytes": 57224975192
+          },
+          {
+            "capability_path": [
+              "vllm",
+              "fp8",
+              "native"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "low",
+            "disk_bytes": 50374828752,
+            "gpu_count": 16,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-16-vllm-fp8-native",
+            "launchable": true,
+            "min_compute_capability": 8.9,
+            "notes": [
+              "runtime settings are defaults; no template was resolved",
+              "KV heads replicate beyond tp=8; KV memory no longer falls per GPU"
+            ],
+            "resources": {
+              "disk": "47GB..",
+              "gpu": {
+                "compute_capability": 8.9,
+                "count": 16,
+                "memory": "14GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": true,
+            "strategy": "tp=16",
+            "vram_per_gpu_bytes": 14360000026
+          },
+          {
+            "capability_path": [
+              "vllm",
+              "fp8",
+              "native"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "low",
+            "disk_bytes": 50374828752,
+            "gpu_count": 2,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-2-vllm-fp8-native",
+            "launchable": true,
+            "min_compute_capability": 8.9,
+            "notes": [
+              "runtime settings are defaults; no template was resolved"
+            ],
+            "resources": {
+              "disk": "47GB..",
+              "gpu": {
+                "compute_capability": 8.9,
+                "count": 2,
+                "memory": "31GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": false,
+            "strategy": "tp=2",
+            "vram_per_gpu_bytes": 33091072200
+          },
+          {
+            "capability_path": [
+              "vllm",
+              "fp8",
+              "native"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "low",
+            "disk_bytes": 50374828752,
+            "gpu_count": 4,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-4-vllm-fp8-native",
+            "launchable": true,
+            "min_compute_capability": 8.9,
+            "notes": [
+              "runtime settings are defaults; no template was resolved"
+            ],
+            "resources": {
+              "disk": "47GB..",
+              "gpu": {
+                "compute_capability": 8.9,
+                "count": 4,
+                "memory": "20GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": false,
+            "strategy": "tp=4",
+            "vram_per_gpu_bytes": 21024120705
+          },
+          {
+            "capability_path": [
+              "vllm",
+              "fp8",
+              "native"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "low",
+            "disk_bytes": 50374828752,
+            "gpu_count": 8,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-8-vllm-fp8-native",
+            "launchable": true,
+            "min_compute_capability": 8.9,
+            "notes": [
+              "runtime settings are defaults; no template was resolved"
+            ],
+            "resources": {
+              "disk": "47GB..",
+              "gpu": {
+                "compute_capability": 8.9,
+                "count": 8,
+                "memory": "14GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": false,
+            "strategy": "tp=8",
+            "vram_per_gpu_bytes": 14990644957
+          }
+        ]
+      }
+    },
+    "lane": "general-llm",
+    "pipeline_backend": null,
+    "workload": {
+      "batch": 8,
+      "cfg": null,
+      "cfg_mode": null,
+      "context": 32768,
+      "engine_key": "vllm",
+      "frames": null,
+      "height": null,
+      "image_tokens": null,
+      "images_per_prompt": null,
+      "kv_dtype": "auto",
+      "modality": "text",
+      "prompt_tokens": null,
+      "provenance": {
+        "batch": "default",
+        "context": "model config",
+        "kv_dtype": "template"
+      },
+      "width": null
+    }
+  },
+  "qwen-qwen2-5-7b-instruct": {
+    "cases": {
+      "offline": {
+        "launchable_order": [
+          "tp-4-vllm-none-bf16-native",
+          "tp-4-vllm-none-bf16-as-fp16",
+          "tp-2-vllm-none-bf16-native",
+          "tp-2-vllm-none-bf16-as-fp16",
+          "tp-1-vllm-none-bf16-native",
+          "tp-1-vllm-none-bf16-as-fp16"
+        ],
+        "star": "tp-4-vllm-none-bf16-native",
+        "tiers": [
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "bf16_as_fp16"
+            ],
+            "capability_preference_rank": 20,
+            "confidence": "medium",
+            "disk_bytes": 62674798496,
+            "gpu_count": 1,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-1-vllm-none-bf16-as-fp16",
+            "launchable": true,
+            "min_compute_capability": 7.5,
+            "notes": [
+              "runtime settings are defaults; no template was resolved",
+              "loads BF16 checkpoint as FP16; numerics differ"
+            ],
+            "resources": {
+              "disk": "59GB..",
+              "gpu": {
+                "compute_capability": 7.5,
+                "count": 1,
+                "memory": "39GB.."
+              },
+              "memory": "32GB.."
+            },
+            "star": false,
+            "strategy": "tp=1",
+            "vram_per_gpu_bytes": 41686442667
+          },
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "bf16_native"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "medium",
+            "disk_bytes": 62674798496,
+            "gpu_count": 1,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-1-vllm-none-bf16-native",
+            "launchable": true,
+            "min_compute_capability": 8.0,
+            "notes": [
+              "runtime settings are defaults; no template was resolved",
+              "native BF16"
+            ],
+            "resources": {
+              "disk": "59GB..",
+              "gpu": {
+                "compute_capability": 8.0,
+                "count": 1,
+                "memory": "39GB.."
+              },
+              "memory": "32GB.."
+            },
+            "star": false,
+            "strategy": "tp=1",
+            "vram_per_gpu_bytes": 41686442667
+          },
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "bf16_as_fp16"
+            ],
+            "capability_preference_rank": 20,
+            "confidence": "medium",
+            "disk_bytes": 62674798496,
+            "gpu_count": 2,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-2-vllm-none-bf16-as-fp16",
+            "launchable": true,
+            "min_compute_capability": 7.5,
+            "notes": [
+              "runtime settings are defaults; no template was resolved",
+              "loads BF16 checkpoint as FP16; numerics differ"
+            ],
+            "resources": {
+              "disk": "59GB..",
+              "gpu": {
+                "compute_capability": 7.5,
+                "count": 2,
+                "memory": "24GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": false,
+            "strategy": "tp=2",
+            "vram_per_gpu_bytes": 24873321245
+          },
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "bf16_native"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "medium",
+            "disk_bytes": 62674798496,
+            "gpu_count": 2,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-2-vllm-none-bf16-native",
+            "launchable": true,
+            "min_compute_capability": 8.0,
+            "notes": [
+              "runtime settings are defaults; no template was resolved",
+              "native BF16"
+            ],
+            "resources": {
+              "disk": "59GB..",
+              "gpu": {
+                "compute_capability": 8.0,
+                "count": 2,
+                "memory": "24GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": false,
+            "strategy": "tp=2",
+            "vram_per_gpu_bytes": 24873321245
+          },
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "bf16_as_fp16"
+            ],
+            "capability_preference_rank": 20,
+            "confidence": "medium",
+            "disk_bytes": 62674798496,
+            "gpu_count": 4,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-4-vllm-none-bf16-as-fp16",
+            "launchable": true,
+            "min_compute_capability": 7.5,
+            "notes": [
+              "runtime settings are defaults; no template was resolved",
+              "loads BF16 checkpoint as FP16; numerics differ"
+            ],
+            "resources": {
+              "disk": "59GB..",
+              "gpu": {
+                "compute_capability": 7.5,
+                "count": 4,
+                "memory": "16GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": false,
+            "strategy": "tp=4",
+            "vram_per_gpu_bytes": 16466760534
+          },
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "bf16_native"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "medium",
+            "disk_bytes": 62674798496,
+            "gpu_count": 4,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-4-vllm-none-bf16-native",
+            "launchable": true,
+            "min_compute_capability": 8.0,
+            "notes": [
+              "runtime settings are defaults; no template was resolved",
+              "native BF16"
+            ],
+            "resources": {
+              "disk": "59GB..",
+              "gpu": {
+                "compute_capability": 8.0,
+                "count": 4,
+                "memory": "16GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": true,
+            "strategy": "tp=4",
+            "vram_per_gpu_bytes": 16466760534
+          }
+        ]
+      }
+    },
+    "lane": "general-llm",
+    "pipeline_backend": null,
+    "workload": {
+      "batch": 8,
+      "cfg": null,
+      "cfg_mode": null,
+      "context": 32768,
+      "engine_key": "vllm",
+      "frames": null,
+      "height": null,
+      "image_tokens": null,
+      "images_per_prompt": null,
+      "kv_dtype": "auto",
+      "modality": "text",
+      "prompt_tokens": null,
+      "provenance": {
+        "batch": "default",
+        "context": "model config",
+        "kv_dtype": "template"
+      },
+      "width": null
+    }
+  },
+  "qwen-qwen2-5-7b-instruct-awq": {
+    "cases": {
+      "offline": {
+        "launchable_order": [
+          "tp-4-vllm-awq-base",
+          "tp-2-vllm-awq-base",
+          "tp-1-vllm-awq-base"
+        ],
+        "star": "tp-4-vllm-awq-base",
+        "tiers": [
+          {
+            "capability_path": [
+              "vllm",
+              "awq",
+              "base"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "low",
+            "disk_bytes": 43353914240,
+            "gpu_count": 1,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-1-vllm-awq-base",
+            "launchable": true,
+            "min_compute_capability": 7.5,
+            "notes": [
+              "runtime settings are defaults; no template was resolved"
+            ],
+            "resources": {
+              "disk": "41GB..",
+              "gpu": {
+                "compute_capability": 7.5,
+                "count": 1,
+                "memory": "29GB.."
+              },
+              "memory": "32GB.."
+            },
+            "star": false,
+            "strategy": "tp=1",
+            "vram_per_gpu_bytes": 30952661263
+          },
+          {
+            "capability_path": [
+              "vllm",
+              "awq",
+              "base"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "low",
+            "disk_bytes": 43353914240,
+            "gpu_count": 2,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-2-vllm-awq-base",
+            "launchable": true,
+            "min_compute_capability": 7.5,
+            "notes": [
+              "runtime settings are defaults; no template was resolved"
+            ],
+            "resources": {
+              "disk": "41GB..",
+              "gpu": {
+                "compute_capability": 7.5,
+                "count": 2,
+                "memory": "19GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": false,
+            "strategy": "tp=2",
+            "vram_per_gpu_bytes": 19506430543
+          },
+          {
+            "capability_path": [
+              "vllm",
+              "awq",
+              "base"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "low",
+            "disk_bytes": 43353914240,
+            "gpu_count": 4,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-4-vllm-awq-base",
+            "launchable": true,
+            "min_compute_capability": 7.5,
+            "notes": [
+              "runtime settings are defaults; no template was resolved"
+            ],
+            "resources": {
+              "disk": "41GB..",
+              "gpu": {
+                "compute_capability": 7.5,
+                "count": 4,
+                "memory": "13GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": true,
+            "strategy": "tp=4",
+            "vram_per_gpu_bytes": 13783315183
+          }
+        ]
+      }
+    },
+    "lane": "general-llm",
+    "pipeline_backend": null,
+    "workload": {
+      "batch": 8,
+      "cfg": null,
+      "cfg_mode": null,
+      "context": 32768,
+      "engine_key": "vllm",
+      "frames": null,
+      "height": null,
+      "image_tokens": null,
+      "images_per_prompt": null,
+      "kv_dtype": "auto",
+      "modality": "text",
+      "prompt_tokens": null,
+      "provenance": {
+        "batch": "default",
+        "context": "model config",
+        "kv_dtype": "template"
+      },
+      "width": null
+    }
+  },
+  "qwen-qwen2-5-vl-7b-instruct": {
+    "cases": {
+      "offline": {
+        "launchable_order": [
+          "tp-4-vllm-none-bf16-native",
+          "tp-4-vllm-none-bf16-as-fp16",
+          "tp-2-vllm-none-bf16-native",
+          "tp-2-vllm-none-bf16-as-fp16",
+          "tp-1-vllm-none-bf16-native",
+          "tp-1-vllm-none-bf16-as-fp16"
+        ],
+        "star": "tp-4-vllm-none-bf16-native",
+        "tiers": [
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "bf16_as_fp16"
+            ],
+            "capability_preference_rank": 20,
+            "confidence": "medium",
+            "disk_bytes": 65381083840,
+            "gpu_count": 1,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-1-vllm-none-bf16-as-fp16",
+            "launchable": true,
+            "min_compute_capability": 7.5,
+            "notes": [
+              "runtime settings are defaults; no template was resolved",
+              "loads BF16 checkpoint as FP16; numerics differ"
+            ],
+            "resources": {
+              "disk": "61GB..",
+              "gpu": {
+                "compute_capability": 7.5,
+                "count": 1,
+                "memory": "41GB.."
+              },
+              "memory": "32GB.."
+            },
+            "star": false,
+            "strategy": "tp=1",
+            "vram_per_gpu_bytes": 43483488712
+          },
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "bf16_native"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "medium",
+            "disk_bytes": 65381083840,
+            "gpu_count": 1,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-1-vllm-none-bf16-native",
+            "launchable": true,
+            "min_compute_capability": 8.0,
+            "notes": [
+              "runtime settings are defaults; no template was resolved",
+              "native BF16"
+            ],
+            "resources": {
+              "disk": "61GB..",
+              "gpu": {
+                "compute_capability": 8.0,
+                "count": 1,
+                "memory": "41GB.."
+              },
+              "memory": "32GB.."
+            },
+            "star": false,
+            "strategy": "tp=1",
+            "vram_per_gpu_bytes": 43483488712
+          },
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "bf16_as_fp16"
+            ],
+            "capability_preference_rank": 20,
+            "confidence": "medium",
+            "disk_bytes": 65381083840,
+            "gpu_count": 2,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-2-vllm-none-bf16-as-fp16",
+            "launchable": true,
+            "min_compute_capability": 7.5,
+            "notes": [
+              "runtime settings are defaults; no template was resolved",
+              "loads BF16 checkpoint as FP16; numerics differ"
+            ],
+            "resources": {
+              "disk": "61GB..",
+              "gpu": {
+                "compute_capability": 7.5,
+                "count": 2,
+                "memory": "25GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": false,
+            "strategy": "tp=2",
+            "vram_per_gpu_bytes": 25918644907
+          },
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "bf16_native"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "medium",
+            "disk_bytes": 65381083840,
+            "gpu_count": 2,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-2-vllm-none-bf16-native",
+            "launchable": true,
+            "min_compute_capability": 8.0,
+            "notes": [
+              "runtime settings are defaults; no template was resolved",
+              "native BF16"
+            ],
+            "resources": {
+              "disk": "61GB..",
+              "gpu": {
+                "compute_capability": 8.0,
+                "count": 2,
+                "memory": "25GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": false,
+            "strategy": "tp=2",
+            "vram_per_gpu_bytes": 25918644907
+          },
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "bf16_as_fp16"
+            ],
+            "capability_preference_rank": 20,
+            "confidence": "medium",
+            "disk_bytes": 65381083840,
+            "gpu_count": 4,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-4-vllm-none-bf16-as-fp16",
+            "launchable": true,
+            "min_compute_capability": 7.5,
+            "notes": [
+              "runtime settings are defaults; no template was resolved",
+              "loads BF16 checkpoint as FP16; numerics differ"
+            ],
+            "resources": {
+              "disk": "61GB..",
+              "gpu": {
+                "compute_capability": 7.5,
+                "count": 4,
+                "memory": "16GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": false,
+            "strategy": "tp=4",
+            "vram_per_gpu_bytes": 17136223005
+          },
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "bf16_native"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "medium",
+            "disk_bytes": 65381083840,
+            "gpu_count": 4,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-4-vllm-none-bf16-native",
+            "launchable": true,
+            "min_compute_capability": 8.0,
+            "notes": [
+              "runtime settings are defaults; no template was resolved",
+              "native BF16"
+            ],
+            "resources": {
+              "disk": "61GB..",
+              "gpu": {
+                "compute_capability": 8.0,
+                "count": 4,
+                "memory": "16GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": true,
+            "strategy": "tp=4",
+            "vram_per_gpu_bytes": 17136223005
+          }
+        ]
+      }
+    },
+    "lane": "general-vlm",
+    "pipeline_backend": null,
+    "workload": {
+      "batch": 8,
+      "cfg": null,
+      "cfg_mode": null,
+      "context": 32768,
+      "engine_key": "vllm",
+      "frames": null,
+      "height": null,
+      "image_tokens": 576,
+      "images_per_prompt": null,
+      "kv_dtype": "auto",
+      "modality": "vlm",
+      "prompt_tokens": null,
+      "provenance": {
+        "batch": "default",
+        "context": "model config",
+        "image_tokens": "default",
+        "kv_dtype": "template"
+      },
+      "width": null
+    }
+  },
+  "qwen-qwen3-30b-a3b": {
+    "cases": {
+      "offline": {
+        "launchable_order": [
+          "tp-16-vllm-none-bf16-native",
+          "tp-16-vllm-none-bf16-as-fp16",
+          "tp-8-vllm-none-bf16-native",
+          "tp-8-vllm-none-bf16-as-fp16",
+          "tp-4-vllm-none-bf16-native",
+          "tp-4-vllm-none-bf16-as-fp16",
+          "tp-2-vllm-none-bf16-native",
+          "tp-2-vllm-none-bf16-as-fp16",
+          "tp-1-vllm-none-bf16-native",
+          "tp-1-vllm-none-bf16-as-fp16"
+        ],
+        "star": "tp-16-vllm-none-bf16-native",
+        "tiers": [
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "bf16_as_fp16"
+            ],
+            "capability_preference_rank": 20,
+            "confidence": "medium",
+            "disk_bytes": 154345406016,
+            "gpu_count": 1,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-1-vllm-none-bf16-as-fp16",
+            "launchable": true,
+            "min_compute_capability": 7.5,
+            "notes": [
+              "runtime settings are defaults; no template was resolved",
+              "loads BF16 checkpoint as FP16; numerics differ"
+            ],
+            "resources": {
+              "disk": "144GB..",
+              "gpu": {
+                "compute_capability": 7.5,
+                "count": 1,
+                "memory": "95GB.."
+              },
+              "memory": "32GB.."
+            },
+            "star": false,
+            "strategy": "tp=1",
+            "vram_per_gpu_bytes": 101857976320
+          },
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "bf16_native"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "medium",
+            "disk_bytes": 154345406016,
+            "gpu_count": 1,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-1-vllm-none-bf16-native",
+            "launchable": true,
+            "min_compute_capability": 8.0,
+            "notes": [
+              "runtime settings are defaults; no template was resolved",
+              "native BF16"
+            ],
+            "resources": {
+              "disk": "144GB..",
+              "gpu": {
+                "compute_capability": 8.0,
+                "count": 1,
+                "memory": "95GB.."
+              },
+              "memory": "32GB.."
+            },
+            "star": false,
+            "strategy": "tp=1",
+            "vram_per_gpu_bytes": 101857976320
+          },
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "bf16_as_fp16"
+            ],
+            "capability_preference_rank": 20,
+            "confidence": "medium",
+            "disk_bytes": 154345406016,
+            "gpu_count": 16,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-16-vllm-none-bf16-as-fp16",
+            "launchable": true,
+            "min_compute_capability": 7.5,
+            "notes": [
+              "runtime settings are defaults; no template was resolved",
+              "KV heads replicate beyond tp=4; KV memory no longer falls per GPU",
+              "loads BF16 checkpoint as FP16; numerics differ"
+            ],
+            "resources": {
+              "disk": "144GB..",
+              "gpu": {
+                "compute_capability": 7.5,
+                "count": 16,
+                "memory": "16GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": false,
+            "strategy": "tp=16",
+            "vram_per_gpu_bytes": 16774551040
+          },
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "bf16_native"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "medium",
+            "disk_bytes": 154345406016,
+            "gpu_count": 16,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-16-vllm-none-bf16-native",
+            "launchable": true,
+            "min_compute_capability": 8.0,
+            "notes": [
+              "runtime settings are defaults; no template was resolved",
+              "KV heads replicate beyond tp=4; KV memory no longer falls per GPU",
+              "native BF16"
+            ],
+            "resources": {
+              "disk": "144GB..",
+              "gpu": {
+                "compute_capability": 8.0,
+                "count": 16,
+                "memory": "16GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": true,
+            "strategy": "tp=16",
+            "vram_per_gpu_bytes": 16774551040
+          },
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "bf16_as_fp16"
+            ],
+            "capability_preference_rank": 20,
+            "confidence": "medium",
+            "disk_bytes": 154345406016,
+            "gpu_count": 2,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-2-vllm-none-bf16-as-fp16",
+            "launchable": true,
+            "min_compute_capability": 7.5,
+            "notes": [
+              "runtime settings are defaults; no template was resolved",
+              "loads BF16 checkpoint as FP16; numerics differ"
+            ],
+            "resources": {
+              "disk": "144GB..",
+              "gpu": {
+                "compute_capability": 7.5,
+                "count": 2,
+                "memory": "50GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": false,
+            "strategy": "tp=2",
+            "vram_per_gpu_bytes": 53616837974
+          },
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "bf16_native"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "medium",
+            "disk_bytes": 154345406016,
+            "gpu_count": 2,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-2-vllm-none-bf16-native",
+            "launchable": true,
+            "min_compute_capability": 8.0,
+            "notes": [
+              "runtime settings are defaults; no template was resolved",
+              "native BF16"
+            ],
+            "resources": {
+              "disk": "144GB..",
+              "gpu": {
+                "compute_capability": 8.0,
+                "count": 2,
+                "memory": "50GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": false,
+            "strategy": "tp=2",
+            "vram_per_gpu_bytes": 53616837974
+          },
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "bf16_as_fp16"
+            ],
+            "capability_preference_rank": 20,
+            "confidence": "medium",
+            "disk_bytes": 154345406016,
+            "gpu_count": 4,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-4-vllm-none-bf16-as-fp16",
+            "launchable": true,
+            "min_compute_capability": 7.5,
+            "notes": [
+              "runtime settings are defaults; no template was resolved",
+              "loads BF16 checkpoint as FP16; numerics differ"
+            ],
+            "resources": {
+              "disk": "144GB..",
+              "gpu": {
+                "compute_capability": 7.5,
+                "count": 4,
+                "memory": "28GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": false,
+            "strategy": "tp=4",
+            "vram_per_gpu_bytes": 29496268800
+          },
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "bf16_native"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "medium",
+            "disk_bytes": 154345406016,
+            "gpu_count": 4,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-4-vllm-none-bf16-native",
+            "launchable": true,
+            "min_compute_capability": 8.0,
+            "notes": [
+              "runtime settings are defaults; no template was resolved",
+              "native BF16"
+            ],
+            "resources": {
+              "disk": "144GB..",
+              "gpu": {
+                "compute_capability": 8.0,
+                "count": 4,
+                "memory": "28GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": false,
+            "strategy": "tp=4",
+            "vram_per_gpu_bytes": 29496268800
+          },
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "bf16_as_fp16"
+            ],
+            "capability_preference_rank": 20,
+            "confidence": "medium",
+            "disk_bytes": 154345406016,
+            "gpu_count": 8,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-8-vllm-none-bf16-as-fp16",
+            "launchable": true,
+            "min_compute_capability": 7.5,
+            "notes": [
+              "runtime settings are defaults; no template was resolved",
+              "KV heads replicate beyond tp=4; KV memory no longer falls per GPU",
+              "loads BF16 checkpoint as FP16; numerics differ"
+            ],
+            "resources": {
+              "disk": "144GB..",
+              "gpu": {
+                "compute_capability": 7.5,
+                "count": 8,
+                "memory": "20GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": false,
+            "strategy": "tp=8",
+            "vram_per_gpu_bytes": 21015123627
+          },
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "bf16_native"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "medium",
+            "disk_bytes": 154345406016,
+            "gpu_count": 8,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-8-vllm-none-bf16-native",
+            "launchable": true,
+            "min_compute_capability": 8.0,
+            "notes": [
+              "runtime settings are defaults; no template was resolved",
+              "KV heads replicate beyond tp=4; KV memory no longer falls per GPU",
+              "native BF16"
+            ],
+            "resources": {
+              "disk": "144GB..",
+              "gpu": {
+                "compute_capability": 8.0,
+                "count": 8,
+                "memory": "20GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": false,
+            "strategy": "tp=8",
+            "vram_per_gpu_bytes": 21015123627
+          }
+        ]
+      }
+    },
+    "lane": "general-llm",
+    "pipeline_backend": null,
+    "workload": {
+      "batch": 8,
+      "cfg": null,
+      "cfg_mode": null,
+      "context": 32768,
+      "engine_key": "vllm",
+      "frames": null,
+      "height": null,
+      "image_tokens": null,
+      "images_per_prompt": null,
+      "kv_dtype": "auto",
+      "modality": "text",
+      "prompt_tokens": null,
+      "provenance": {
+        "batch": "default",
+        "context": "model config",
+        "kv_dtype": "template"
+      },
+      "width": null
+    }
+  },
+  "qwen-qwen3-5-9b": {
+    "cases": {
+      "offline": {
+        "launchable_order": [
+          "tp-16-vllm-none-base",
+          "tp-8-vllm-none-base",
+          "tp-4-vllm-none-base",
+          "tp-2-vllm-none-base",
+          "tp-1-vllm-none-base"
+        ],
+        "star": "tp-16-vllm-none-base",
+        "tiers": [
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "base"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "low",
+            "disk_bytes": 70824876480,
+            "gpu_count": 1,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-1-vllm-none-base",
+            "launchable": true,
+            "min_compute_capability": 7.5,
+            "notes": [
+              "linear-attention state size used the hidden-size fallback",
+              "runtime settings are defaults; no template was resolved"
+            ],
+            "resources": {
+              "disk": "66GB..",
+              "gpu": {
+                "compute_capability": 7.5,
+                "count": 1,
+                "memory": "38GB.."
+              },
+              "memory": "32GB.."
+            },
+            "star": false,
+            "strategy": "tp=1",
+            "vram_per_gpu_bytes": 40295427378
+          },
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "base"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "low",
+            "disk_bytes": 70824876480,
+            "gpu_count": 16,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-16-vllm-none-base",
+            "launchable": true,
+            "min_compute_capability": 7.5,
+            "notes": [
+              "linear-attention state size used the hidden-size fallback",
+              "runtime settings are defaults; no template was resolved",
+              "KV heads replicate beyond tp=4; KV memory no longer falls per GPU"
+            ],
+            "resources": {
+              "disk": "66GB..",
+              "gpu": {
+                "compute_capability": 7.5,
+                "count": 16,
+                "memory": "13GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": true,
+            "strategy": "tp=16",
+            "vram_per_gpu_bytes": 13021263572
+          },
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "base"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "low",
+            "disk_bytes": 70824876480,
+            "gpu_count": 2,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-2-vllm-none-base",
+            "launchable": true,
+            "min_compute_capability": 7.5,
+            "notes": [
+              "linear-attention state size used the hidden-size fallback",
+              "runtime settings are defaults; no template was resolved"
+            ],
+            "resources": {
+              "disk": "66GB..",
+              "gpu": {
+                "compute_capability": 7.5,
+                "count": 2,
+                "memory": "24GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": false,
+            "strategy": "tp=2",
+            "vram_per_gpu_bytes": 24794070454
+          },
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "base"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "low",
+            "disk_bytes": 70824876480,
+            "gpu_count": 4,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-4-vllm-none-base",
+            "launchable": true,
+            "min_compute_capability": 7.5,
+            "notes": [
+              "linear-attention state size used the hidden-size fallback",
+              "runtime settings are defaults; no template was resolved"
+            ],
+            "resources": {
+              "disk": "66GB..",
+              "gpu": {
+                "compute_capability": 7.5,
+                "count": 4,
+                "memory": "16GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": false,
+            "strategy": "tp=4",
+            "vram_per_gpu_bytes": 17043391992
+          },
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "base"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "low",
+            "disk_bytes": 70824876480,
+            "gpu_count": 8,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-8-vllm-none-base",
+            "launchable": true,
+            "min_compute_capability": 7.5,
+            "notes": [
+              "linear-attention state size used the hidden-size fallback",
+              "runtime settings are defaults; no template was resolved",
+              "KV heads replicate beyond tp=4; KV memory no longer falls per GPU"
+            ],
+            "resources": {
+              "disk": "66GB..",
+              "gpu": {
+                "compute_capability": 7.5,
+                "count": 8,
+                "memory": "14GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": false,
+            "strategy": "tp=8",
+            "vram_per_gpu_bytes": 14361973045
+          }
+        ]
+      }
+    },
+    "lane": "general-vlm",
+    "pipeline_backend": null,
+    "workload": {
+      "batch": 8,
+      "cfg": null,
+      "cfg_mode": null,
+      "context": 32768,
+      "engine_key": "vllm",
+      "frames": null,
+      "height": null,
+      "image_tokens": 576,
+      "images_per_prompt": null,
+      "kv_dtype": "auto",
+      "modality": "vlm",
+      "prompt_tokens": null,
+      "provenance": {
+        "batch": "default",
+        "context": "model config",
+        "image_tokens": "default",
+        "kv_dtype": "template"
+      },
+      "width": null
+    }
+  },
+  "qwen-qwen3-8b": {
+    "cases": {
+      "offline": {
+        "launchable_order": [
+          "tp-16-vllm-none-bf16-native",
+          "tp-16-vllm-none-bf16-as-fp16",
+          "tp-8-vllm-none-bf16-native",
+          "tp-8-vllm-none-bf16-as-fp16",
+          "tp-4-vllm-none-bf16-native",
+          "tp-4-vllm-none-bf16-as-fp16",
+          "tp-2-vllm-none-bf16-native",
+          "tp-2-vllm-none-bf16-as-fp16",
+          "tp-1-vllm-none-bf16-native",
+          "tp-1-vllm-none-bf16-as-fp16"
+        ],
+        "star": "tp-16-vllm-none-bf16-native",
+        "tiers": [
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "bf16_as_fp16"
+            ],
+            "capability_preference_rank": 20,
+            "confidence": "medium",
+            "disk_bytes": 64975288272,
+            "gpu_count": 1,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-1-vllm-none-bf16-as-fp16",
+            "launchable": true,
+            "min_compute_capability": 7.5,
+            "notes": [
+              "runtime settings are defaults; no template was resolved",
+              "loads BF16 checkpoint as FP16; numerics differ"
+            ],
+            "resources": {
+              "disk": "61GB..",
+              "gpu": {
+                "compute_capability": 7.5,
+                "count": 1,
+                "memory": "66GB.."
+              },
+              "memory": "32GB.."
+            },
+            "star": false,
+            "strategy": "tp=1",
+            "vram_per_gpu_bytes": 70109641387
+          },
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "bf16_native"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "medium",
+            "disk_bytes": 64975288272,
+            "gpu_count": 1,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-1-vllm-none-bf16-native",
+            "launchable": true,
+            "min_compute_capability": 8.0,
+            "notes": [
+              "runtime settings are defaults; no template was resolved",
+              "native BF16"
+            ],
+            "resources": {
+              "disk": "61GB..",
+              "gpu": {
+                "compute_capability": 8.0,
+                "count": 1,
+                "memory": "66GB.."
+              },
+              "memory": "32GB.."
+            },
+            "star": false,
+            "strategy": "tp=1",
+            "vram_per_gpu_bytes": 70109641387
+          },
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "bf16_as_fp16"
+            ],
+            "capability_preference_rank": 20,
+            "confidence": "medium",
+            "disk_bytes": 64975288272,
+            "gpu_count": 16,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-16-vllm-none-bf16-as-fp16",
+            "launchable": true,
+            "min_compute_capability": 7.5,
+            "notes": [
+              "runtime settings are defaults; no template was resolved",
+              "KV heads replicate beyond tp=8; KV memory no longer falls per GPU",
+              "loads BF16 checkpoint as FP16; numerics differ"
+            ],
+            "resources": {
+              "disk": "61GB..",
+              "gpu": {
+                "compute_capability": 7.5,
+                "count": 16,
+                "memory": "15GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": false,
+            "strategy": "tp=16",
+            "vram_per_gpu_bytes": 15464645547
+          },
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "bf16_native"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "medium",
+            "disk_bytes": 64975288272,
+            "gpu_count": 16,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-16-vllm-none-bf16-native",
+            "launchable": true,
+            "min_compute_capability": 8.0,
+            "notes": [
+              "runtime settings are defaults; no template was resolved",
+              "KV heads replicate beyond tp=8; KV memory no longer falls per GPU",
+              "native BF16"
+            ],
+            "resources": {
+              "disk": "61GB..",
+              "gpu": {
+                "compute_capability": 8.0,
+                "count": 16,
+                "memory": "15GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": true,
+            "strategy": "tp=16",
+            "vram_per_gpu_bytes": 15464645547
+          },
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "bf16_as_fp16"
+            ],
+            "capability_preference_rank": 20,
+            "confidence": "medium",
+            "disk_bytes": 64975288272,
+            "gpu_count": 2,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-2-vllm-none-bf16-as-fp16",
+            "launchable": true,
+            "min_compute_capability": 7.5,
+            "notes": [
+              "runtime settings are defaults; no template was resolved",
+              "loads BF16 checkpoint as FP16; numerics differ"
+            ],
+            "resources": {
+              "disk": "61GB..",
+              "gpu": {
+                "compute_capability": 7.5,
+                "count": 2,
+                "memory": "37GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": false,
+            "strategy": "tp=2",
+            "vram_per_gpu_bytes": 39533987840
+          },
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "bf16_native"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "medium",
+            "disk_bytes": 64975288272,
+            "gpu_count": 2,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-2-vllm-none-bf16-native",
+            "launchable": true,
+            "min_compute_capability": 8.0,
+            "notes": [
+              "runtime settings are defaults; no template was resolved",
+              "native BF16"
+            ],
+            "resources": {
+              "disk": "61GB..",
+              "gpu": {
+                "compute_capability": 8.0,
+                "count": 2,
+                "memory": "37GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": false,
+            "strategy": "tp=2",
+            "vram_per_gpu_bytes": 39533987840
+          },
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "bf16_as_fp16"
+            ],
+            "capability_preference_rank": 20,
+            "confidence": "medium",
+            "disk_bytes": 64975288272,
+            "gpu_count": 4,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-4-vllm-none-bf16-as-fp16",
+            "launchable": true,
+            "min_compute_capability": 7.5,
+            "notes": [
+              "runtime settings are defaults; no template was resolved",
+              "loads BF16 checkpoint as FP16; numerics differ"
+            ],
+            "resources": {
+              "disk": "61GB..",
+              "gpu": {
+                "compute_capability": 7.5,
+                "count": 4,
+                "memory": "23GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": false,
+            "strategy": "tp=4",
+            "vram_per_gpu_bytes": 24246161067
+          },
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "bf16_native"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "medium",
+            "disk_bytes": 64975288272,
+            "gpu_count": 4,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-4-vllm-none-bf16-native",
+            "launchable": true,
+            "min_compute_capability": 8.0,
+            "notes": [
+              "runtime settings are defaults; no template was resolved",
+              "native BF16"
+            ],
+            "resources": {
+              "disk": "61GB..",
+              "gpu": {
+                "compute_capability": 8.0,
+                "count": 4,
+                "memory": "23GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": false,
+            "strategy": "tp=4",
+            "vram_per_gpu_bytes": 24246161067
+          },
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "bf16_as_fp16"
+            ],
+            "capability_preference_rank": 20,
+            "confidence": "medium",
+            "disk_bytes": 64975288272,
+            "gpu_count": 8,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-8-vllm-none-bf16-as-fp16",
+            "launchable": true,
+            "min_compute_capability": 7.5,
+            "notes": [
+              "runtime settings are defaults; no template was resolved",
+              "loads BF16 checkpoint as FP16; numerics differ"
+            ],
+            "resources": {
+              "disk": "61GB..",
+              "gpu": {
+                "compute_capability": 7.5,
+                "count": 8,
+                "memory": "16GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": false,
+            "strategy": "tp=8",
+            "vram_per_gpu_bytes": 16602247680
+          },
+          {
+            "capability_path": [
+              "vllm",
+              null,
+              "bf16_native"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "medium",
+            "disk_bytes": 64975288272,
+            "gpu_count": 8,
+            "host_ram_bytes": 34359738368,
+            "id": "tp-8-vllm-none-bf16-native",
+            "launchable": true,
+            "min_compute_capability": 8.0,
+            "notes": [
+              "runtime settings are defaults; no template was resolved",
+              "native BF16"
+            ],
+            "resources": {
+              "disk": "61GB..",
+              "gpu": {
+                "compute_capability": 8.0,
+                "count": 8,
+                "memory": "16GB.."
+              },
+              "memory": "32GB..",
+              "shm_size": "16GB"
+            },
+            "star": false,
+            "strategy": "tp=8",
+            "vram_per_gpu_bytes": 16602247680
+          }
+        ]
+      }
+    },
+    "lane": "general-llm",
+    "pipeline_backend": null,
+    "workload": {
+      "batch": 8,
+      "cfg": null,
+      "cfg_mode": null,
+      "context": 32768,
+      "engine_key": "vllm",
+      "frames": null,
+      "height": null,
+      "image_tokens": null,
+      "images_per_prompt": null,
+      "kv_dtype": "auto",
+      "modality": "text",
+      "prompt_tokens": null,
+      "provenance": {
+        "batch": "default",
+        "context": "model config",
+        "kv_dtype": "template"
+      },
+      "width": null
+    }
+  },
+  "stabilityai-stable-diffusion-xl-base-1-0": {
+    "cases": {
+      "offline": {
+        "launchable_order": [
+          "offload-vllm-omni-none-base",
+          "offload-tiling-vllm-omni-none-base",
+          "resident-vllm-omni-none-base"
+        ],
+        "star": "offload-vllm-omni-none-base",
+        "tiers": [
+          {
+            "capability_path": [
+              "vllm-omni",
+              null,
+              "base"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "medium",
+            "disk_bytes": 59963631592,
+            "gpu_count": 1,
+            "host_ram_bytes": 16336999104,
+            "id": "offload-tiling-vllm-omni-none-base",
+            "launchable": true,
+            "min_compute_capability": 8.0,
+            "notes": [],
+            "resources": {
+              "disk": "56GB..",
+              "gpu": {
+                "compute_capability": 8.0,
+                "count": 1,
+                "memory": "13GB.."
+              },
+              "memory": "16GB.."
+            },
+            "star": false,
+            "strategy": "offload+tiling",
+            "vram_per_gpu_bytes": 13692777324
+          },
+          {
+            "capability_path": [
+              "vllm-omni",
+              null,
+              "base"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "medium",
+            "disk_bytes": 59963631592,
+            "gpu_count": 1,
+            "host_ram_bytes": 16336999104,
+            "id": "offload-vllm-omni-none-base",
+            "launchable": true,
+            "min_compute_capability": 8.0,
+            "notes": [],
+            "resources": {
+              "disk": "56GB..",
+              "gpu": {
+                "compute_capability": 8.0,
+                "count": 1,
+                "memory": "13GB.."
+              },
+              "memory": "16GB.."
+            },
+            "star": true,
+            "strategy": "offload",
+            "vram_per_gpu_bytes": 13692777324
+          },
+          {
+            "capability_path": [
+              "vllm-omni",
+              null,
+              "base"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "medium",
+            "disk_bytes": 59963631592,
+            "gpu_count": 1,
+            "host_ram_bytes": 16336999104,
+            "id": "resident-vllm-omni-none-base",
+            "launchable": true,
+            "min_compute_capability": 8.0,
+            "notes": [],
+            "resources": {
+              "disk": "56GB..",
+              "gpu": {
+                "compute_capability": 8.0,
+                "count": 1,
+                "memory": "16GB.."
+              },
+              "memory": "16GB.."
+            },
+            "star": false,
+            "strategy": "resident",
+            "vram_per_gpu_bytes": 16963744756
+          }
+        ]
+      }
+    },
+    "lane": "general-image",
+    "pipeline_backend": "diffusers",
+    "workload": {
+      "batch": null,
+      "cfg": true,
+      "cfg_mode": "concat",
+      "context": null,
+      "engine_key": "vllm-omni:diffusers",
+      "frames": 1,
+      "height": 1024,
+      "image_tokens": null,
+      "images_per_prompt": 1,
+      "kv_dtype": null,
+      "modality": "image",
+      "prompt_tokens": 256,
+      "provenance": {
+        "cfg": "default",
+        "cfg_mode": "runtime registry",
+        "frames": "model config",
+        "height": "model config",
+        "images_per_prompt": "default",
+        "prompt_tokens": "default",
+        "width": "model config"
+      },
+      "width": 1024
+    }
+  },
+  "stabilityai-triposr": {
+    "cases": {
+      "offline": {
+        "launchable_order": [],
+        "star": null,
+        "tiers": [
+          {
+            "capability_path": null,
+            "capability_preference_rank": 10000,
+            "confidence": "low",
+            "disk_bytes": 35566748204,
+            "gpu_count": 1,
+            "host_ram_bytes": 2918713241,
+            "id": "research-floor-research",
+            "launchable": false,
+            "min_compute_capability": null,
+            "notes": [
+              "weights-only research floor; runtime and workload working sets are model-specific"
+            ],
+            "resources": {
+              "disk": "34GB..",
+              "gpu": {
+                "count": 1,
+                "memory": "3GB.."
+              },
+              "memory": "3GB.."
+            },
+            "star": false,
+            "strategy": "research-floor",
+            "vram_per_gpu_bytes": 2750988566
+          }
+        ]
+      }
+    },
+    "lane": null,
+    "pipeline_backend": null,
+    "workload": {
+      "batch": null,
+      "cfg": null,
+      "cfg_mode": null,
+      "context": null,
+      "engine_key": "unknown",
+      "frames": null,
+      "height": null,
+      "image_tokens": null,
+      "images_per_prompt": null,
+      "kv_dtype": null,
+      "modality": "research",
+      "prompt_tokens": null,
+      "provenance": {},
+      "width": null
+    }
+  },
+  "unsloth-qwen3-30b-a3b-gguf": {
+    "cases": {
+      "offline": {
+        "launchable_order": [
+          "full-offload-llama-cpp-none-base",
+          "cpu-only-llama-cpp-none-base"
+        ],
+        "star": "full-offload-llama-cpp-none-base",
+        "tiers": [
+          {
+            "capability_path": [
+              "llama.cpp",
+              null,
+              "base"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "low",
+            "disk_bytes": 69325628544,
+            "gpu_count": 0,
+            "host_ram_bytes": 47255901204,
+            "id": "cpu-only-llama-cpp-none-base",
+            "launchable": true,
+            "min_compute_capability": null,
+            "notes": [
+              "gguf-parser unavailable; selected-file fallback is a low-confidence floor",
+              "pre-7.0 support is low confidence"
+            ],
+            "resources": {
+              "disk": "65GB..",
+              "memory": "45GB.."
+            },
+            "star": false,
+            "strategy": "cpu-only",
+            "vram_per_gpu_bytes": null
+          },
+          {
+            "capability_path": [
+              "llama.cpp",
+              null,
+              "base"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "low",
+            "disk_bytes": 69325628544,
+            "gpu_count": 1,
+            "host_ram_bytes": 2929410516,
+            "id": "full-offload-llama-cpp-none-base",
+            "launchable": true,
+            "min_compute_capability": null,
+            "notes": [
+              "gguf-parser unavailable; selected-file fallback is a low-confidence floor",
+              "pre-7.0 support is low confidence"
+            ],
+            "resources": {
+              "disk": "65GB..",
+              "gpu": {
+                "count": 1,
+                "memory": "43GB.."
+              },
+              "memory": "3GB.."
+            },
+            "star": true,
+            "strategy": "full-offload",
+            "vram_per_gpu_bytes": 45400232512
+          }
+        ]
+      }
+    },
+    "lane": "general-gguf",
+    "pipeline_backend": null,
+    "workload": {
+      "batch": 8,
+      "cfg": null,
+      "cfg_mode": null,
+      "context": 32768,
+      "engine_key": "llama.cpp",
+      "frames": null,
+      "height": null,
+      "image_tokens": null,
+      "images_per_prompt": null,
+      "kv_dtype": "auto",
+      "modality": "gguf",
+      "prompt_tokens": null,
+      "provenance": {
+        "batch": "default",
+        "context": "model config",
+        "kv_dtype": "template"
+      },
+      "width": null
+    }
+  },
+  "wan-ai-wan2-2-t2v-a14b-diffusers": {
+    "cases": {
+      "offline": {
+        "launchable_order": [
+          "offload-vllm-omni-none-base",
+          "offload-tiling-vllm-omni-none-base",
+          "resident-vllm-omni-none-base"
+        ],
+        "star": "offload-vllm-omni-none-base",
+        "tiers": [
+          {
+            "capability_path": [
+              "vllm-omni",
+              null,
+              "base"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "medium",
+            "disk_bytes": 284567451960,
+            "gpu_count": 1,
+            "host_ram_bytes": 139869100306,
+            "id": "offload-tiling-vllm-omni-none-base",
+            "launchable": true,
+            "min_compute_capability": 8.0,
+            "notes": [],
+            "resources": {
+              "disk": "266GB..",
+              "gpu": {
+                "compute_capability": 8.0,
+                "count": 1,
+                "memory": "143GB.."
+              },
+              "memory": "131GB.."
+            },
+            "star": false,
+            "strategy": "offload+tiling",
+            "vram_per_gpu_bytes": 153125815636
+          },
+          {
+            "capability_path": [
+              "vllm-omni",
+              null,
+              "base"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "medium",
+            "disk_bytes": 284567451960,
+            "gpu_count": 1,
+            "host_ram_bytes": 139869100306,
+            "id": "offload-vllm-omni-none-base",
+            "launchable": true,
+            "min_compute_capability": 8.0,
+            "notes": [],
+            "resources": {
+              "disk": "266GB..",
+              "gpu": {
+                "compute_capability": 8.0,
+                "count": 1,
+                "memory": "143GB.."
+              },
+              "memory": "131GB.."
+            },
+            "star": true,
+            "strategy": "offload",
+            "vram_per_gpu_bytes": 153125815636
+          },
+          {
+            "capability_path": [
+              "vllm-omni",
+              null,
+              "base"
+            ],
+            "capability_preference_rank": 10,
+            "confidence": "medium",
+            "disk_bytes": 284567451960,
+            "gpu_count": 1,
+            "host_ram_bytes": 139869100306,
+            "id": "resident-vllm-omni-none-base",
+            "launchable": true,
+            "min_compute_capability": 8.0,
+            "notes": [],
+            "resources": {
+              "disk": "266GB..",
+              "gpu": {
+                "compute_capability": 8.0,
+                "count": 1,
+                "memory": "154GB.."
+              },
+              "memory": "131GB.."
+            },
+            "star": false,
+            "strategy": "resident",
+            "vram_per_gpu_bytes": 164487666844
+          }
+        ]
+      }
+    },
+    "lane": "general-video",
+    "pipeline_backend": "native",
+    "workload": {
+      "batch": null,
+      "cfg": true,
+      "cfg_mode": "concat",
+      "context": null,
+      "engine_key": "vllm-omni:native",
+      "frames": 81,
+      "height": 720,
+      "image_tokens": null,
+      "images_per_prompt": 1,
+      "kv_dtype": null,
+      "modality": "video",
+      "prompt_tokens": 256,
+      "provenance": {
+        "cfg": "default",
+        "cfg_mode": "runtime registry",
+        "frames": "default",
+        "height": "default",
+        "images_per_prompt": "default",
+        "prompt_tokens": "default",
+        "width": "default"
+      },
+      "width": 1280
+    }
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "fixture_schema": 1,
+  "models": [
+    {
+      "purpose": "plain text and KV arithmetic",
+      "repo": "Qwen/Qwen2.5-7B-Instruct"
+    },
+    {
+      "purpose": "vision-language encoder accounting",
+      "repo": "Qwen/Qwen2.5-VL-7B-Instruct"
+    },
+    {
+      "purpose": "explicit head_dim",
+      "repo": "Qwen/Qwen3-8B"
+    },
+    {
+      "purpose": "mixed linear/full-attention layer types",
+      "repo": "Qwen/Qwen3.5-9B"
+    },
+    {
+      "purpose": "FP8 quantization configuration",
+      "repo": "neuralmagic/Meta-Llama-3.1-8B-Instruct-FP8"
+    },
+    {
+      "purpose": "AWQ residency and capability floor",
+      "repo": "Qwen/Qwen2.5-7B-Instruct-AWQ"
+    },
+    {
+      "purpose": "mixture-of-experts total versus active parameters",
+      "repo": "Qwen/Qwen3-30B-A3B"
+    },
+    {
+      "purpose": "SDXL components, variants, and deduplication",
+      "repo": "stabilityai/stable-diffusion-xl-base-1.0"
+    },
+    {
+      "purpose": "FLUX transformer and multiple text encoders",
+      "repo": "lzyvegetable/FLUX.1-schnell"
+    },
+    {
+      "purpose": "Wan temporal VAE and native video pipeline",
+      "repo": "Wan-AI/Wan2.2-T2V-A14B-Diffusers"
+    },
+    {
+      "purpose": "multiple GGUF quantizations",
+      "repo": "bartowski/Qwen2.5-7B-Instruct-GGUF"
+    },
+    {
+      "purpose": "sharded GGUF selection and shard-set summing",
+      "repo": "unsloth/Qwen3-30B-A3B-GGUF"
+    },
+    {
+      "purpose": "research/world-model floor",
+      "repo": "stabilityai/TripoSR"
+    }
+  ]
+}

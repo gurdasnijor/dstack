@@ -1,0 +1,101 @@
+{
+  "general-gguf": {
+    "chunked_prefill_tokens": 8192,
+    "context": 32768,
+    "enforce_eager": false,
+    "engine": "llama.cpp",
+    "engine_key": "llama.cpp",
+    "fingerprint": {
+      "engine_key": "llama.cpp",
+      "flags": [
+        "--ctx-size=32768",
+        "--n-gpu-layers=999"
+      ],
+      "image": "ghcr.io/ggml-org/llama.cpp:server-cuda@sha256:b19cec9fe85f11d001f8911d87bc20a0479bfaf8ab99fd8dcef2258a4fd8c0ab",
+      "key": "f35ab437b6789748fb489c3e"
+    },
+    "gpu_memory_utilization": 0.9,
+    "image": "ghcr.io/ggml-org/llama.cpp:server-cuda@sha256:b19cec9fe85f11d001f8911d87bc20a0479bfaf8ab99fd8dcef2258a4fd8c0ab",
+    "kv_cache_dtype": "auto",
+    "pipeline_backend": null
+  },
+  "general-image": {
+    "chunked_prefill_tokens": 8192,
+    "context": null,
+    "enforce_eager": false,
+    "engine": "vllm-omni",
+    "engine_key": "vllm-omni:native",
+    "fingerprint": {
+      "engine_key": "vllm-omni:native",
+      "flags": [
+        "PIPELINE_BACKEND=native"
+      ],
+      "image": "ghcr.io/gurdasnijor/vllm-omni@sha256:8f46deb42329a2cf2e280c656d10734e0c5fb8469a99852db6f620f92f6f64ae",
+      "key": "eb0bc4a2f43983098b2a2753"
+    },
+    "gpu_memory_utilization": 0.9,
+    "image": "ghcr.io/gurdasnijor/vllm-omni@sha256:8f46deb42329a2cf2e280c656d10734e0c5fb8469a99852db6f620f92f6f64ae",
+    "kv_cache_dtype": "auto",
+    "pipeline_backend": "native"
+  },
+  "general-llm": {
+    "chunked_prefill_tokens": 8192,
+    "context": 65536,
+    "enforce_eager": false,
+    "engine": "vllm",
+    "engine_key": "vllm",
+    "fingerprint": {
+      "engine_key": "vllm",
+      "flags": [
+        "--gpu-memory-utilization=0.92",
+        "--kv-cache-dtype=fp8",
+        "--max-model-len=65536"
+      ],
+      "image": "vllm/vllm-openai:nightly@sha256:7f2bc168366c77fbd8329368f00310d208531c14ece6c2de31a6611ef99f6ec8",
+      "key": "35604ee09ca332fbe5c01940"
+    },
+    "gpu_memory_utilization": 0.92,
+    "image": "vllm/vllm-openai:nightly@sha256:7f2bc168366c77fbd8329368f00310d208531c14ece6c2de31a6611ef99f6ec8",
+    "kv_cache_dtype": "fp8",
+    "pipeline_backend": null
+  },
+  "general-video": {
+    "chunked_prefill_tokens": 8192,
+    "context": null,
+    "enforce_eager": false,
+    "engine": "vllm-omni",
+    "engine_key": "vllm-omni:native",
+    "fingerprint": {
+      "engine_key": "vllm-omni:native",
+      "flags": [
+        "PIPELINE_BACKEND=native"
+      ],
+      "image": "ghcr.io/gurdasnijor/vllm-omni@sha256:8f46deb42329a2cf2e280c656d10734e0c5fb8469a99852db6f620f92f6f64ae",
+      "key": "eb0bc4a2f43983098b2a2753"
+    },
+    "gpu_memory_utilization": 0.9,
+    "image": "ghcr.io/gurdasnijor/vllm-omni@sha256:8f46deb42329a2cf2e280c656d10734e0c5fb8469a99852db6f620f92f6f64ae",
+    "kv_cache_dtype": "auto",
+    "pipeline_backend": "native"
+  },
+  "general-vlm": {
+    "chunked_prefill_tokens": 8192,
+    "context": 32768,
+    "enforce_eager": false,
+    "engine": "vllm",
+    "engine_key": "vllm",
+    "fingerprint": {
+      "engine_key": "vllm",
+      "flags": [
+        "--gpu-memory-utilization=0.92",
+        "--max-model-len=32768"
+      ],
+      "image": "vllm/vllm-openai:nightly@sha256:7f2bc168366c77fbd8329368f00310d208531c14ece6c2de31a6611ef99f6ec8",
+      "key": "6a9ce3df9c05708cd429ee4b"
+    },
+    "gpu_memory_utilization": 0.92,
+    "image": "vllm/vllm-openai:nightly@sha256:7f2bc168366c77fbd8329368f00310d208531c14ece6c2de31a6611ef99f6ec8",
+    "kv_cache_dtype": "auto",
+    "pipeline_backend": null
+  }
+}

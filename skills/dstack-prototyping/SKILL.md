@@ -62,6 +62,40 @@ Diffusers adapter is a candidate for compatible pipelines and exposes
 choosing its image and command. ComfyUI, Diffusers services, media runtimes, or a
 model-specific HTTP server are valid when they provide a stable API and probe.
 
+## Interpreting the inspection evidence object
+
+When the endpoint request includes a "Deterministic model inspection" block
+(also written to `inspection.json` in the workspace), the CLI has already
+resolved the immutable revision, fetched the metadata, and ranked runtime
+candidates on an evidence ladder. Use it instead of re-deriving those facts:
+
+- `exact_recipe`: a versioned recipe validated end to end on this platform.
+  Use its `launch_hints` and go straight to service-first validation.
+- `support_registry`: the architecture or pipeline is in the pinned support
+  registry of a runtime this platform deploys. A strong candidate.
+- `generic_adapter`: a documented generic contract applies (for example the
+  Diffusers adapter). It is a candidate only until its smoke test passes.
+- `discovery_hint`: only a Hub app/library/tag or model-card claim supports
+  the pairing. Tags are optional, author-supplied, and may be stale or
+  computed at a different runtime version. A hint is never proof.
+- `research`/no candidates: metadata is missing or contradictory. Research
+  from the normalized snapshot and the listed unresolved questions.
+
+Follow these rules exactly:
+
+- Take the highest-confidence candidate (the first in the list) through
+  service-first validation before anything else.
+- Do not research alternate frameworks until that candidate fails or the
+  evidence object itself names a material ambiguity in `missing_facts`.
+- When you move to a lower-ranked candidate, write a progress message
+  recording exactly why the higher-ranked one was abandoned.
+- Never override an entry in `negative_results` without new evidence; a
+  negative result recorded by the inspection stage outranks a tag or a hunch.
+- Always run the candidate's `smoke_test` against the real service. Metadata
+  classification is never runtime validation, even for `exact_recipe`.
+- `hardware_hint` is an offer-independent floor estimate, not a placement
+  decision; validate real offers as described below before submitting.
+
 ## Choose Service-First Or Task-First
 
 Prefer service-first validation when the serving framework documents support

@@ -1,0 +1,134 @@
+{
+  "files": {},
+  "fixture_schema": 1,
+  "model_info": {
+    "library_name": null,
+    "pipeline_tag": "text-generation",
+    "safetensors": null,
+    "siblings": [
+      {
+        "rfilename": ".gitattributes",
+        "size": 3209
+      },
+      {
+        "rfilename": "Qwen2.5-7B-Instruct-IQ2_M.gguf",
+        "size": 2780342976
+      },
+      {
+        "rfilename": "Qwen2.5-7B-Instruct-IQ3_M.gguf",
+        "size": 3574012608
+      },
+      {
+        "rfilename": "Qwen2.5-7B-Instruct-IQ3_XS.gguf",
+        "size": 3346256576
+      },
+      {
+        "rfilename": "Qwen2.5-7B-Instruct-IQ4_XS.gguf",
+        "size": 4218473152
+      },
+      {
+        "rfilename": "Qwen2.5-7B-Instruct-Q2_K.gguf",
+        "size": 3015940800
+      },
+      {
+        "rfilename": "Qwen2.5-7B-Instruct-Q2_K_L.gguf",
+        "size": 3548164800
+      },
+      {
+        "rfilename": "Qwen2.5-7B-Instruct-Q3_K_L.gguf",
+        "size": 4088459968
+      },
+      {
+        "rfilename": "Qwen2.5-7B-Instruct-Q3_K_M.gguf",
+        "size": 3808391872
+      },
+      {
+        "rfilename": "Qwen2.5-7B-Instruct-Q3_K_S.gguf",
+        "size": 3492369088
+      },
+      {
+        "rfilename": "Qwen2.5-7B-Instruct-Q3_K_XL.gguf",
+        "size": 4565332672
+      },
+      {
+        "rfilename": "Qwen2.5-7B-Instruct-Q4_0.gguf",
+        "size": 4444121792
+      },
+      {
+        "rfilename": "Qwen2.5-7B-Instruct-Q4_0_4_4.gguf",
+        "size": 4431391424
+      },
+      {
+        "rfilename": "Qwen2.5-7B-Instruct-Q4_0_4_8.gguf",
+        "size": 4431391424
+      },
+      {
+        "rfilename": "Qwen2.5-7B-Instruct-Q4_0_8_8.gguf",
+        "size": 4431391424
+      },
+      {
+        "rfilename": "Qwen2.5-7B-Instruct-Q4_K_L.gguf",
+        "size": 5087564480
+      },
+      {
+        "rfilename": "Qwen2.5-7B-Instruct-Q4_K_M.gguf",
+        "size": 4683074240
+      },
+      {
+        "rfilename": "Qwen2.5-7B-Instruct-Q4_K_S.gguf",
+        "size": 4457769664
+      },
+      {
+        "rfilename": "Qwen2.5-7B-Instruct-Q5_K_L.gguf",
+        "size": 5781197504
+      },
+      {
+        "rfilename": "Qwen2.5-7B-Instruct-Q5_K_M.gguf",
+        "size": 5444831936
+      },
+      {
+        "rfilename": "Qwen2.5-7B-Instruct-Q5_K_S.gguf",
+        "size": 5315177152
+      },
+      {
+        "rfilename": "Qwen2.5-7B-Instruct-Q6_K.gguf",
+        "size": 6254199488
+      },
+      {
+        "rfilename": "Qwen2.5-7B-Instruct-Q6_K_L.gguf",
+        "size": 6518182592
+      },
+      {
+        "rfilename": "Qwen2.5-7B-Instruct-Q8_0.gguf",
+        "size": 8098525888
+      },
+      {
+        "rfilename": "Qwen2.5-7B-Instruct-f16.gguf",
+        "size": 15237853600
+      },
+      {
+        "rfilename": "Qwen2.5-7B-Instruct.imatrix",
+        "size": 4536678
+      },
+      {
+        "rfilename": "README.md",
+        "size": 10166
+      }
+    ],
+    "tags": [
+      "gguf",
+      "chat",
+      "text-generation",
+      "en",
+      "base_model:Qwen/Qwen2.5-7B-Instruct",
+      "base_model:quantized:Qwen/Qwen2.5-7B-Instruct",
+      "license:apache-2.0",
+      "endpoints_compatible",
+      "region:us",
+      "conversational"
+    ]
+  },
+  "repo": "bartowski/Qwen2.5-7B-Instruct-GGUF",
+  "requested_revision": null,
+  "revision": "8911e8a47f92bac19d6f5c64a2e2095bd2f7d031"
+}
